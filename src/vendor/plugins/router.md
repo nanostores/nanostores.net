@@ -1,4 +1,4 @@
-<!-- @nanostores/router@1.1.0 https://raw.githubusercontent.com/nanostores/router/1.1.0/README.md -->
+<!-- @nanostores/router@2.0.0 https://raw.githubusercontent.com/nanostores/router/2.0.0/README.md -->
 # Nano Stores Router
 
 <img align="right" width="92" height="92" title="Nano Stores logo"
@@ -7,7 +7,7 @@
 A tiny URL router for [Nano Stores](https://github.com/nanostores/nanostores)
 state manager.
 
-- **Small.** 725 bytes (minified and brotlied). Zero dependencies.
+- **Small.** 765 bytes (minified and brotlied). Zero dependencies.
 - Good **TypeScript** support.
 - Framework agnostic. Can be used with **React**, **Preact**, **Vue**,
   **Svelte**, **Angular**, **Solid.js**, and vanilla JS.
@@ -52,7 +52,7 @@ export const Layout = () => {
 
 ---
 
-<img src="https://cdn.evilmartians.com/badges/logo-no-label.svg" alt="" width="22" height="16" />  Made at <b><a href="https://evilmartians.com/devtools?utm_source=nanostores-router&utm_campaign=devtools-button&utm_medium=github">Evil Martians</a></b>, product consulting for <b>developer tools</b>.
+<img src="https://cdn.evilmartians.com/badges/logo-no-label.svg" alt="" width="22" height="16" />  Nano Stores Router is built by <b><a href="https://evilmartians.com/">Evil Martians</a></b>, an American design and engineering consultancy for <b>developer tools, AI, and cybersecurity startups</b>.
 
 ---
 
@@ -89,22 +89,27 @@ createRouter({
 ```
 
 Routes can have RegExp patterns. They should be an array with function,
-which convert `()` groups to key-value map.
+which convert `()` groups to key-value map. Add optional second function,
+which converts params back to URL, to use the route in `getPagePath()`,
+`openPage()`, and `redirectPage()`.
 
 For TypeScript, router parameters will be converted to types automatically.
-You need to use TypeScript ≥5.x.
 
 ```ts
 createRouter({
   routeName: '/path/:var1/and/:var2',
-  routeName2: [/path2/, () => ({ num: 1, str: '' })]
+  routeName2: [
+    /\/posts\/(\d+)/,
+    id => ({ id: Number(id) }),
+    p => `/posts/${p.id}`
+  ]
 })
 
 /**
  * Params will be inferred as:
  * {
  *   routeName: { var1: string, var2: string },
- *   routeName2: { num: number, str: string }
+ *   routeName2: { id: number }
  * }
  */
 ```
