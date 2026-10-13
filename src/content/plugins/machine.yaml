@@ -1,0 +1,6 @@
+name: Machine
+package: '@alexcarpenter/machine'
+purpose: Need a state machine?
+maintainer: community
+repo: https://github.com/alexcarpenter/machine
+docs: https://github.com/alexcarpenter/machine#readme

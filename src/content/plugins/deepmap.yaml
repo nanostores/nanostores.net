@@ -1,0 +1,5 @@
+name: DeepMap
+package: '@nanostores/deepmap'
+purpose: Need big nested objects changed by path?
+repo: https://github.com/nanostores/deepmap
+docs: https://github.com/nanostores/deepmap#readme

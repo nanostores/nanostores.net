@@ -1,0 +1,71 @@
+---
+interface Props {
+  mobile?: boolean
+}
+
+const { mobile = false } = Astro.props
+const path = Astro.url.pathname.replace(/\/+$/, '')
+const current = (href: string) => {
+  const section = href.replace(/\/+$/, '')
+  return path === section
+    ? 'page'
+    : path.startsWith(`${section}/`)
+      ? 'true'
+      : undefined
+}
+---
+
+<nav class:list={['site-links', { mobile }]} aria-label="Main navigation">
+  <a href="/docs/" aria-current={current('/docs/')}>
+    Docs
+  </a>
+  <a href="/ecosystem/" aria-current={current('/ecosystem/')}>
+    Ecosystem
+  </a>
+  <a class="github" href="https://github.com/nanostores/nanostores">
+    GitHub
+  </a>
+</nav>
+
+<style>
+  .site-links {
+    display: flex;
+    align-items: center;
+    gap: var(--site-nav-gap);
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 20px;
+  }
+  .site-links a {
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .site-links a[aria-current] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 8px;
+  }
+  .github {
+    display: flex;
+    align-items: center;
+    height: var(--site-control-height);
+    padding-inline: 18px;
+    border-radius: var(--radius-control);
+    background: var(--control);
+  }
+  .github:hover {
+    background: var(--control-hover);
+  }
+  .mobile {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .mobile a:not(.github) {
+    display: flex;
+    align-items: center;
+    min-height: var(--site-control-height);
+  }
+</style>

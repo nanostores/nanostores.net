@@ -1,0 +1,5 @@
+name: Persistent Store
+package: '@nanostores/persistent'
+purpose: Need persistence across reloads?
+repo: https://github.com/nanostores/persistent
+docs: https://github.com/nanostores/persistent#readme

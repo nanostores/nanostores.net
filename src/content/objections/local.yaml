@@ -1,0 +1,3 @@
+question: Is this only one local toggle?
+answer: Keep it in plain JavaScript or local component state.
+alternative: Plain JavaScript

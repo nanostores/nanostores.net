@@ -1,0 +1,6 @@
+name: nanotags
+package: nanotags
+purpose: Need typed, reactive Web Components on top of stores?
+maintainer: community
+repo: https://github.com/psd-coder/nanotags
+docs: https://psd-coder.github.io/nanotags

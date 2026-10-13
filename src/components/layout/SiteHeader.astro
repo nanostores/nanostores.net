@@ -1,0 +1,13 @@
+---
+import HeaderContent from './HeaderContent.astro'
+import SiteMenuButton from './SiteMenuButton.astro'
+import SiteNav from './SiteNav.astro'
+---
+
+<header class="site-header">
+  <HeaderContent />
+  <SiteMenuButton target="site-main-menu" label="Navigation menu" />
+  <div id="site-main-menu" class="site-menu" popover="auto">
+    <SiteNav mobile />
+  </div>
+</header>

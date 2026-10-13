@@ -1,0 +1,90 @@
+---
+import type { CollectionEntry } from 'astro:content'
+interface Props {
+  situation: CollectionEntry<'situations'>
+  number: number
+}
+const { situation, number } = Astro.props
+const { data } = situation
+---
+
+<section
+  class="situation"
+  id={situation.id}
+  data-situation-id={situation.id}
+  data-kind={data.kind}
+>
+  <div class="container inner">
+    <header class="section-head chapter-mark">
+      <span class="number mono" data-number>
+        {number}
+      </span>
+    </header>
+    <slot />
+    {data.boundary.home && (
+      <div class="boundary">
+        <span>
+          {data.boundary.text}
+          {data.boundary.strong && <b> {data.boundary.strong}</b>}
+        </span>
+      </div>
+    )}
+  </div>
+</section>
+<style>
+  /*
+   * A section is 2 x padding + content, in whole line units: the padding is
+   * 2L (1L on phones), the content grows by whole L (index.astro).
+   */
+  .inner {
+    position: relative;
+    display: grid;
+    padding-block: var(--section-pad);
+  }
+  /*
+   * The number sits at the heading's right edge below 64rem; on wider
+   * screens it hangs in the left margin. The homepage supplies its heading
+   * position, and ornaments.css aligns the mark's baseline to the heading.
+   */
+  .section-head {
+    margin-bottom: var(--space-2);
+  }
+  /* A quiet footer: the boundary stays next to what it qualifies. */
+  .boundary {
+    justify-content: flex-start;
+    margin-top: var(--line-unit);
+    padding-top: 0;
+    border-top: 0;
+    font-size: var(--text-15);
+    line-height: var(--leading-body);
+  }
+  /* The open code already has a bottom frame; avoid another rule below it. */
+  .inner > :global(:has(.code-open)) + .boundary {
+    border-top-color: transparent;
+  }
+  .boundary :global(span) {
+    color: var(--text-3);
+  }
+  .boundary :global(b) {
+    color: var(--text-2);
+  }
+  @media (width < 64rem) {
+    .section-head {
+      top: var(--section-pad);
+      right: var(--leaf-pad);
+    }
+  }
+  @media (width >= 64rem) {
+    .section-head {
+      position: absolute;
+      top: calc(var(--section-pad) + 1px);
+      left: calc(var(--page-margin) - 33px);
+      margin: 0;
+    }
+    @supports (text-box: trim-start cap alphabetic) {
+      .section-head {
+        top: calc(var(--section-pad) - 5px);
+      }
+    }
+  }
+</style>

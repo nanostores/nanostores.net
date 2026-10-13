@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "semi": false,
+  "printWidth": 80,
+  "astro": true,
+  "htmlWhitespaceSensitivity": "strict",
+  "ignorePatterns": ["src/vendor/**", "src/snippets/**"],
+  "overrides": [
+    {
+      "files": ["**/*.md", "**/*.mdx"],
+      "options": { "embeddedLanguageFormatting": "off" }
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+---
+import { getEntry } from 'astro:content'
+import CodeWindow from '../primitives/CodeWindow.astro'
+const { anchors } = (await getEntry('situations', 'static-page'))!.data
+---
+
+<div class="pricing-demo">
+  <div class="pricing" data-pricing>
+    <strong>Pricing</strong>
+    <div class="plans">
+      <span>
+        Starter{' '}
+        <b data-price data-monthly="$9" data-yearly="$7">
+          $9
+        </b>
+      </span>
+      <span>
+        Team{' '}
+        <b data-price data-monthly="$29" data-yearly="$24">
+          $29
+        </b>
+      </span>
+    </div>
+    <div class="period" role="group" aria-label="Billing period">
+      <button type="button" data-period-button="monthly" aria-pressed="true">
+        Monthly
+      </button>
+      <button type="button" data-period-button="yearly" aria-pressed="false">
+        Yearly
+      </button>
+    </div>
+  </div>
+  <CodeWindow
+    anchors={anchors}
+    file="static-page/pricing.ts"
+    caption="pricing.js · no framework"
+    store
+  />
+</div>
+<script>
+  import { $period } from '../../state/site'
+
+  $period.subscribe((period) => {
+    document.querySelectorAll<HTMLElement>('[data-price]').forEach((el) => {
+      el.textContent = el.dataset[period] || ''
+    })
+    document
+      .querySelectorAll<HTMLButtonElement>('[data-period-button]')
+      .forEach((button) => {
+        button.setAttribute(
+          'aria-pressed',
+          String(button.dataset.periodButton === period),
+        )
+      })
+  })
+  document
+    .querySelectorAll<HTMLButtonElement>('[data-period-button]')
+    .forEach((button) => {
+      button.addEventListener('click', () => {
+        $period.set(
+          button.dataset.periodButton === 'yearly' ? 'yearly' : 'monthly',
+        )
+      })
+    })
+</script>
+<style>
+  .pricing-demo {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    min-width: 0;
+  }
+  .pricing {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 18px;
+    border-radius: var(--radius-card);
+    background: var(--tint);
+  }
+  .pricing > strong {
+    font:
+      700 17px 'Instrument Sans',
+      sans-serif;
+  }
+  .plans,
+  .period {
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .plans span {
+    padding: 6px 10px;
+    border-radius: var(--radius-control);
+    background: var(--tint);
+  }
+  .plans b {
+    font-weight: 600;
+  }
+  .period {
+    gap: 4px;
+  }
+  .period button {
+    min-height: 44px;
+    padding-inline: 12px;
+    border: 0;
+    border-radius: var(--radius-control);
+    background: var(--control);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .period button:hover {
+    background: var(--control-hover);
+  }
+  .period button[aria-pressed='true'] {
+    background: var(--text);
+    color: var(--page);
+  }
+</style>

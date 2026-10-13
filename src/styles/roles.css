@@ -1,0 +1,117 @@
+.store-dot {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-color);
+}
+.store-node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 12px 14px;
+  border-radius: var(--radius-card);
+  background: var(--accent-color);
+  color: var(--on-accent-color);
+  font:
+    400 13px 'Fragment Mono',
+    monospace;
+}
+.code-window[data-store] .dot {
+  background: var(--accent-color);
+}
+/* In code: stores take the accent, the terms a preview promised stand out. */
+.code-store {
+  color: var(--accent-color);
+  font-weight: 400;
+}
+.code-anchor {
+  color: var(--text);
+  font-weight: 400;
+  border-radius: 3px;
+  background: var(--tint-2);
+  box-shadow: 0 0 0 2px var(--tint-2);
+}
+/* The store in the way-of-thinking sketch: the accent means "store". */
+.store-mark {
+  stroke: var(--accent-color);
+}
+text.store-mark {
+  fill: var(--accent-color);
+  stroke: none;
+}
+
+/* Rubric also colors the reference's quiet waves. */
+.code-window .dot,
+.code-window .wave,
+.expressive-code .header .title::before {
+  background: var(--accent-color);
+}
+.code-window .filename {
+  color: var(--accent-color);
+}
+.initial {
+  color: var(--accent-color);
+}
+/* Lombard initials: the pigment comes from the chapter number (lib/chapter.ts). */
+.first[data-pigment='rubric']::after {
+  color: var(--accent-color);
+}
+.first[data-pigment='lapis']::after {
+  color: oklch(var(--lapis));
+}
+/*
+ * The mechanism link is underlined in faded iron-gall ink: secondary ink
+ * warmed with rubric. Rubric itself shows only on hover.
+ */
+.lead a,
+.essay section a {
+  text-decoration-color: color-mix(
+    in oklab,
+    var(--text-2) 70%,
+    var(--accent-color)
+  );
+}
+.lead a:hover,
+.essay section a:hover {
+  text-decoration-color: var(--accent-color);
+}
+/* The manicules are rubric. */
+.copy .lead::before,
+.back .hand {
+  color: var(--accent-color);
+}
+/* Hero facts: the ledger's values are rubricated. */
+.ledger dt {
+  color: var(--accent-color);
+}
+/* The install line: a rubric block for the prompt, the command in rubric. */
+.install-cap {
+  background: var(--accent-color);
+  color: var(--on-accent-color);
+}
+.install code {
+  color: var(--accent-color);
+}
+/* The closing explicit is rubric. */
+.essay .explicit {
+  color: var(--accent-color);
+}
+/* The why essay's incipit is rubric. */
+.incipit {
+  color: var(--accent-color);
+}
+/* The why essay's section pilcrows are rubric. */
+.essay h2::before {
+  color: var(--accent-color);
+}
+/* The reference mark (⁜) beside glossed terms and their code is rubric. */
+.gloss-mark {
+  color: var(--accent-color);
+}
+/* The colophon's links use rubric on hover. */
+.colophon a:hover {
+  text-decoration-color: var(--accent-color);
+}

@@ -1,0 +1,5 @@
+name: Logger
+package: '@nanostores/logger'
+purpose: Need to see store changes in the console?
+repo: https://github.com/nanostores/logger
+docs: https://github.com/nanostores/logger#readme

@@ -1,0 +1,5 @@
+name: Svelte Runes
+package: '@nanostores/svelte-runes'
+purpose: Need stores in .svelte.ts files or with runes?
+repo: https://github.com/nanostores/svelte-runes
+docs: https://github.com/nanostores/svelte-runes#readme

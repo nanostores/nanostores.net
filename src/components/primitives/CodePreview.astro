@@ -1,0 +1,271 @@
+---
+// Home: the tech match lists the reader's familiar terms (anchors) and is
+// itself the button: a click opens the demo and its code in a full-width
+// popover whose top sits under it, with an arrow pointing at it. Native
+// popover, so it opens without JS too.
+//
+// Each section has its own popover, arrow and CSS anchor, so nothing is
+// reused or re-anchored. The arrow is a sibling popover: an element inside
+// an anchor-positioned popover loses its anchor in current browsers.
+//
+// `open` shows the code under the terms from the start: the terms are
+// plain text, the code is in the flow, and there is nothing to close.
+interface Props {
+  situationId: string
+  anchors: string[]
+  open?: boolean
+}
+const { situationId, anchors, open = false } = Astro.props
+const id = `code-${situationId}`
+const anchor = `--code-${situationId}`
+---
+
+{open ? (
+  <>
+    <div class="tech-match open">
+      <span class="gloss-mark" aria-hidden="true"></span>
+      <slot name="preview">
+        <span class="anchors">
+          {anchors.map((anchor) => (
+            <code>{anchor}</code>
+          ))}
+        </span>
+      </slot>
+    </div>
+    <div class="code-open" data-code-open={situationId}>
+      <svg class="code-open-rule" width="100%" height="14" aria-hidden="true">
+        <path d="M0 13.5 H36 L48 1.5 L60 13.5 H10000" />
+      </svg>
+      <slot />
+    </div>
+  </>
+) : (
+  <>
+    <button
+      type="button"
+      class="tech-match"
+      style={`anchor-name: ${anchor}`}
+      popovertarget={id}
+      aria-label={`Show code: ${anchors.join(', ')}`}
+      data-code-preview={situationId}
+      data-situation-id={situationId}
+    >
+      <span class="gloss-mark" aria-hidden="true"></span>
+      <slot name="preview">
+        <span class="anchors">
+          {anchors.map((anchor) => (
+            <code>{anchor}</code>
+          ))}
+        </span>
+      </slot>
+    </button>
+    <div
+      class="code-popover"
+      id={id}
+      popover
+      data-code-popover={situationId}
+      aria-label="Code"
+      style={`position-anchor: ${anchor}`}
+    >
+      <div class="container inner">
+        <slot />
+        <button
+          type="button"
+          class="close"
+          popovertarget={id}
+          popovertargetaction="hide"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+    <div
+      class="code-arrow"
+      popover="manual"
+      aria-hidden="true"
+      data-code-arrow={situationId}
+      style={`position-anchor: ${anchor}`}
+    ></div>
+  </>
+)}
+<style>
+  /* The terms are the trigger: a dashed frame says they open. */
+  .tech-match {
+    display: flex;
+    align-items: baseline;
+    column-gap: 0.5em;
+    width: fit-content;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    border: 2px dashed var(--line-strong);
+    border-radius: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .tech-match:hover,
+  .tech-match:has(+ :popover-open) {
+    border-color: var(--text-2);
+  }
+  /*
+   * The reference mark (ornaments.css) before the terms says they have a
+   * gloss: cap height of the 18px terms, on their first baseline.
+   */
+  .tech-match .gloss-mark {
+    font-size: var(--text-18);
+  }
+  /* Open: the same terms as plain text, the code already under them. */
+  .tech-match.open {
+    padding: 0;
+    border: 0;
+    cursor: auto;
+  }
+  .anchors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-4);
+  }
+  /* An ochre wash marks the terms to find, as a scribe's highlight would. */
+  .anchors code {
+    padding: 0 0.3em;
+    background: var(--tint-2);
+    color: var(--text);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    font:
+      400 var(--text-18) / var(--leading-body) 'Fragment Mono',
+      monospace;
+  }
+  .anchors code:not(:last-child)::after {
+    content: '·';
+    margin-left: var(--space-4);
+    color: var(--text-3);
+  }
+  .close {
+    min-height: 44px;
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    color: var(--text-2);
+    font-size: var(--text-15);
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .close:hover {
+    color: var(--text);
+  }
+  /*
+   * The code is a slip sewn into the leaf (a cedula): a thin line of
+   * secondary ink on the page, square. Popovers and the open code share it.
+   */
+  .code-popover,
+  .code-arrow,
+  .code-open {
+    --slip-line: 1px solid var(--text-2);
+  }
+  /*
+   * Open code: the same slip, in the flow and without a shadow or Close,
+   * so nothing says it will close. A fixed tongue on its top line points
+   * up at the first of the terms (16px above), as the popover arrow does.
+   */
+  .code-open {
+    position: relative;
+    padding-block: 4px;
+    border: var(--slip-line);
+    border-top-color: transparent;
+    background: var(--page);
+  }
+  /* One continuous stroke joins the tongue to the top rule. The SVG is
+     clipped at the frame's width; its coordinates stay in CSS pixels. */
+  .code-open-rule {
+    position: absolute;
+    top: -14px;
+    left: -0.5px;
+    width: calc(100% + 1px);
+    height: 14px;
+    overflow: hidden;
+    fill: var(--page);
+    stroke: var(--text-2);
+    stroke-width: 1;
+    pointer-events: none;
+  }
+  /*
+   * Full width in the top layer. Without anchor positioning the client sets
+   * --top under the button; without JS the popover stays in the viewport.
+   */
+  .code-popover {
+    position: fixed;
+    inset: 64px 0 auto;
+    width: 100%;
+    max-width: none;
+    max-height: calc(100vh - 96px);
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    border: 0;
+    border-block: var(--slip-line);
+    background: var(--page);
+    color: var(--text);
+    box-shadow: 0 24px 48px oklch(0 0 0 / 18%);
+  }
+  .code-popover[style*='--top'] {
+    position: absolute;
+    top: var(--top);
+    max-height: none;
+    overflow: visible;
+  }
+  .code-arrow {
+    display: none;
+  }
+  @supports (anchor-name: --a) {
+    .code-popover {
+      position: absolute;
+      inset: calc(anchor(bottom) + 16px) 0 auto;
+      max-height: none;
+      overflow: visible;
+    }
+    /* A square turned 45°: its upper half shows above the popover's top
+       border and continues it; its center sits on that border. */
+    .code-arrow:popover-open {
+      display: block;
+      position: absolute;
+      inset: calc(anchor(bottom) + 8px) auto auto anchor(center);
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+      border: 0;
+      border-top: var(--slip-line);
+      border-left: var(--slip-line);
+      background: var(--page);
+      transform: translateX(-50%) rotate(45deg);
+      pointer-events: none;
+    }
+  }
+  /* Centered in the full-width popover; Close stays at its right edge. */
+  .code-popover .inner {
+    margin-inline: auto;
+  }
+  .inner {
+    display: grid;
+    gap: 16px;
+    padding-block: 28px;
+    container: code-preview / inline-size;
+  }
+  /* Compare the two examples side by side only inside a wide popover. */
+  @container code-preview (min-width: 60rem) {
+    .inner :global(.context-compare .windows) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+    }
+  }
+  .close {
+    justify-self: end;
+  }
+</style>

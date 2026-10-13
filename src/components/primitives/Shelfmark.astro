@@ -1,0 +1,22 @@
+---
+// A scene's catalogue mark: where the original is kept and its leaf, the
+// way a library cites a manuscript (city or library, shelfmark, folio).
+// It runs along the paper's right edge beside its scene (ornaments.css);
+// the title repeats it, as vertical text is slow to read. The scans
+// reproduce flat public-domain works, so no photo credit or licence.
+import type { Source } from '../../lib/sources'
+type Props = Source
+const { label, href } = Astro.props
+---
+
+<span class="shelfmark-frame">
+  {href ? (
+    <a class="shelfmark" href={href} title={label}>
+      {label}
+    </a>
+  ) : (
+    <span class="shelfmark" title={label}>
+      {label}
+    </span>
+  )}
+</span>

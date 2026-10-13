@@ -1,0 +1,4 @@
+claim: Nano Stores exposes atom, computed and onMount in its public API.
+source: https://github.com/nanostores/nanostores/blob/main/index.d.ts
+checkedAt: 2026-09-25
+status: verified

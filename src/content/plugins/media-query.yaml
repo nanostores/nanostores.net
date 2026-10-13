@@ -1,0 +1,5 @@
+name: Media Query
+package: '@nanostores/media-query'
+purpose: Need a store that follows a media query?
+repo: https://github.com/nanostores/media-query
+docs: https://github.com/nanostores/media-query#readme

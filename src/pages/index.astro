@@ -1,0 +1,892 @@
+---
+import WayOfThinkingSketch from '../components/blocks/WayOfThinkingSketch.astro'
+import CodePreview from '../components/primitives/CodePreview.astro'
+import Meme from '../components/primitives/Meme.astro'
+import type { Source } from '../lib/sources'
+import Initial from '../components/primitives/Initial.astro'
+import HeadingInitial from '../components/primitives/HeadingInitial.astro'
+import { getCollection } from 'astro:content'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SectionShell from '../components/sections/SectionShell.astro'
+import HooksBeforeAfter from '../components/blocks/HooksBeforeAfter.astro'
+import ContextCompare from '../components/blocks/ContextCompare.astro'
+import FrameworkFiles from '../components/blocks/FrameworkFiles.astro'
+import { order } from '../config/order'
+import { asteriskNumbers } from '../lib/chapter'
+import { facts } from '../lib/readme'
+import mono500 from '@fontsource/fragment-mono/files/fragment-mono-latin-400-normal.woff2?url'
+import jacquard from '@fontsource/jacquard-12/files/jacquard-12-latin-400-normal.woff2?url'
+import lion from '../assets/memes/lion.avif'
+import demons from '../assets/memes/demons.avif'
+import brawl from '../assets/memes/brawl.avif'
+import apostles from '../assets/memes/apostles.avif'
+import knights from '../assets/memes/knights.avif'
+import stones from '../assets/memes/stones.avif'
+// One scene per section, keyed by section id (`top` is the frame). Each
+// scene is a square crop; `rest` is the close-up the circle shows before
+// hover: background size and position. Lines starting with "—" are
+// dialogue.
+const memes: Record<
+  string,
+  {
+    src: string
+    rest: [string, string]
+    lines: string[]
+    alt: string
+    source: Source
+  }
+> = {
+  top: {
+    src: lion.src,
+    // Gallerix crop: (430, 360), 780px; contrast 120%,
+    // brightness 114%, saturation 100%, with the demo's lifted shadows baked in.
+    rest: ['120%', '50% 50%'],
+    lines: [
+      "— Here's your state manager.",
+      `— But it's ${facts.coreSize.split(/[–-]/)[0]} bytes!!`,
+    ],
+    alt: "St Jerome draws a thorn from a lion's paw.",
+    source: {
+      label: 'Sano di Pietro, 1444 · Louvre, MI 472',
+      href: 'https://collections.louvre.fr/ark:/53355/cl010064937',
+    },
+  },
+  'logic-outside-hooks': {
+    src: demons.src,
+    rest: ['180%', '32% 0%'],
+    lines: ['The business rule lives in a component.', 'Its unit test:'],
+    alt: 'Demons torment a sinner in hell.',
+    source: {
+      label: 'Toulouse, BM, MS 815 · f. 60r',
+      href: 'https://gallica.bnf.fr/ark:/12148/btv1b105602030/f122.item',
+    },
+  },
+  islands: {
+    src: brawl.src,
+    rest: ['180%', '50% 61%'],
+    lines: ['Our islands are completely independent.'],
+    alt: 'Soldiers grab each other and stab with knives in the battle at Gibeon.',
+    source: {
+      label: 'Morgan Library, MS M.638 · f. 36v',
+      href: 'https://commons.wikimedia.org/wiki/File:Maciejowski_Bible_-_Morgan_Library_%26_Museum_MS_M.638,_fol._36v.jpg',
+    },
+  },
+  'outgrowing-context': {
+    src: apostles.src,
+    rest: ['140%', '40% 0%'],
+    lines: [
+      '— Context is shared.',
+      '— Certainly.',
+      '— Well, tell me more, please.',
+    ],
+    alt: 'St James with a scallop shell and St Peter in spectacles reading a book.',
+    source: {
+      label: 'F. Herlin, 1466 · St. Jakob, Rothenburg',
+    },
+  },
+  'multi-framework': {
+    src: knights.src,
+    rest: ['160%', '18% 42%'],
+    lines: [
+      '— We need the cart logic in Vue.',
+      "— Nah, I'm a React hook till the end of the project.",
+    ],
+    alt: 'Jean de Saintré unhorses Enguerrant at a joust.',
+    source: {
+      label: 'British Library, Cotton MS Nero D IX · f. 40',
+      href: 'https://commons.wikimedia.org/wiki/File:Jean_de_Saintr%C3%A9_jousts_with_Enguerrant_-_The_Romance_of_Jean_de_Saintr%C3%A9_(c.1470),_f.40_-_BL_Cotton_MS_Nero_D_IX.jpg',
+    },
+  },
+  'small-ecosystem': {
+    src: stones.src,
+    rest: ['170%', '50% 0%'],
+    lines: ['— Got a router, man?', '— No.', "— Here's a router, man."],
+    alt: 'The devil offers Christ to turn stones into bread.',
+    source: {
+      label: 'Besançon, BM, Ms 69 · p. 269',
+    },
+  },
+}
+const entries = await getCollection('situations')
+const byId = new Map(entries.map((entry) => [entry.id, entry]))
+const situation = (id: string) => {
+  const item = byId.get(id)
+  if (!item) throw Error(`Missing situation: ${id}`)
+  return item
+}
+const hooks = situation('logic-outside-hooks')
+const islands = situation('islands')
+const context = situation('outgrowing-context')
+const frameworks = situation('multi-framework')
+const markup = [hooks, islands, frameworks, context]
+if (order.join() !== markup.map((item) => item.id).join())
+  throw Error('order must match the section markup')
+const number = (item: { id: string }) => order.indexOf(item.id) + 1
+---
+
+<BaseLayout
+  title="Nano Stores — tiny state manager with a hook-free core API"
+  description="A tiny state manager with atomic, tree-shakable stores."
+  preload={[mono500, jacquard]}
+>
+  <div class="home-leaf leaf">
+    <section class="frame container split" id="top">
+      <h1>
+        <Initial>A</Initial> tiny state manager with atomic, tree-shakable
+        stores.
+      </h1>
+      <div class="properties">
+        <dl class="ledger">
+          <div>
+            <dt>{facts.coreSize}</dt> <dd>minified and brotlied</dd>
+          </div>
+          <div>
+            <dt>0</dt> <dd>dependencies</dd>
+          </div>
+          <div>
+            <dt>Hook-free</dt> <dd>core API</dd>
+          </div>
+          <div>
+            <dt>{facts.weeklyDownloads}</dt>{' '}
+            <dd>
+              downloads a week. Used by Clerk and Better Auth, recommended by
+              Astro
+            </dd>
+          </div>
+        </dl>
+        <p class="frameworks">
+          React, Vue, Svelte, Solid, Lit, Angular, vanilla JS and more
+        </p>
+      </div>
+      <Meme {...memes.top} />
+    </section>
+    <div class="situations">
+      <SectionShell situation={hooks} number={number(hooks)}>
+        <div class="body split manuscript-trial code-opened">
+          <h2>
+            <HeadingInitial text={hooks.data.title} number={number(hooks)} />
+          </h2>
+          <div class="columns">
+            <div class="copy">
+              <p class="lead">
+                <a
+                  href={`/for/${hooks.id}/`}
+                  data-track="section_cta_click"
+                  data-situation-id={hooks.id}
+                >
+                  {hooks.data.mechanism}
+                </a>
+              </p>
+            </div>
+            <Meme {...memes[hooks.id]} />
+            <CodePreview
+              situationId={hooks.id}
+              anchors={hooks.data.anchors}
+              open
+            >
+              <HooksBeforeAfter parallel />
+            </CodePreview>
+          </div>
+        </div>
+      </SectionShell>
+      <SectionShell situation={islands} number={number(islands)}>
+        <div class="body split">
+          <h2>
+            <HeadingInitial
+              text={islands.data.title}
+              number={number(islands)}
+            />
+          </h2>
+          <div class="columns">
+            <div class="copy">
+              <p class="lead">
+                <a
+                  href={`/for/${islands.id}/`}
+                  data-track="section_cta_click"
+                  data-situation-id={islands.id}
+                >
+                  {islands.data.mechanism}
+                </a>
+              </p>
+            </div>
+          </div>
+          <Meme {...memes[islands.id]} />
+        </div>
+      </SectionShell>
+      <SectionShell situation={frameworks} number={number(frameworks)}>
+        <div class="body split">
+          <h2>
+            <HeadingInitial
+              text={frameworks.data.title}
+              number={number(frameworks)}
+            />
+          </h2>
+          <div class="columns">
+            <div class="copy">
+              <p class="lead">
+                <a
+                  href={`/for/${frameworks.id}/`}
+                  data-track="section_cta_click"
+                  data-situation-id={frameworks.id}
+                >
+                  {frameworks.data.mechanism}
+                </a>
+              </p>
+            </div>
+            <CodePreview
+              situationId={frameworks.id}
+              anchors={frameworks.data.anchors}
+            >
+              <FrameworkFiles />
+            </CodePreview>
+          </div>
+          <Meme {...memes[frameworks.id]} />
+        </div>
+      </SectionShell>
+      <SectionShell situation={context} number={number(context)}>
+        <div class="body split">
+          <h2>
+            <HeadingInitial
+              text={context.data.title}
+              number={number(context)}
+            />
+          </h2>
+          <div class="columns">
+            <div class="copy">
+              <p class="lead">
+                <a
+                  href={`/for/${context.id}/`}
+                  data-track="section_cta_click"
+                  data-situation-id={context.id}
+                >
+                  {context.data.mechanism}
+                </a>
+              </p>
+            </div>
+            <CodePreview
+              situationId={context.id}
+              anchors={context.data.anchors}
+            >
+              <ContextCompare />
+            </CodePreview>
+          </div>
+          <Meme {...memes[context.id]} />
+        </div>
+      </SectionShell>
+    </div>
+    <section class="ecosystem container split" id="small-ecosystem">
+      <div class="ecosystem-text">
+        <span class="way-mark chapter-mark" aria-hidden="true">
+          <span class="mono star">*</span>
+        </span>
+        <h2>
+          <HeadingInitial
+            text="Small library. Big ecosystem"
+            number={asteriskNumbers[0]}
+          />
+        </h2>
+        <p class="lead">Small core, by design. Here's what's around it.</p>
+      </div>
+      <CodePreview
+        situationId="small-ecosystem"
+        anchors={[
+          'Persistence',
+          'Data fetching',
+          'Routing',
+          'i18n',
+          'Devtools',
+          'SSR',
+          'Changelog',
+        ]}
+      >
+        <dl class="qa">
+          <div>
+            <dt>What if we need more than the core?</dt>
+            <dd>
+              Persistence, data fetching, routing, i18n: separate official
+              packages. Each one is a store you add only when you need it.{' '}
+              <a href="/ecosystem/">Ecosystem →</a>
+            </dd>
+          </div>
+          <div>
+            <dt>Can we see what the stores are doing?</dt>
+            <dd>
+              Every store and change in Redux DevTools, with a stack trace to
+              the line that wrote it. No time travel.{' '}
+              <a href="/docs/ecosystem/devtools/">Devtools →</a>
+            </dd>
+          </div>
+          <div>
+            <dt>Does it work with SSR?</dt>
+            <dd>
+              On the client, yes. On the server a store is shared by all
+              requests, so keep per-request data out of it.{' '}
+              <a href="https://docs.astro.build/en/recipes/sharing-state-islands/">
+                Astro recipe →
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt>Is it still moving?</dt>
+            <dd>
+              <a href="https://github.com/nanostores/nanostores/blob/main/CHANGELOG.md">
+                Changelog →
+              </a>
+            </dd>
+          </div>
+        </dl>
+      </CodePreview>
+      <Meme {...memes['small-ecosystem']} />
+    </section>
+    <section class="way" id="way-of-thinking">
+      <div class="container way-inner split">
+        <div class="way-text">
+          <span class="way-mark chapter-mark" aria-hidden="true">
+            <span class="mono star">*</span>
+          </span>
+          <h2>
+            <HeadingInitial
+              text="We think logic belongs in stores, not components."
+              number={asteriskNumbers[1]}
+            />
+          </h2>
+          <p class="lead">
+            <a href="/why/" data-track="exit_click" data-target="why">
+              UI as a skin: components render, stores decide what is true.
+            </a>
+          </p>
+        </div>
+        <div class="way-sketch">
+          <WayOfThinkingSketch />
+        </div>
+      </div>
+    </section>
+    <section
+      class="start container"
+      id="getting-started"
+      aria-labelledby="getting-started-title"
+    >
+      <h2 id="getting-started-title">
+        <a
+          href="/docs/getting-started/"
+          data-track="exit_click"
+          data-target="docs"
+        >
+          Getting started →
+        </a>
+      </h2>
+      <p class="lead">
+        Install, Create a store, Derive a value, Read it in a component
+      </p>
+    </section>
+  </div>
+  <script src="../client/home.ts"></script>
+</BaseLayout>
+<style>
+  /*
+   * Rows. Every block of a section is a whole number of line units L
+   * (--line-unit, 28px): a section is 2L padding, content, 2L padding (1L on
+   * phones), the circle is 6L (5L), the tech match 2L. Gaps inside a group
+   * use the 4px spacing scale. Text lines are 13/20, 15/20, 18/28 and 24/28.
+   *
+   * Columns. One track below 64rem, then A | B (layout.css `.split`). The
+   * situation (heading, mechanism link, tech match) lives in A,
+   * the illustration in B. On a phone the tech match comes before the
+   * illustration, as the copy does on desktop.
+   */
+
+  /*
+   * The frame uses the section grid: the claim where section headings
+   * stand, the properties where sections show the tech match. The claim
+   * keeps its compact size while sharing the reference heading face. The hero keeps its own sizes (22 and 15): a named
+   * exception to the type scale, its lines are still on the 4px grid.
+   */
+  .frame {
+    padding-block: var(--section-pad);
+  }
+  .frame h1 {
+    margin: 0;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 680;
+    line-height: var(--leading-body);
+  }
+  .properties {
+    display: grid;
+    margin: 0;
+    color: var(--text-3);
+    font-size: var(--text-15);
+    line-height: var(--leading-body);
+  }
+  /*
+   * The facts as a ledger: the value in rubric (roles.css), a dotted leader
+   * to its meaning, one fact per row, as in an old table of contents.
+   */
+  .ledger {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    color: var(--text);
+    font:
+      400 16px/1.6 'Fragment Mono',
+      monospace;
+  }
+  .ledger > div {
+    display: grid;
+    grid-template-columns: 16ch minmax(0, 1fr);
+    column-gap: 0.75ch;
+  }
+  .ledger dt {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6ch;
+  }
+  .ledger dt::after {
+    content: '';
+    flex: 1;
+    min-width: 1ch;
+    border-bottom: 2px dotted
+      color-mix(in oklab, var(--text-2) 45%, var(--page));
+    transform: translateY(-0.28em);
+  }
+  .ledger dd {
+    margin: 0;
+  }
+  .frameworks {
+    margin: var(--space-2) 0 0;
+  }
+  /*
+   * A way of thinking as one more section: the same grid and type, an
+   * asterisk instead of a number. The two diagrams align below the
+   * left-aligned copy, with 32px of air on phones and 2L from 37.5rem.
+   */
+  .way-inner {
+    row-gap: var(--space-6);
+    padding-block: var(--section-pad);
+  }
+  .way-text,
+  .ecosystem-text {
+    position: relative;
+    display: grid;
+    justify-items: start;
+  }
+  .way-text h2 {
+    margin: 0;
+    font-size: var(--text-24);
+    font-weight: 680;
+    line-height: var(--leading-body);
+    letter-spacing: -0.01em;
+  }
+  .way-mark {
+    margin-bottom: var(--space-2);
+  }
+  .way-text .lead {
+    align-self: stretch;
+    margin-top: var(--space-1);
+  }
+  /* The sketch reaches 9L tall and scales proportionally on narrow screens. */
+  .way-sketch {
+    width: 100%;
+  }
+  .way-sketch :global(.sketch) {
+    margin: 0;
+  }
+  .way-sketch :global(svg) {
+    display: block;
+    width: min(100%, calc(9 * var(--line-unit) * 480 / 250));
+    height: auto;
+    margin-inline: 0;
+  }
+  /*
+   * Small ecosystem: a quiet row between the feed and the way of thinking,
+   * an asterisk instead of a number, as the way of thinking has. Heading,
+   * lead and the tech match stack in one column; the popover holds four
+   * short Q&A pairs.
+   */
+  .ecosystem {
+    display: grid;
+    justify-items: start;
+    padding-block: var(--section-pad);
+  }
+  /* Column A only; the scene takes B from 64rem. */
+  .ecosystem > :global(*) {
+    grid-column: 1;
+  }
+  .ecosystem h2 {
+    margin: 0;
+    font-size: var(--text-24);
+    font-weight: 680;
+    line-height: var(--leading-body);
+  }
+  .ecosystem .lead {
+    margin: var(--space-1) 0 var(--space-5);
+  }
+  .qa {
+    display: grid;
+    gap: var(--space-5) var(--space-7);
+    margin: 0;
+  }
+  .qa dt {
+    font-weight: 680;
+    line-height: var(--leading-body);
+  }
+  .qa dd {
+    margin: 0;
+    color: var(--text-2);
+    font-size: var(--text-15);
+    line-height: var(--leading-small);
+  }
+  .qa dd a {
+    font-weight: 600;
+  }
+  @media (width >= 48rem) {
+    .qa {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .start {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    min-height: calc(17 * var(--line-unit));
+    padding-block: var(--section-pad);
+    text-align: center;
+  }
+  .start h2 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 680;
+    line-height: 1.125;
+  }
+  .start .lead {
+    max-width: var(--col-a);
+    margin: 0;
+    text-wrap: balance;
+  }
+  .body {
+    min-width: 0;
+    grid-template-areas:
+      'title'
+      'copy'
+      'match'
+      'art';
+    --copy-gap: var(--space-1);
+    --match-gap: var(--space-5);
+  }
+  .body h2 {
+    grid-area: title;
+    margin: 0;
+    font-size: var(--text-24);
+    font-weight: 680;
+    line-height: var(--leading-body);
+    letter-spacing: -0.01em;
+  }
+  .columns {
+    display: contents;
+  }
+  /* Heading to lead 4 and lead to tech match 24: with the heading, 1L. */
+  .copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    grid-area: copy;
+    margin-top: var(--copy-gap);
+    min-width: 0;
+  }
+  /*
+   * The mechanism line is the link to the detail page, underlined like a
+   * lemma a scribe marked in red: a thin stroke, full strength on hover.
+   * The stroke's color is in roles.css.
+   */
+  .lead {
+    font-size: var(--text-lead);
+    line-height: var(--leading-body);
+  }
+  .lead a {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-skip-ink: auto;
+  }
+  .lead a:hover {
+    text-decoration-thickness: 1.5px;
+  }
+  .copy .lead {
+    align-self: stretch;
+  }
+  /*
+   * A manicule points at the mechanism link. It hangs in the margin so the
+   * text column keeps its edge; on phones there is no room, so it stands
+   * inline. content's empty alt text keeps it away from screen readers.
+   * A fixed width keeps the hand and the text in place when the symbols
+   * font arrives (it swaps in late).
+   */
+  .copy .lead {
+    position: relative;
+  }
+  .copy .lead::before {
+    content: '☞' / '';
+    position: absolute;
+    right: 100%;
+    display: inline-block;
+    width: 1.1em;
+    margin-right: 0.35em;
+    font-family: 'Noto Sans Symbols 2', serif;
+    text-align: right;
+  }
+  @media (width < 64rem) {
+    .home-leaf .way-mark {
+      top: 0;
+      right: 0;
+    }
+    .home-leaf .ecosystem-text {
+      justify-self: stretch;
+    }
+    .home-leaf .body h2,
+    .home-leaf .ecosystem h2,
+    .home-leaf .way-text h2 {
+      width: 100%;
+      padding-inline-end: var(--space-6);
+    }
+  }
+  @media (width < 37.5rem) {
+    .copy .lead::before {
+      position: static;
+      margin-right: 0.4em;
+    }
+  }
+  /*
+   * The tech match keeps its own width: these are code terms, and an empty
+   * dashed field is worse than a ragged edge.
+   */
+  .body :global(.tech-match) {
+    grid-area: match;
+    justify-self: start;
+    margin-top: var(--match-gap);
+  }
+  /*
+   * From 64rem the cap of the heading (and the claim) sits on the top line
+   * of the circle: text-box trims the empty space above the capitals. The
+   * section heading gets the trimmed height back as a margin below it, so
+   * the copy and the tech match stay where they are and every gap keeps its
+   * scale value. Without text-box support the heading stays about 6px lower
+   * than the circle.
+   */
+  @media (width >= 64rem) {
+    .properties {
+      gap: var(--space-1);
+      margin-top: var(--space-3);
+      line-height: var(--leading-small);
+    }
+    @supports (text-box: trim-start cap alphabetic) {
+      .frame h1,
+      .body h2,
+      .way-text h2,
+      .ecosystem-text h2 {
+        text-box: trim-start cap alphabetic;
+      }
+      .body h2,
+      .way-text h2,
+      .ecosystem-text h2 {
+        margin-bottom: var(--heading-trim);
+      }
+    }
+  }
+
+  /*
+   * The scene with its caption (Meme). Under 64rem it follows the tech
+   * match in the single track, 1L below it. From 64rem it takes B: the
+   * situation (heading, mechanism link, then the tech match)
+   * stays in A, and the tech match stands at the bottom of the circle, so
+   * the lead to the tech match is 52. The frame
+   * mirrors it: claim and properties in A, the lion in B.
+   */
+  .body :global(.meme) {
+    grid-area: art;
+  }
+  .frame :global(.meme),
+  .body :global(.meme),
+  .ecosystem :global(.meme) {
+    margin-top: var(--line-unit);
+  }
+  @media (width >= 64rem) {
+    .frame {
+      grid-template-rows: auto 1fr;
+    }
+    .frame h1 {
+      grid-area: 1 / 1;
+    }
+    .properties {
+      grid-area: 2 / 1;
+    }
+    .frame :global(.meme) {
+      grid-area: 1 / 2 / 3 / 3;
+    }
+    .body {
+      grid-template-rows: auto auto 1fr;
+      grid-template-areas:
+        'title art'
+        'copy art'
+        'match art';
+    }
+    .body :global(.tech-match) {
+      align-self: end;
+    }
+    .ecosystem :global(.meme) {
+      grid-column: 2;
+      grid-row: 1 / 3;
+    }
+    .frame :global(.meme),
+    .body :global(.meme),
+    .ecosystem :global(.meme) {
+      margin-top: 0;
+    }
+  }
+  /*
+   * Ruled boundaries. They are absolutely positioned on the section's top
+   * edge, so no section changes height and the 28px grid holds. Between
+   * numbered sections and before the frame's first section: a single 1px
+   * rule.
+   */
+  .situations > :global(.situation),
+  .ecosystem,
+  .way,
+  .start {
+    position: relative;
+  }
+  .situations > :global(.situation)::before,
+  .ecosystem::before,
+  .way::before,
+  .start::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: var(--line);
+  }
+  .home-leaf > .container,
+  .home-leaf > .way > .container,
+  .home-leaf > .situations :global(.situation > .inner) {
+    padding-inline: var(--leaf-pad);
+    max-width: none;
+    width: 100%;
+  }
+  .home-leaf .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .home-leaf .body {
+    grid-template-areas: 'title' 'copy' 'match' 'art';
+    grid-template-rows: auto;
+    --copy-gap: 12px;
+  }
+  /*
+   * The first section shows its code open: the scene, then the terms, then
+   * the code under them (CodePreview `open`), the boundary last.
+   */
+  .home-leaf .body.code-opened {
+    grid-template-areas: 'title' 'copy' 'art' 'match' 'code';
+  }
+  .body :global(.code-open) {
+    grid-area: code;
+    margin-top: var(--space-4);
+  }
+  .home-leaf .frame {
+    grid-template-rows: auto;
+    row-gap: 24px;
+  }
+  .home-leaf .frame h1 {
+    grid-area: auto;
+    font-size: clamp(38px, 6vw, 60px);
+    font-stretch: 78%;
+    line-height: 1.09;
+    letter-spacing: -0.025em;
+    text-box: normal;
+  }
+  .home-leaf .properties {
+    grid-area: auto;
+    margin-top: 0;
+    gap: 4px;
+    font-size: 18px;
+    line-height: 1.55;
+  }
+  /* Claude's larger reading scale belongs to the paper, not the popovers. */
+  .home-leaf .body h2,
+  .home-leaf .ecosystem h2,
+  .home-leaf .way-text h2 {
+    font-size: 32px;
+    line-height: 1.125;
+    text-box: normal;
+    margin-bottom: 0;
+  }
+  .home-leaf .lead {
+    font-size: 21px;
+    line-height: 1.55;
+  }
+  .home-leaf .way-text .lead {
+    margin-top: 12px;
+  }
+  @media (width >= 37.5rem) {
+    .home-leaf .way-inner {
+      row-gap: calc(2 * var(--line-unit));
+    }
+  }
+  .home-leaf .ecosystem .lead {
+    margin-top: 12px;
+  }
+  .home-leaf .frame :global(.meme) {
+    grid-area: auto;
+    margin-top: 8px;
+    --circle-size: 168px;
+  }
+  .home-leaf .body :global(.meme),
+  .home-leaf .ecosystem :global(.meme) {
+    margin-top: var(--line-unit);
+  }
+  .home-leaf .ecosystem :global(.meme) {
+    grid-area: auto;
+  }
+  .home-leaf .manuscript-trial :global(.meme) {
+    --circle-size: 140px;
+  }
+  /* Chapter marks start with the heading; ornaments.css aligns their baselines. */
+  @media (width >= 64rem) {
+    .home-leaf :global(.section-head) {
+      top: var(--section-pad);
+      left: 0;
+      right: 0;
+    }
+    .home-leaf .way-mark {
+      top: 0;
+      left: calc(-1 * var(--leaf-pad));
+      right: calc(-1 * var(--leaf-pad));
+    }
+    /* The ecosystem grid shrinks items to their content; the mark row needs the column. */
+    .home-leaf .ecosystem-text {
+      justify-self: stretch;
+    }
+  }
+  @media (width < 37.5rem) {
+    .home-leaf .frame h1 {
+      line-height: 1.12;
+    }
+    .home-leaf .body h2,
+    .home-leaf .ecosystem h2,
+    .home-leaf .way-text h2,
+    .home-leaf .start h2 {
+      font-size: 28px;
+      line-height: 1.15;
+    }
+    .home-leaf .lead {
+      font-size: 18px;
+    }
+    .home-leaf .properties {
+      font-size: 16px;
+    }
+    .ledger {
+      font-size: 14px;
+    }
+  }
+</style>

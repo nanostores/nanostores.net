@@ -1,0 +1,66 @@
+---
+import evilMartiansLogo from '../../assets/evil-martians.svg?url'
+---
+
+<div class="brand">
+  <a class="wordmark" href="/" aria-label="Nano Stores home">
+    <svg width="32" height="32" viewBox="0 0 500 500" aria-hidden="true">
+      <circle cx="250" cy="250" r="250" fill="currentColor"></circle>
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M269.463 385 122 281.746l86.384-33.697 126.397 88.503L269.463 385zM231.036 115l147.463 103.254-86.384 33.697-126.397-88.503L231.036 115z"
+        fill="var(--page)"
+      ></path>
+    </svg>
+    <span>Nano Stores</span>
+  </a>
+  <span class="separator" aria-hidden="true"></span>
+  <a class="by" href="https://evilmartians.com/">
+    <span>by</span>
+    <img src={evilMartiansLogo} alt="Evil Martians" width="40" height="40" />
+  </a>
+</div>
+
+<style>
+  .brand,
+  .wordmark,
+  .by {
+    display: flex;
+    align-items: center;
+  }
+  .by img {
+    filter: var(--brand-filter);
+  }
+  .brand {
+    gap: 16px;
+  }
+  .wordmark {
+    min-height: var(--site-control-height);
+    gap: 12px;
+    color: var(--text);
+    font:
+      700 22px 'Instrument Sans',
+      sans-serif;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .wordmark svg {
+    flex: none;
+  }
+  .separator {
+    width: 1px;
+    height: 28px;
+    background: var(--line);
+  }
+  .by {
+    min-height: var(--site-control-height);
+    gap: 10px;
+    color: var(--text-3);
+    font-size: 14px;
+    text-decoration: none;
+  }
+  .by img {
+    display: block;
+  }
+</style>

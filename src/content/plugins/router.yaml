@@ -1,0 +1,5 @@
+name: Router
+package: '@nanostores/router'
+purpose: Need URL-driven state?
+repo: https://github.com/nanostores/router
+docs: https://github.com/nanostores/router#readme

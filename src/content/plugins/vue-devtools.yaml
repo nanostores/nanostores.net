@@ -1,0 +1,5 @@
+name: Vue Devtools plugin
+package: '@nanostores/vue'
+purpose: Need stores in Vue Devtools?
+repo: https://github.com/nanostores/vue
+docs: https://github.com/nanostores/vue#devtools

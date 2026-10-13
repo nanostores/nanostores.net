@@ -1,0 +1,5 @@
+name: SQL
+package: '@nanostores/sql'
+purpose: Need a SQLite SELECT as a reactive store?
+repo: https://github.com/nanostores/sql
+docs: https://github.com/nanostores/sql#readme

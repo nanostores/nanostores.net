@@ -1,0 +1,43 @@
+/*
+ * Content up to 1200px, aligned to the left like the full-width header:
+ * the brand, every column and the docs start on one vertical line. Wider
+ * screens leave space on the right instead of moving the content away
+ * from the brand. The margin is the header's gutter (tokens.css).
+ */
+.container {
+  max-width: calc(var(--content-max) + 2 * var(--page-margin));
+  margin-inline: 0 auto;
+  padding-inline: var(--page-margin);
+}
+/*
+ * The one two-column recipe of the home page: column A for text, column B
+ * beside it from 64rem. Below that, one track.
+ */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, var(--col-a));
+  column-gap: var(--col-gap);
+  align-items: start;
+}
+@media (width >= 64rem) {
+  .split {
+    grid-template-columns: minmax(0, var(--col-a)) minmax(var(--col-b-min), 1fr);
+  }
+}
+/*
+ * The manuscript leaf: one sheet of paper on the desk, its ruled edges
+ * running the full height of the main area. Pages give their own blocks
+ * the leaf's side margins (--leaf-pad); the margins hold the chapter marks.
+ * Top-layer popovers keep the viewport grid.
+ */
+body:has(.leaf) {
+  background: var(--desk-color);
+}
+.leaf {
+  width: var(--sheet-width);
+  margin: 0 auto;
+  border-inline: var(--sheet-edge) solid var(--line);
+  background: var(--page);
+  min-height: calc(100vh - var(--site-header-height));
+  min-height: calc(100svh - var(--site-header-height));
+}

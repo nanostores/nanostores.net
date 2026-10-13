@@ -1,0 +1,943 @@
+---
+import { getCollection, getEntry } from 'astro:content'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import CodeWindow from '../components/primitives/CodeWindow.astro'
+import { pluginDocs } from '../lib/plugin-config'
+
+type Snippet = { file: string; caption: string }
+type Module = { name: string; href: string; note: string }
+type RowInput = {
+  id?: string
+  indexTitle?: string
+  title: string
+  text?: string
+  read?: string
+  plugin?: string
+  module?: Module
+  alternative?: string
+  alternativeLead?: string
+  snippets?: Snippet[]
+  points?: string[]
+  boundary?: string
+  featured?: boolean
+}
+
+const readme = 'https://github.com/nanostores/nanostores'
+const adapter = (title: string, id: string, read: string): RowInput => ({
+  id: `framework-${id}`,
+  title,
+  read,
+  module: {
+    name: `@nanostores/${id}`,
+    href: `https://github.com/nanostores/${id}#readme`,
+    note: 'official',
+  },
+})
+const builtIn = (title: string, read: string, anchor: string): RowInput => ({
+  id: `framework-${anchor}`,
+  title,
+  read,
+  module: { name: 'built in', href: `${readme}#${anchor}`, note: 'no adapter' },
+})
+
+const frameworks: RowInput[] = [
+  adapter('React', 'react', 'useStore($cart)'),
+  adapter('Preact', 'preact', 'useStore($cart)'),
+  adapter('Vue', 'vue', 'useStore($cart)'),
+  {
+    ...builtIn('Svelte', '$cart — Svelte’s store contract', 'svelte'),
+    alternative: 'svelte-runes',
+    alternativeLead: 'Runes',
+  },
+  adapter('Solid', 'solid', 'useStore($cart)'),
+  adapter('Lit', 'lit', 'new StoreController(this, $cart)'),
+  adapter('Angular', 'angular', 'nanostores.useStore($cart)'),
+  adapter('Alpine.js', 'alpine', 'x-nano:cart="$cart"'),
+  {
+    ...builtIn(
+      'Vanilla JS · Web Components',
+      '$cart.subscribe(render)',
+      'vanilla-js',
+    ),
+    alternative: 'nanotags',
+    alternativeLead: 'Components',
+  },
+]
+
+// Order is a hypothesis: the worries people raise most often when choosing come first.
+const capabilities: RowInput[] = [
+  {
+    id: 'persistence',
+    title: 'Persistence',
+    text: 'Swap atom for persistentJSON. The value is saved to localStorage, and other open tabs get every change.',
+    plugin: 'persistent',
+    snippets: [{ file: 'ecosystem/persistence.ts', caption: 'stores/cart.ts' }],
+    boundary:
+      'On the server there is no localStorage: the store starts from its initial value.',
+  },
+  {
+    id: 'data-fetching',
+    title: 'Data fetching',
+    text: 'A fetcher store loads on the first subscriber, caches by key and shares the result. Every widget just reads $products.',
+    plugin: 'query',
+    snippets: [{ file: 'ecosystem/query.ts', caption: 'stores/products.ts' }],
+    boundary:
+      'Already on TanStack Query? Keep it for server data and use stores for client state.',
+  },
+  {
+    id: 'url',
+    title: 'Routing',
+    text: 'The router is a store of the current page. Read the query string as one more computed store.',
+    plugin: 'router',
+    alternative: 'qs',
+    alternativeLead: 'Only the query string',
+    snippets: [{ file: 'ecosystem/router.ts', caption: 'stores/router.ts' }],
+  },
+  {
+    id: 'i18n',
+    title: 'Translations',
+    text: 'Components declare their strings in the base language. Translations for the current locale load on demand.',
+    plugin: 'i18n',
+    snippets: [{ file: 'ecosystem/i18n.ts', caption: 'stores/i18n.ts' }],
+  },
+  {
+    id: 'media-query',
+    title: 'Media queries',
+    text: 'No plugin needed. onMount starts listening when the first component subscribes and stops after the last one leaves.',
+    module: {
+      name: 'onMount',
+      href: '/docs/concepts/lazy-stores/',
+      note: 'core',
+    },
+    alternative: 'media-query',
+    alternativeLead: 'Ready-made store',
+    snippets: [
+      { file: 'ecosystem/media-query.ts', caption: 'stores/layout.ts' },
+    ],
+  },
+  {
+    id: 'nested-state',
+    title: 'Nested state',
+    text: 'Update a field by its path instead of copying the whole object by hand.',
+    plugin: 'deepmap',
+    snippets: [
+      { file: 'ecosystem/nested-form.ts', caption: 'stores/checkout.ts' },
+    ],
+    boundary: 'Flat object? map in the core has setKey too.',
+  },
+]
+
+const devtoolsRows: RowInput[] = [
+  {
+    id: 'redux-devtools',
+    indexTitle: 'Redux DevTools',
+    featured: true,
+    title: 'Which line wrote this value?',
+    text: 'Every store appears in the Redux DevTools panel, named after the variable you wrote. Each change gets its own timeline row with a diff and a stack trace to the line that wrote it.',
+    plugin: 'nanostores-devtools',
+    points: [
+      'No setup per store',
+      'Dev builds only — production gets empty functions',
+      'Vite, webpack, Rspack · trackStores() elsewhere',
+    ],
+    snippets: [
+      { file: 'ecosystem/devtools-vite.ts', caption: 'vite.config.ts' },
+      { file: 'ecosystem/devtools-connect.ts', caption: 'main.ts' },
+    ],
+  },
+  {
+    id: 'logger',
+    indexTitle: 'Logger',
+    title: 'Print every change to the console',
+    text: 'No browser extension: store changes and lifecycle events appear in the console under the names you pass.',
+    plugin: 'logger',
+    snippets: [{ file: 'ecosystem/logger.ts', caption: 'dev.ts' }],
+  },
+  {
+    id: 'vue-devtools',
+    indexTitle: 'Vue Devtools',
+    title: 'Already working in Vue Devtools?',
+    text: 'The Vue integration adds your stores to the Vue Devtools panel.',
+    plugin: 'vue-devtools',
+  },
+]
+
+const plugins = await getCollection('plugins')
+const situations = await getCollection('situations')
+const plugin = async (id: string) => {
+  const entry = await getEntry('plugins', id)
+  if (!entry) throw Error(`Missing plugin: ${id}`)
+  return entry
+}
+const docsPage = new Map(
+  pluginDocs.map((p) => [p.id, `/docs/ecosystem/${p.slug}/`]),
+)
+const toModule = (entry: (typeof plugins)[number]): Module => ({
+  name: entry.data.package,
+  href: docsPage.get(entry.id) ?? entry.data.docs,
+  note: entry.data.maintainer,
+})
+const resolve = async (row: RowInput) => {
+  const entry = row.plugin ? await plugin(row.plugin) : null
+  const module = row.module ?? (entry ? toModule(entry) : null)
+  if (!module) throw Error(`Row without a module: ${row.title}`)
+  return {
+    ...row,
+    module,
+    alternative: row.alternative
+      ? toModule(await plugin(row.alternative))
+      : null,
+    usedIn: row.plugin
+      ? situations.filter((s) =>
+          s.data.deep.plugins.some((p) => p.id === row.plugin),
+        )
+      : [],
+  }
+}
+
+const shown = new Set(
+  [...frameworks, ...capabilities, ...devtoolsRows].flatMap((r) => [
+    r.plugin,
+    r.alternative,
+  ]),
+)
+const more: RowInput[] = plugins
+  .filter((p) => !shown.has(p.id))
+  .sort(
+    (a, b) =>
+      Number(a.data.maintainer === 'community') -
+        Number(b.data.maintainer === 'community') ||
+      a.data.name.localeCompare(b.data.name),
+  )
+  .map((p) => ({ title: p.data.purpose, plugin: p.id }))
+
+const groups = [
+  {
+    id: 'frameworks',
+    title: 'Framework adapters',
+    lead: null,
+    link: {
+      href: '/for/multi-framework/',
+      text: 'One state for several frameworks →',
+    },
+    compact: true,
+    tone: null,
+    rows: await Promise.all(frameworks.map(resolve)),
+    more: [],
+    boundary: null,
+  },
+  {
+    id: 'capabilities',
+    title: 'Store utilities',
+    lead: 'Persistence, data fetching, routing, translations, media queries, and nested state.',
+    link: null,
+    compact: false,
+    tone: null,
+    rows: await Promise.all(capabilities.map(resolve)),
+    more: await Promise.all(more.map(resolve)),
+    boundary: null,
+  },
+  {
+    id: 'devtools',
+    title: 'Devtools',
+    lead: 'Your stores in the Redux DevTools panel, named for you. Or a plain console log when that is enough.',
+    link: null,
+    compact: false,
+    tone: 'ink',
+    rows: await Promise.all(devtoolsRows.map(resolve)),
+    more: [],
+    boundary: {
+      text: 'nanostores-devtools only reads state, so there is no time travel.',
+      strong:
+        'Built your workflow around it? Redux Toolkit is the stronger fit.',
+    },
+  },
+]
+---
+
+<BaseLayout
+  title="Ecosystem | Nano Stores"
+  description="Connect your framework, add persistence, data fetching, routing or i18n when the task shows up, and inspect every store in Redux DevTools."
+>
+  <div class="leaf ecosystem-leaf">
+    <aside class="ecosystem-index">
+      <details class="index-panel" open>
+        <summary class="index-toggle">Index</summary>
+        <nav aria-label="Ecosystem index">
+          <ul class="index-groups">
+            {groups.map((group, i) => (
+              <li>
+                <details class="index-group-panel" open>
+                  <summary>
+                    <span class="index-group">{group.title}</span>
+                    <svg
+                      class="index-caret"
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                      aria-hidden="true"
+                    >
+                      <path d="m9 5 7 7-7 7" />
+                    </svg>
+                  </summary>
+                  <ul>
+                    <li>
+                      <a
+                        href={`#${group.id}`}
+                        data-index-link
+                        aria-label={`${group.title} overview`}
+                        aria-current={i === 0 ? 'location' : undefined}
+                      >
+                        Overview
+                      </a>
+                    </li>
+                    {group.rows.map((row) => (
+                      <li>
+                        <a href={`#${row.id}`} data-index-link>
+                          {row.indexTitle ?? row.title}
+                        </a>
+                      </li>
+                    ))}
+                    {group.more.length > 0 && (
+                      <li>
+                        <a href="#more-packages" data-index-link>
+                          More packages
+                        </a>
+                      </li>
+                    )}
+                  </ul>
+                </details>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    </aside>
+    <div class="ecosystem-content">
+      {groups.map((group) => (
+        <section
+          class:list={['group', group.tone, { compact: group.compact }]}
+          id={group.id}
+        >
+          <div class="container">
+            <header class="group-head">
+              {group.id === 'frameworks' ? (
+                <h1>{group.title}</h1>
+              ) : (
+                <h2>{group.title}</h2>
+              )}
+              {group.lead && <p class="lead">{group.lead}</p>}
+              {group.link && <a href={group.link.href}>{group.link.text}</a>}
+            </header>
+            {[group.rows, group.more].map(
+              (rows, i) =>
+                rows.length > 0 && (
+                  <>
+                    {i === 1 && (
+                      <p class="mono subhead" id="more-packages">
+                        More packages
+                      </p>
+                    )}
+                    <div class:list={['rows', { more: i === 1 }]}>
+                      {rows.map((row) => (
+                        <article
+                          class:list={['row', { featured: row.featured }]}
+                          id={row.id}
+                        >
+                          <div class="row-head">
+                            <div class="pain">
+                              <h3>{row.title}</h3>
+                              {row.read && <code class="read">{row.read}</code>}
+                              {row.text && <p>{row.text}</p>}
+                            </div>
+                            <div class="ref">
+                              <a
+                                class="module"
+                                href={row.module.href}
+                                data-package={row.module.name}
+                              >
+                                {row.module.name}
+                                {row.module.href.startsWith('http')
+                                  ? ' ↗'
+                                  : ' →'}
+                              </a>
+                              <span class="mono note">{row.module.note}</span>
+                              {row.alternative && (
+                                <span class="alternative">
+                                  {row.alternativeLead}:{' '}
+                                  <a
+                                    href={row.alternative.href}
+                                    data-package={row.alternative.name}
+                                  >
+                                    {row.alternative.name} ↗
+                                  </a>{' '}
+                                  <span class="mono note">
+                                    {row.alternative.note}
+                                  </span>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          {row.points && (
+                            <ul class="points">
+                              {row.points.map((point) => (
+                                <li>{point}</li>
+                              ))}
+                            </ul>
+                          )}
+                          {row.snippets && (
+                            <div class="row-code">
+                              {row.snippets.map((s) => (
+                                <CodeWindow
+                                  file={s.file}
+                                  caption={s.caption}
+                                  store
+                                />
+                              ))}
+                            </div>
+                          )}
+                          {(row.boundary || row.usedIn.length > 0) && (
+                            <div class="row-foot">
+                              {row.boundary && <p>{row.boundary}</p>}
+                              {row.usedIn.map((s) => (
+                                <a href={`/for/${s.id}/`}>
+                                  Used in: {s.data.toc} →
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </article>
+                      ))}
+                    </div>
+                  </>
+                ),
+            )}
+            {group.id === 'capabilities' && (
+              <a
+                class="full-list"
+                href="https://github.com/nanostores/nanostores/discussions"
+              >
+                Missing a package? Tell us →
+              </a>
+            )}
+            {group.boundary && (
+              <p class="boundary">
+                <span>
+                  {group.boundary.text} <b>{group.boundary.strong}</b>
+                </span>
+              </p>
+            )}
+          </div>
+        </section>
+      ))}
+
+      <section class="next container">
+        <a href="/docs/getting-started/">
+          <strong>Getting started →</strong>
+          <span>Your first store and component in a few minutes.</span>
+        </a>
+        <a href="/">
+          <strong>Find your situation →</strong>
+          <span>Islands, Context, live data, several frameworks.</span>
+        </a>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    import { track } from '../lib/analytics'
+    document
+      .querySelectorAll<HTMLAnchorElement>('[data-package]')
+      .forEach((link) =>
+        link.addEventListener('click', () =>
+          track('package_click', { target: link.dataset.package }),
+        ),
+      )
+
+    const panel = document.querySelector<HTMLDetailsElement>('.index-panel')!
+    const desktop = matchMedia('(min-width: 50rem)')
+    const adaptIndex = () => {
+      panel.open = desktop.matches
+    }
+    adaptIndex()
+    desktop.addEventListener('change', adaptIndex)
+    const links = [
+      ...panel.querySelectorAll<HTMLAnchorElement>('[data-index-link]'),
+    ]
+    const entries = links.map((link) => ({
+      link,
+      target: document.getElementById(link.hash.slice(1))!,
+    }))
+    panel.addEventListener('click', (event) => {
+      if (
+        !desktop.matches &&
+        (event.target as Element).closest('[data-index-link]')
+      ) {
+        panel.open = false
+      }
+    })
+
+    // Use document order, including headings above the viewport, so long
+    // examples keep their index entry selected until the next heading arrives.
+    let scheduled = false
+    let activeLink: HTMLAnchorElement | undefined
+    const updateIndex = () => {
+      scheduled = false
+      let active = entries[0]
+      for (const entry of entries) {
+        if (entry.target.getBoundingClientRect().top <= 96) active = entry
+      }
+      if (active.link !== activeLink) {
+        const group =
+          active.link.closest<HTMLDetailsElement>('.index-group-panel')
+        if (group) group.open = true
+        activeLink = active.link
+      }
+      for (const entry of entries) {
+        if (entry === active)
+          entry.link.setAttribute('aria-current', 'location')
+        else entry.link.removeAttribute('aria-current')
+      }
+    }
+    const scheduleUpdate = () => {
+      if (scheduled) return
+      scheduled = true
+      requestAnimationFrame(updateIndex)
+    }
+    addEventListener('scroll', scheduleUpdate, { passive: true })
+    addEventListener('resize', scheduleUpdate)
+    addEventListener('hashchange', scheduleUpdate)
+    updateIndex()
+  </script>
+</BaseLayout>
+<style>
+  .ecosystem-leaf {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ecosystem-content {
+    min-width: 0;
+    container: ecosystem-content / inline-size;
+  }
+  .ecosystem-index {
+    min-width: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .index-panel {
+    max-height: 60svh;
+    overflow-y: auto;
+    padding: var(--space-4) var(--site-header-sheet-gutter);
+  }
+  .index-panel > summary {
+    color: var(--text-2);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+  }
+  .index-panel nav {
+    margin-top: var(--space-4);
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  .index-panel ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .index-groups > li + li {
+    margin-top: var(--space-3);
+  }
+  .index-groups ul > li {
+    margin-inline-start: var(--space-2);
+    border-inline-start: 1px solid var(--line);
+    padding-inline-start: var(--space-2);
+  }
+  .index-group-panel > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: var(--space-2);
+    line-height: 1.4;
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+  }
+  .index-group-panel > summary::-webkit-details-marker {
+    display: none;
+  }
+  .index-caret {
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    transition: transform 0.2s ease-in-out;
+  }
+  .index-group-panel[open] > summary .index-caret {
+    transform: rotate(90deg);
+  }
+  .index-panel a {
+    display: block;
+    padding: 0.3em var(--space-2);
+    border-radius: var(--radius-control);
+    color: var(--text-2);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  .index-panel .index-group {
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+    padding-block: 0.2em;
+    flex: 1;
+  }
+  .index-panel a:hover,
+  .index-panel a:focus {
+    color: var(--text);
+  }
+  .index-panel a[aria-current] {
+    font-weight: 600;
+    color: var(--page);
+    background: var(--text);
+  }
+  .index-panel a:focus-visible,
+  .index-group-panel > summary:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+  }
+  @media (width >= 50rem) {
+    .ecosystem-leaf {
+      grid-template-columns: 15rem minmax(0, 1fr);
+    }
+    .ecosystem-index {
+      border-bottom: 0;
+      border-right: 1px solid var(--line);
+    }
+    .index-panel {
+      position: sticky;
+      top: var(--space-5);
+      max-height: calc(100svh - 2 * var(--space-5));
+      padding: var(--space-4) var(--site-header-sheet-gutter);
+      scrollbar-gutter: stable;
+    }
+    .index-panel > summary {
+      display: none;
+    }
+    .index-panel nav {
+      margin-top: 0;
+      font-size: 14px;
+    }
+    .index-panel .index-group {
+      font-size: 16px;
+    }
+    .index-groups > li + li {
+      margin-top: var(--space-2);
+    }
+  }
+  @media print {
+    .ecosystem-leaf {
+      display: block;
+    }
+    .ecosystem-index {
+      display: none;
+    }
+  }
+  .ecosystem-leaf .container {
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: var(--site-header-sheet-gutter);
+  }
+  .group:first-child {
+    border-top: 0;
+  }
+  h1,
+  h2 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 680;
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+  }
+  h3 {
+    margin: 0;
+    font-size: clamp(21px, 1.8vw, 26px);
+    font-weight: 680;
+    line-height: 1.2;
+  }
+  p {
+    line-height: 1.6;
+  }
+
+  .group {
+    padding-block: 32px 24px;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: var(--header-h);
+  }
+  .group.ink {
+    border-top: 0;
+  }
+  .group-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    max-width: 880px;
+    margin-bottom: 36px;
+  }
+
+  .compact .group-head {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: none;
+    gap: 12px 24px;
+  }
+  .compact .group-head > a {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .rows {
+    border-bottom: 2px solid var(--text);
+  }
+  .row {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-block: 28px;
+    border-top: 2px solid var(--text);
+    scroll-margin-top: var(--header-h);
+  }
+  .row-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 16px 48px;
+  }
+  .pain {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 720px;
+  }
+  .pain p {
+    margin: 0;
+    color: var(--text-2);
+  }
+  .ref {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    text-align: right;
+  }
+  .module {
+    font:
+      400 17px 'Fragment Mono',
+      monospace;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    white-space: nowrap;
+  }
+  .note {
+    color: var(--text-3);
+    font-size: 11px;
+  }
+  .alternative {
+    margin-top: 6px;
+    color: var(--text-3);
+    font-size: 14px;
+  }
+  .alternative a {
+    font-family: 'Fragment Mono', monospace;
+    font-size: 13px;
+  }
+  .read {
+    font:
+      400 14px 'Fragment Mono',
+      monospace;
+    color: var(--text-2);
+  }
+  .points {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+  }
+  .points li {
+    padding: 5px 10px;
+    border-radius: var(--radius-control);
+    background: var(--control);
+    color: var(--text-2);
+  }
+  .row-code {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: 14px;
+    max-width: 880px;
+  }
+  .featured .row-code {
+    max-width: none;
+  }
+  .row-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 32px;
+    font-size: 15px;
+  }
+  .row-foot p {
+    margin: 0;
+    color: var(--text-3);
+  }
+  .row-foot a {
+    font-weight: 500;
+  }
+  .featured h3 {
+    font-size: clamp(26px, 2.4vw, 34px);
+  }
+
+  .compact .row,
+  .more .row {
+    gap: 6px;
+    padding-block: 10px;
+    border-top-width: 1px;
+    border-color: var(--line);
+  }
+  .compact .row:first-child,
+  .more .row:first-child {
+    border-top: 2px solid var(--text);
+  }
+  .compact h3,
+  .more h3 {
+    font-size: 18px;
+  }
+  .compact .pain {
+    flex-direction: row;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    min-width: 0;
+  }
+  .compact .pain > * {
+    flex-shrink: 0;
+  }
+  .compact .row-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+  }
+  .compact .ref {
+    margin-left: auto;
+  }
+  .compact .read {
+    overflow-wrap: anywhere;
+    max-width: 100%;
+  }
+  .compact .row-head,
+  .more .row-head {
+    align-items: center;
+  }
+  .compact .ref,
+  .more .ref {
+    flex-flow: row wrap;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 2px 12px;
+  }
+  .compact .alternative,
+  .more .alternative {
+    flex-basis: 100%;
+    margin-top: 0;
+    font-size: 13px;
+  }
+  .alternative .note {
+    margin-left: 4px;
+  }
+  .compact .module,
+  .more .module {
+    font-size: 15px;
+  }
+  .compact .ref > .note,
+  .more .ref > .note {
+    min-width: 72px;
+  }
+  .subhead {
+    scroll-margin-top: var(--header-h);
+    margin: 40px 0 12px;
+    color: var(--text-3);
+  }
+  .full-list {
+    display: inline-block;
+    margin-top: 20px;
+    font-weight: 500;
+  }
+  .ink .rows {
+    border-bottom: 0;
+  }
+  .ink .boundary {
+    padding-top: 20px;
+    border-top: 2px solid var(--text);
+  }
+
+  .next {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding-block: 56px 96px;
+  }
+  .next a {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 22px 24px;
+    border-radius: var(--radius-card);
+    background: var(--tint);
+    text-decoration: none;
+  }
+  .next a:hover {
+    background: var(--tint-2);
+  }
+  .next strong {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .next span {
+    color: var(--text-2);
+    font-size: 15px;
+  }
+
+  @container ecosystem-content (width <= 40rem) {
+    .group {
+      padding-block: 32px 24px;
+    }
+    .row-head {
+      grid-template-columns: 1fr;
+    }
+    .ref,
+    .compact .ref,
+    .more .ref {
+      align-items: flex-start;
+      justify-content: flex-start;
+      text-align: left;
+    }
+    .compact .ref,
+    .more .ref {
+      align-items: baseline;
+    }
+    .module {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .next {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

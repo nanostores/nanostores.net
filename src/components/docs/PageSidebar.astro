@@ -1,0 +1,30 @@
+---
+import TableOfContents from '@astrojs/starlight/components/TableOfContents.astro'
+---
+
+{Astro.locals.starlightRoute.toc && (
+  <details class="docs-page-toc">
+    <summary>{Astro.locals.t('tableOfContents.onThisPage')}</summary>
+    <TableOfContents />
+  </details>
+)}
+
+<style>
+  .docs-page-toc {
+    padding: 1rem var(--sl-content-pad-x);
+    border-bottom: 1px solid var(--line);
+    font-size: var(--sl-text-sm);
+  }
+  summary {
+    cursor: pointer;
+  }
+  .docs-page-toc :global(nav) {
+    margin-top: 1rem;
+  }
+  .docs-page-toc :global(h2) {
+    display: none;
+  }
+  .docs-page-toc :global(a) {
+    color: var(--text-2);
+  }
+</style>

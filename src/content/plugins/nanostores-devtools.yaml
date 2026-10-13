@@ -1,0 +1,6 @@
+name: nanostores-devtools
+package: nanostores-devtools
+purpose: Need every store and change in the Redux DevTools panel?
+maintainer: community
+repo: https://github.com/psd-coder/nanostores-devtools
+docs: https://nanostores-devtools.psdcoder.dev/

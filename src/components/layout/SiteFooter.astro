@@ -1,0 +1,73 @@
+<footer class="colophon" id="colophon">
+  <div class="container colophon-inner">
+    <p class="label">Colophon</p>
+    <p>
+      Nano Stores is built by{' '}
+      <a href="https://evilmartians.com">Evil Martians</a>.
+    </p>
+    <p>Logo by Eduard Aksamitov.</p>
+    <nav aria-label="Footer">
+      <span>MIT License</span>
+      <span aria-hidden="true">·</span>
+      <a href="https://github.com/nanostores/nanostores">GitHub</a>
+      <span aria-hidden="true">·</span>
+      <a href="https://github.com/nanostores/nanostores/releases">Changelog</a>
+    </nav>
+  </div>
+</footer>
+<style>
+  .colophon {
+    border-top: 1px solid var(--line);
+    background: var(--page);
+    color: var(--text-2);
+  }
+  .colophon-inner {
+    position: relative;
+    display: grid;
+    row-gap: var(--space-3);
+    padding-block: var(--space-6) var(--space-7);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  p {
+    margin: 0;
+  }
+  .label {
+    font:
+      12px/1.4 'Fragment Mono',
+      monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  nav {
+    font-size: var(--text-13);
+  }
+  a {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-2);
+  }
+  /* Continue the manuscript's paper and ruled sides below the main text. */
+  :global(body:has(.leaf)) .colophon {
+    width: var(--sheet-width);
+    margin-inline: auto;
+    border-inline: var(--sheet-edge) solid var(--line);
+  }
+  :global(body:has(.leaf)) .colophon-inner {
+    max-width: none;
+    padding-inline: var(--leaf-pad);
+  }
+  @media (width >= 64rem) {
+    :global(body:has(.leaf)) .label {
+      position: absolute;
+      top: var(--space-6);
+      left: var(--space-5);
+      width: calc(var(--leaf-pad) - 2 * var(--space-5));
+    }
+  }
+</style>

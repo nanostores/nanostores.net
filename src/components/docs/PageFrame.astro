@@ -1,0 +1,124 @@
+---
+import MobileMenuToggle from './MobileMenuToggle.astro'
+
+const { hasSidebar } = Astro.locals.starlightRoute
+---
+
+<div class="page docs-sheet">
+  <header class="header">
+    <slot name="header" />
+  </header>
+  {hasSidebar && (
+    <nav
+      class="docs-navigation print:hidden"
+      aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}
+    >
+      <MobileMenuToggle />
+      <docs-sidebar-pane
+        popover="auto"
+        id="starlight__sidebar"
+        class="sidebar-pane"
+      >
+        <div class="docs-navigation-content">
+          <slot name="sidebar" />
+        </div>
+      </docs-sidebar-pane>
+    </nav>
+  )}
+  <div class:list={['main-frame', { 'docs-with-sidebar': hasSidebar }]}>
+    <slot />
+  </div>
+</div>
+
+<script>
+  // Keep Starlight's popover and focus behaviour with the centered sheet.
+  class DocsSidebarPane extends HTMLElement {
+    constructor() {
+      super()
+      const desktop = matchMedia('(min-width: 50rem)')
+      const resetPopover = () => {
+        this.popover = desktop.matches ? null : 'auto'
+      }
+      resetPopover()
+      desktop.addEventListener('change', resetPopover)
+      this.addEventListener('toggle', (event) => {
+        const open = (event as ToggleEvent).newState === 'open'
+        document
+          .querySelectorAll<HTMLElement>('.main-frame, .sl-skip-link')
+          .forEach((element) => {
+            element.inert = open
+          })
+      })
+    }
+  }
+  customElements.define('docs-sidebar-pane', DocsSidebarPane)
+</script>
+
+<style>
+  .docs-sheet {
+    box-sizing: border-box;
+    width: var(--sheet-width);
+    min-height: 100svh;
+    margin-inline: auto;
+    border-inline: var(--sheet-edge) solid var(--line);
+    background: var(--page);
+  }
+  .header {
+    position: fixed;
+    z-index: var(--sl-z-index-navbar);
+    inset: 0 0 auto;
+    height: var(--sl-nav-height);
+    border-bottom: 1px solid var(--line);
+  }
+  .main-frame {
+    min-width: 0;
+    padding-top: var(--sl-nav-height);
+  }
+  .sidebar-pane {
+    position: fixed;
+    z-index: var(--sl-z-index-menu);
+    inset-block: var(--sl-nav-height) 0;
+    inset-inline: 0;
+    width: var(--sheet-width);
+    height: auto;
+    margin: 0 auto;
+    padding: 0;
+    border: 0;
+    background: var(--page);
+    color: var(--text);
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+  .docs-navigation-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    gap: 1rem;
+    padding: 1rem var(--sl-sidebar-pad-x);
+  }
+  @media (width >= 50rem) {
+    .sidebar-pane {
+      display: block;
+      inset-inline-start: calc(var(--sheet-offset) + 1px);
+      inset-inline-end: auto;
+      width: var(--sl-sidebar-width);
+      margin: 0;
+      border-inline-end: 1px solid var(--line);
+    }
+    .docs-with-sidebar {
+      padding-inline-start: var(--sl-sidebar-width);
+    }
+  }
+  @media print {
+    .docs-sheet {
+      width: 100%;
+      border: 0;
+    }
+    .header {
+      position: relative;
+    }
+    .main-frame {
+      padding: 0;
+    }
+  }
+</style>

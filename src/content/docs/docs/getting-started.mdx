@@ -1,0 +1,84 @@
+---
+title: Getting started
+description: Install Nano Stores, create a store, derive a value and read it in a component.
+---
+
+import { Code, Tabs, TabItem } from '@astrojs/starlight/components'
+import { region } from '../../../lib/snippets'
+
+A store is a plain JavaScript module. Components only read it.
+
+## Install
+
+```sh
+npm install nanostores
+```
+
+## Create a store
+
+`atom` keeps one value. Actions that change it are plain functions next to the store.
+
+<Code
+  code={region('getting-started/stores/users.ts')}
+  lang="ts"
+  title="stores/users.ts"
+/>
+
+## Derive a value
+
+`computed` recalculates when the stores it depends on change.
+
+<Code
+  code={region('getting-started/stores/admins.ts')}
+  lang="ts"
+  title="stores/admins.ts"
+/>
+
+## Read it in a component
+
+Install the adapter for your framework. The component re-renders when `$admins` changes.
+
+<Tabs syncKey="framework">
+  <TabItem label="React">
+
+    ```sh
+    npm install @nanostores/react
+    ```
+
+    <Code
+      code={region('getting-started/components/Admins.tsx')}
+      lang="tsx"
+      title="components/Admins.tsx"
+    />
+
+  </TabItem>
+  <TabItem label="Vue">
+
+    ```sh
+    npm install @nanostores/vue
+    ```
+
+    <Code
+      code={region('getting-started/components/admins-vue.ts')}
+      lang="ts"
+      title="Admins.vue — <script setup lang='ts'>"
+    />
+    Use `admins` in the template as a regular ref.
+
+  </TabItem>
+  <TabItem label="Vanilla JS">
+    No adapter needed: `subscribe` calls the callback right away and on every change.
+    <Code
+      code={region('getting-started/components/admins.ts')}
+      lang="ts"
+      title="admins.ts"
+    />
+  </TabItem>
+</Tabs>
+
+Svelte, Solid, Lit, Angular, Alpine.js and Web Components: see [Frameworks](/docs/frameworks/react-preact/).
+
+## Next
+
+- [Lazy stores](/docs/concepts/lazy-stores/): load data only while a component listens.
+- [Move logic from components to stores](/docs/handbook/move-logic-from-components-to-stores/)

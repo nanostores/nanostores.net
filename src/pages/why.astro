@@ -1,0 +1,299 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Initial from '../components/primitives/Initial.astro'
+import CodeWindow from '../components/primitives/CodeWindow.astro'
+import WayOfThinkingSketch from '../components/blocks/WayOfThinkingSketch.astro'
+import jacquard from '@fontsource/jacquard-12/files/jacquard-12-latin-400-normal.woff2?url'
+---
+
+<BaseLayout
+  title="Why state lives outside UI"
+  description="Why the authors of Nano Stores keep state, computations and lifecycle out of components, and what that costs."
+  preload={[jacquard]}
+>
+  <article class="leaf essay">
+    <p class="incipit mono">How we think</p>
+    <h1>Why state lives outside UI</h1>
+    <div class="column">
+      <p class="lead">
+        <Initial>W</Initial>hen logic leaves the components, a framework becomes
+        a simple rendering layer. We think much of the complexity we attribute
+        to frameworks comes from the logic we write inside them.
+      </p>
+      <WayOfThinkingSketch />
+      <p class="idea">
+        This is the idea Nano Stores is built around, and it is our opinion, not
+        an API rule: we think a component should draw state, not own it.
+      </p>
+
+      <section>
+        <h2>The problem</h2>
+        <p>
+          It is easy to write a feature inside a component, and we understand
+          why. Loading, derived values and cleanup all fit next to the markup:
+        </p>
+        <CodeWindow
+          file="logic-outside-hooks/before.tsx"
+          caption="Header.tsx"
+        />
+        <p>
+          It works, but we don't like where the model of the feature ends up: in
+          the render cycle. Where the data comes from, when it loads and what
+          depends on what are written as effects and dependency arrays, in the
+          terms of one framework.
+        </p>
+      </section>
+
+      <section>
+        <h2>What we think it costs</h2>
+        <ul>
+          <li>
+            <strong>Testing.</strong> To check that the admin flag is derived
+            correctly, the test has to render the component in a framework's
+            test environment and emulate its lifecycle.
+          </li>
+          <li>
+            <strong>Reuse.</strong> The next screen that needs{' '}
+            <code>isAdmin</code> either copies the effect or lifts the state
+            into a provider. In both cases the component tree comes along.
+          </li>
+          <li>
+            <strong>Moving.</strong> Another framework, or a second client such
+            as React Native, means rewriting the logic, because it is written in
+            the framework's terms.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>The other way</h2>
+        <p>
+          We'd rather have the store own the state, the computations and the
+          lifecycle. The component then renders the ready value, and the link to
+          the framework is one line at the boundary:
+        </p>
+        <CodeWindow file="why/user.ts" caption="stores/user.ts" store />
+        <CodeWindow file="why/Header.tsx" caption="Header.tsx" />
+        <p>
+          <code>onMount</code> starts loading when something subscribes,{' '}
+          <code>task</code> marks the loading so that tests and server rendering
+          can wait for it, and <code>computed</code> derives the flag (see{' '}
+          <a href="/docs/concepts/smart-stores/">Smart stores</a>).{' '}
+          <code>useStore</code> is the only React-specific line. Vue, Svelte and
+          the other <a href="/docs/frameworks/react-preact/">frameworks</a> have
+          their own one-line equivalent.
+        </p>
+      </section>
+
+      <section>
+        <h2>Testing a store</h2>
+        <p>
+          To test the admin flag in the component version, the test renders the
+          component in a DOM environment and waits for the rendered output:
+        </p>
+        <CodeWindow file="why/before.test.tsx.txt" caption="Header.test.tsx" />
+        <p>
+          The store is plain JavaScript, so its test needs no renderer and no
+          DOM, which is a large part of why we prefer this shape.{' '}
+          <code>keepMount</code> keeps the store active during the test,{' '}
+          <code>allTasks</code> waits for the loading started by{' '}
+          <code>task</code>, and <code>cleanStores</code> resets the store
+          afterwards (see <a href="/docs/guides/tests/">Tests</a>):
+        </p>
+        <CodeWindow file="why/user.test.ts" caption="stores/user.test.ts" />
+      </section>
+
+      <section>
+        <h2>UI as a skin</h2>
+        <p>
+          We like to think of a component as a skin over the state. It decides
+          how things look, and the store decides what is true. Swap the skin,
+          whether it is another framework, another platform or a test, and the
+          state and its logic stay the same.
+        </p>
+        <p>
+          The shape is a familiar one. If it sounds like MVC, it is: stores are
+          the model, components are the view.
+        </p>
+      </section>
+
+      <section>
+        <h2>What it costs us</h2>
+        <ul>
+          <li>
+            The logic is not next to the markup. Reading a feature means opening
+            the store and the component.
+          </li>
+          <li>
+            State that belongs to one component and dies with it doesn't need a
+            store, and we'd keep a local <code>useState</code> there.
+          </li>
+        </ul>
+      </section>
+
+      <div class="end">
+        <p class="explicit" aria-hidden="true">
+          Explicit
+        </p>
+        <a class="back" href="/">
+          <span class="hand" aria-hidden="true">
+            ☜
+          </span>{' '}
+          Find your situation
+        </a>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+<style>
+  /*
+   * An essay on the manuscript leaf (layout.css): the leaf's margins, its
+   * text column as the reading column, the home page's reading scale.
+   */
+  article {
+    padding: 64px var(--leaf-pad) 0;
+  }
+  /* The incipit: the opening words a scribe wrote in red. Color in roles.css. */
+  .incipit {
+    margin: 0 0 16px;
+    font:
+      400 12px/20px 'Fragment Mono',
+      monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(38px, 6vw, 60px);
+    font-stretch: 78%;
+    line-height: 1.09;
+    letter-spacing: -0.025em;
+  }
+  .column .lead {
+    margin-block: 24px 32px;
+    font-size: 21px;
+    line-height: 1.55;
+  }
+  /*
+   * The lead opens with a decorative initial (Initial.astro) dropped two
+   * lines. Jacquard's capitals are 0.57em tall, Instrument Sans' 0.72em; at
+   * line-height 1.55 the lead's first cap line sits 0.415em below its top
+   * and the second baseline 2.27em below that cap line. So the initial is
+   * 2.27 / 0.57 = 3.98em of the lead, its box exactly one capital tall,
+   * nudged down to the first cap line. The box ends inside the second line,
+   * so two lines wrap around it.
+   */
+  .column .lead :global(.initial) {
+    width: auto;
+    margin: 0.054em 0.1em 0 -0.02em;
+    font-size: 3.98em;
+    line-height: 0.57;
+    transform: none;
+  }
+  .column p,
+  li {
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  section {
+    margin-top: 56px;
+  }
+  /*
+   * Section headings at the home section scale, in ink. A rubric pilcrow
+   * (the text face's own ¶) hangs in the margin so the column keeps its
+   * edge; on phones it stands inline. Hidden from screen readers.
+   */
+  h2 {
+    position: relative;
+    margin: 0 0 12px;
+    font-size: 32px;
+    line-height: 1.125;
+  }
+  h2::before {
+    content: '¶' / '';
+    position: absolute;
+    top: 0;
+    right: 100%;
+    margin-right: 0.3em;
+    font-weight: 400;
+    font-stretch: 100%;
+    letter-spacing: 0;
+  }
+  ul {
+    padding-left: 1.2em;
+  }
+  section :global(.code-window) {
+    margin-block: 16px;
+  }
+  /* Links in the text: ink, a faded iron-gall underline (roles.css). */
+  section a {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-skip-ink: auto;
+  }
+  section a:hover {
+    text-decoration-thickness: 1.5px;
+  }
+  /*
+   * The end: a single rule across the leaf, then the
+   * scribe's closing word and the way back, centered. The closing word
+   * is decoration only.
+   */
+  .end {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 64px calc(-1 * var(--leaf-pad)) 0;
+    padding: 56px var(--leaf-pad) 64px;
+    text-align: center;
+    box-shadow: inset 0 1px var(--line);
+  }
+  .end p {
+    margin: 0;
+  }
+  .end .explicit {
+    margin-bottom: 12px;
+    font:
+      400 11px/20px 'Fragment Mono',
+      monospace;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .back {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.55;
+    text-decoration: none;
+  }
+  /* A hand points back home, as on the situation pages. */
+  .back .hand {
+    display: inline-block;
+    width: 1.1em;
+    margin-right: 0.3em;
+    font:
+      1.6em/0 'Noto Sans Symbols 2',
+      serif;
+    vertical-align: -0.12em;
+  }
+  @media (width < 37.5rem) {
+    h1 {
+      line-height: 1.12;
+    }
+    .column .lead {
+      font-size: 18px;
+    }
+    section {
+      margin-top: 44px;
+    }
+    h2 {
+      font-size: 28px;
+      line-height: 1.15;
+    }
+    h2::before {
+      position: static;
+      margin-right: 0.25em;
+    }
+  }
+</style>

@@ -1,0 +1,6 @@
+name: Logux Client
+package: '@logux/client'
+purpose: Need WebSocket sync with CRDT conflict resolution?
+maintainer: community
+repo: https://github.com/logux/client
+docs: https://github.com/logux/client#readme

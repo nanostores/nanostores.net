@@ -1,0 +1,47 @@
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 400 700;
+  font-stretch: 75% 100%;
+  font-display: swap;
+  src: url('@fontsource-variable/instrument-sans/files/instrument-sans-latin-standard-normal.woff2')
+    format('woff2');
+}
+@font-face {
+  font-family: 'Fragment Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('@fontsource/fragment-mono/files/fragment-mono-latin-400-normal.woff2')
+    format('woff2');
+}
+@font-face {
+  font-family: 'Shantell Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  src: url('@fontsource/shantell-sans/files/shantell-sans-latin-600-normal.woff2')
+    format('woff2');
+}
+@font-face {
+  font-family: 'Jacquard 12';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('@fontsource/jacquard-12/files/jacquard-12-latin-400-normal.woff2')
+    format('woff2');
+}
+/* Regular mono has no synthetic bold weight. */
+code,
+pre,
+.mono {
+  font-synthesis: none;
+}
+h1,
+h2,
+h3 {
+  font-weight: 680;
+  font-stretch: 78%;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}

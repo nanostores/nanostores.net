@@ -1,0 +1,10 @@
+---
+import SiteMenuButton from '../layout/SiteMenuButton.astro'
+---
+
+<!-- Starlight's sidebar pane is the popover; its id is the MobileMenuToggle contract. -->
+<SiteMenuButton
+  target="starlight__sidebar"
+  label={Astro.locals.t('menuButton.accessibleLabel')}
+  fixed
+/>

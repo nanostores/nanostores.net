@@ -1,0 +1,6 @@
+name: Storage
+package: '@vp-tw/nanostores-storage'
+purpose: Need sessionStorage, memory or custom storage adapters?
+maintainer: community
+repo: https://github.com/vp-tw/nanostores-storage
+docs: https://github.com/vp-tw/nanostores-storage#readme

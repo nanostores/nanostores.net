@@ -1,0 +1,5 @@
+name: I18n
+package: '@nanostores/i18n'
+purpose: Need translations loaded per locale?
+repo: https://github.com/nanostores/i18n
+docs: https://github.com/nanostores/i18n#readme

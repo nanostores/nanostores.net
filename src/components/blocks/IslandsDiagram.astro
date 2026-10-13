@@ -1,0 +1,53 @@
+---
+import { getEntry } from 'astro:content'
+import CodeWindow from '../primitives/CodeWindow.astro'
+const { anchors } = (await getEntry('situations', 'islands'))!.data
+---
+
+<div class="islands-diagram">
+  <CodeWindow
+    anchors={anchors}
+    file="islands/header.tsx"
+    caption="Header island · React"
+  />
+  <div class="wire">
+    <span class="store-node">$cart = atom([])</span>
+  </div>
+  <CodeWindow
+    anchors={anchors}
+    file="islands/Catalog.vue"
+    caption="Catalog island · Vue"
+  />
+</div>
+<style>
+  .islands-diagram {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px minmax(0, 1fr);
+    align-items: center;
+    min-width: 0;
+  }
+  .wire {
+    display: flex;
+    align-items: center;
+  }
+  .wire::before,
+  .wire::after {
+    content: '';
+    flex-grow: 1;
+    height: 2px;
+    background: var(--line-strong);
+  }
+  .wire .store-node {
+    white-space: nowrap;
+  }
+  @media (max-width: 900px) {
+    .islands-diagram {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .wire::before,
+    .wire::after {
+      min-width: 30px;
+    }
+  }
+</style>

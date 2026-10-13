@@ -1,0 +1,124 @@
+---
+// Hand-drawn sketch for the "way of thinking" sheet on the home page: logic
+// tangled inside a component versus logic in a store under a thin UI skin.
+---
+
+<figure class="sketch">
+  <svg
+    viewBox="0 0 480 250"
+    role="img"
+    aria-label="Logic in components: a tangle of effects inside the component. Or logic in stores: the store holds data, loading and rules, the component only renders. UI as a skin."
+  >
+    <g
+      class="ink-lines"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <!-- before: a component box with tangled logic -->
+      <text class="hand small muted" x="94" y="24" text-anchor="middle">
+        logic in components
+      </text>
+      <path d="M16 42 C58 37 118 39 170 41" />
+      <path d="M168 38 C171 88 167 142 170 192" />
+      <path d="M172 190 C118 194 62 193 18 189" />
+      <path d="M20 193 C16 140 19 90 15 40" />
+      <path
+        class="tangle"
+        d="M44 118 c14 -38 58 22 76 -14 s-58 -34 -48 16 s72 14 62 -28 s-52 38 -30 52 s40 -40 8 -46 s-60 30 -40 44 s50 -6 44 -30"
+      />
+      <text class="hand small" x="28" y="68" transform="rotate(-6 28 68)">
+        useEffect
+      </text>
+      <text class="hand small" x="108" y="76" transform="rotate(5 108 76)">
+        fetch()
+      </text>
+      <text class="hand small" x="96" y="176" transform="rotate(-3 96 176)">
+        deps [ ]
+      </text>
+      <text class="hand" x="54" y="218">
+        component
+      </text>
+
+      <!-- The second system stands apart, with open space between the diagrams. -->
+      <text class="hand small muted" x="245" y="24" text-anchor="middle">
+        or
+      </text>
+      <g transform="translate(60 0)">
+        <text class="hand small muted" x="336" y="24" text-anchor="middle">
+          logic in stores
+        </text>
+        <path class="store store-mark" d="M264 42 C312 39 362 41 408 43" />
+        <path class="store store-mark" d="M407 41 C409 62 406 84 408 104" />
+        <path class="store store-mark" d="M409 103 C360 106 312 105 263 103" />
+        <path class="store store-mark" d="M265 105 C262 84 266 62 262 41" />
+        <text class="hand store-mark" x="336" y="70" text-anchor="middle">
+          store
+        </text>
+        <text class="hand small" x="336" y="92" text-anchor="middle">
+          data · loading · rules
+        </text>
+
+        <path d="M334 110 C335 120 333 130 334 140" />
+        <path d="M327 132 L334 142 L341 133" />
+        <text class="hand small muted" x="344" y="130">
+          renders
+        </text>
+
+        <path class="skin" d="M264 146 C310 143 362 145 408 147" />
+        <path class="skin" d="M407 145 C409 164 406 184 408 202" />
+        <path class="skin" d="M409 201 C360 204 312 203 263 201" />
+        <path class="skin" d="M265 203 C262 184 266 164 262 145" />
+        <text class="hand" x="336" y="180" text-anchor="middle">
+          components
+        </text>
+
+        <!-- caption -->
+        <text class="hand" x="276" y="238">
+          UI as a skin
+        </text>
+        <path d="M274 244 C300 240 340 246 372 241" />
+      </g>
+    </g>
+  </svg>
+</figure>
+<style>
+  /* The sketch */
+  .sketch {
+    margin: 8px 0 32px;
+    color: var(--text);
+  }
+  .sketch svg {
+    display: block;
+    width: 100%;
+    max-width: 560px;
+    height: auto;
+  }
+  .ink-lines {
+    stroke: currentColor;
+    stroke-width: 2.2;
+  }
+  .tangle {
+    stroke-width: 1.8;
+  }
+  .skin {
+    stroke-width: 1.6;
+    stroke-dasharray: 6 5;
+  }
+  .store {
+    stroke-width: 2.6;
+  }
+  .hand {
+    fill: currentColor;
+    stroke: none;
+    font-family: 'Shantell Sans', 'Comic Sans MS', cursive;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .hand.small {
+    font-size: 12px;
+  }
+  .hand.muted {
+    fill: var(--text-3);
+  }
+</style>

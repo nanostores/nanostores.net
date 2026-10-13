@@ -1,0 +1,13 @@
+<!-- Inside the 960px sheet the page TOC sits above the article. -->
+<div class="docs-content">
+  <div class="docs-toc print:hidden">
+    <slot name="right-sidebar" />
+  </div>
+  <slot />
+</div>
+
+<style>
+  .docs-content {
+    min-width: 0;
+  }
+</style>

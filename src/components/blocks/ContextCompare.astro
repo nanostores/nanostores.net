@@ -1,0 +1,75 @@
+---
+import { getEntry } from 'astro:content'
+import CodeWindow from '../primitives/CodeWindow.astro'
+const { anchors } = (await getEntry('situations', 'outgrowing-context'))!.data
+---
+
+<div class="context-compare">
+  <div class="windows">
+    <CodeWindow
+      anchors={anchors}
+      file="outgrowing-context/context.tsx"
+      caption="Today · providers"
+    />
+    <CodeWindow
+      anchors={anchors}
+      file="outgrowing-context/store.tsx"
+      caption="With a store · no provider"
+      store
+    />
+  </div>
+  <div class="choices">
+    <div>
+      <span>Theme, locale</span>
+      <strong>Keep Context</strong>
+    </div>
+    <div>
+      <span>Time travel, strict patterns</span>
+      <strong>Redux Toolkit</strong>
+    </div>
+    <div class="recommended">
+      <span>Shared state, less wiring</span>
+      <strong>A small store</strong>
+    </div>
+  </div>
+</div>
+<style>
+  .context-compare {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    min-width: 0;
+  }
+  .windows,
+  .choices {
+    display: grid;
+    gap: 14px;
+  }
+  .choices {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .choices > div {
+    display: grid;
+    gap: 4px;
+    padding: 14px 16px;
+    border-radius: var(--radius-card);
+    background: var(--tint);
+    min-width: 0;
+  }
+  .choices .recommended {
+    box-shadow: inset 0 0 0 2px var(--text);
+  }
+  .choices span {
+    color: var(--text-3);
+    font-size: 14px;
+  }
+  .choices strong {
+    font-size: 16px;
+  }
+  @media (max-width: 900px) {
+    .choices {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

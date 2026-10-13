@@ -1,0 +1,21 @@
+---
+// A heading whose first letter is a Lombard initial (ornaments.css): the
+// letter stays plain text, the Lombard is drawn over it, and hovering the
+// heading shows the plain letter. Jacquard comes from Fontsource.
+// Letter and rest are one expression,
+// so no line break between them can render as a space inside the word.
+import { pigment } from '../../lib/chapter'
+interface Props {
+  text: string
+  number: number
+}
+const { text, number } = Astro.props
+const first = text.charAt(0)
+---
+
+{[
+  <span class="first" data-letter={first} data-pigment={pigment(number)}>
+    {first}
+  </span>,
+  text.slice(1),
+]}

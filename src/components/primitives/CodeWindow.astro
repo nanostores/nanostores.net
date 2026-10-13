@@ -1,0 +1,95 @@
+---
+import { snippet } from '../../lib/snippets'
+interface Props {
+  file: string
+  caption: string
+  store?: boolean
+  anchors?: string[]
+  // The reference mark in place of the dot: this is the gloss, opened.
+  gloss?: boolean
+}
+const {
+  file,
+  caption,
+  store = false,
+  anchors = [],
+  gloss = false,
+} = Astro.props
+const html = await snippet(file, anchors)
+---
+
+<figure class="window code-window" data-store={store || undefined}>
+  <figcaption>
+    {gloss ? (
+      <span class="gloss-mark" aria-hidden="true"></span>
+    ) : (
+      <span class="dot" aria-hidden="true"></span>
+    )}
+    <span class="filename">{caption}</span>
+    <span class="wave" aria-hidden="true"></span>
+  </figcaption>
+  <div class="code" set:html={html} />
+</figure>
+<style>
+  .window {
+    margin: 0;
+    /* Transparent paper and border retain the existing block geometry. */
+    background: transparent;
+    color: var(--text);
+    border: 1px solid transparent;
+    border-radius: 0;
+    overflow: hidden;
+    min-width: 0;
+  }
+  figcaption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-bottom: 1px solid transparent;
+    font:
+      400 12px 'Fragment Mono',
+      monospace;
+  }
+  .dot {
+    width: 12px;
+    height: 9px;
+    flex: none;
+    visibility: hidden;
+  }
+  /* Cap height of the caption, in the dot's 12px slot. */
+  .gloss-mark {
+    margin-inline: calc((12px - 0.7em) / 2);
+  }
+  .filename {
+    min-width: 0;
+    background: var(--tint-2);
+    box-shadow: 0 0 0 3px var(--tint-2);
+  }
+  .wave {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 9px;
+    mask: var(--double-wave) left center / 12px 9px repeat-x;
+  }
+  .code {
+    overflow-x: auto;
+    padding: 18px;
+    background-image: var(--code-dots);
+    background-size: 10px var(--code-pitch);
+    background-repeat: repeat-y;
+    background-position: 4px 18px;
+  }
+  .code :global(pre) {
+    margin: 0;
+    background: transparent !important;
+    font:
+      400 13px/1.65 'Fragment Mono',
+      monospace;
+    min-width: max-content;
+  }
+  /* The browser sets code to its own monospace; keep Fragment Mono. */
+  .code :global(code) {
+    font: inherit;
+  }
+</style>

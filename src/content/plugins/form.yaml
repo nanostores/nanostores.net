@@ -1,0 +1,6 @@
+name: Form
+package: '@alexcarpenter/form'
+purpose: Need headless form state?
+maintainer: community
+repo: https://github.com/alexcarpenter/form
+docs: https://github.com/alexcarpenter/form#readme

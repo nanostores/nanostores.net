@@ -1,0 +1,164 @@
+---
+// Home: a captioned scene from a medieval manuscript, the way the
+// "Suffering Middle Ages" memes frame it. The circle shows a close-up
+// (`rest`: background size and position) and zooms to the whole square
+// crop on hover. The caption is the joke, so it always stays visible.
+import Shelfmark from './Shelfmark.astro'
+import type { Source } from '../../lib/sources'
+interface Props {
+  src: string
+  rest: [size: string, position: string]
+  lines: string[]
+  // What the scene shows, for readers who do not see it.
+  alt: string
+  // Where the original is kept, set along the paper's edge.
+  source?: Source
+}
+const { src, rest, lines, alt, source } = Astro.props
+---
+
+<figure class="meme">
+  <span class="art" role="img" aria-label={alt}>
+    <i
+      style={`background-image: url(${src}); --rest-size: ${rest[0]}; --rest-position: ${rest[1]}`}
+    ></i>
+  </span>
+  <figcaption>
+    {lines.map((line) => (
+      <span>
+        <span>{line}</span>
+      </span>
+    ))}
+  </figcaption>
+  {source && <Shelfmark {...source} />}
+</figure>
+<style>
+  /*
+   * The circle is --circle-size (6L, 5L on phones); the caption stands to
+   * its left, centred on it. Each scene shares the paper's right content
+   * edge. The zoom grows leftwards, with the captions above it; narrow
+   * screens retain enough room for the captions to wrap normally.
+   */
+  .meme {
+    /* Zoom opening: fast at first, then a long slow settle. */
+    --zoom-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --zoom-time: 0.2s;
+    --size: var(--circle-size);
+    --zr: min(180px, calc((100vw - 64px) / 2));
+    --caption-edge: calc(var(--size) + var(--space-4));
+    position: relative;
+    display: grid;
+    align-content: start;
+    width: 100%;
+    min-height: var(--size);
+    margin: 0;
+  }
+  .art {
+    position: relative;
+    display: block;
+    width: var(--size);
+    height: var(--size);
+    justify-self: end;
+  }
+  .art i {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    border: 2px dotted var(--text-2);
+    border-radius: 50%;
+    /* A paper band separates the ink rim from the lighter outer ring. */
+    box-shadow:
+      0 0 0 3px var(--page),
+      0 0 0 4px var(--line);
+    background-color: var(--tint-2);
+    background-repeat: no-repeat;
+    background-size: var(--rest-size);
+    background-position: var(--rest-position);
+    transform: translateY(-50%);
+    transition:
+      width 0.2s ease-in,
+      height 0.2s ease-in,
+      background-size 0.2s ease-in,
+      background-position 0.2s ease-in,
+      box-shadow 0.2s ease-in;
+  }
+  figcaption {
+    position: absolute;
+    top: calc(var(--size) / 2);
+    right: var(--caption-edge);
+    z-index: 2;
+    display: block;
+    width: calc(100% - var(--caption-edge));
+    font-size: var(--text-15);
+    font-weight: 400;
+    line-height: var(--leading-small);
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition:
+      top 0.2s ease-in,
+      right 0.2s ease-in;
+  }
+  figcaption > span {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin-block: 3px;
+    margin-inline-start: auto;
+    padding: 1px;
+    background: var(--text-2);
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      calc(100% - 8.8px) 50%,
+      100% 100%,
+      0 100%,
+      8.8px 50%
+    );
+  }
+  figcaption span span {
+    display: block;
+    padding: 4px 13px;
+    background: var(--ribbon-color);
+    clip-path: polygon(
+      1px 0,
+      calc(100% - 1px) 0,
+      calc(100% - 9.3px) 50%,
+      calc(100% - 1px) 100%,
+      1px 100%,
+      9.3px 50%
+    );
+    overflow-wrap: anywhere;
+  }
+  @media (hover: hover) {
+    .art:hover i {
+      z-index: 5;
+      width: calc(2 * var(--zr));
+      height: calc(2 * var(--zr));
+      background-size: 100%;
+      background-position: center;
+      box-shadow:
+        0 0 0 3px var(--page),
+        0 0 0 4px var(--line),
+        0 16px 40px oklch(0 0 0 / 20%);
+      transition:
+        width var(--zoom-time) var(--zoom-ease),
+        height var(--zoom-time) var(--zoom-ease),
+        background-size var(--zoom-time) var(--zoom-ease),
+        background-position var(--zoom-time) var(--zoom-ease),
+        box-shadow var(--zoom-time) var(--zoom-ease);
+    }
+    .meme:has(.art:hover) figcaption {
+      --caption-edge: min(
+        calc(var(--zr) * 1.6),
+        max(calc(var(--size) + var(--space-4)), calc(100% - 220px))
+      );
+      z-index: 6;
+      transition:
+        top var(--zoom-time) var(--zoom-ease),
+        right var(--zoom-time) var(--zoom-ease);
+    }
+  }
+</style>

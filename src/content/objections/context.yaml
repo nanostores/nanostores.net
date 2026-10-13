@@ -1,0 +1,3 @@
+question: Does the value change rarely?
+answer: Context remains a good tool for theme, locale and similarly stable values.
+alternative: React Context

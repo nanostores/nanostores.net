@@ -1,0 +1,12 @@
+// @vitest-environment happy-dom
+import { render, screen } from '@testing-library/react'
+import { expect, it, vi } from 'vitest'
+import { Header } from '../logic-outside-hooks/before'
+
+// #region show
+it('shows Admin after the user loads', async () => {
+  vi.stubGlobal('fetchUser', async () => ({ roles: ['admin'] }))
+  render(<Header />)
+  expect(await screen.findByText('Admin')).toBeTruthy()
+})
+// #endregion

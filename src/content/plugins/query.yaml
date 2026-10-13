@@ -1,0 +1,5 @@
+name: Query
+package: '@nanostores/query'
+purpose: Need remote data fetched once, cached and shared?
+repo: https://github.com/nanostores/query
+docs: https://github.com/nanostores/query#readme

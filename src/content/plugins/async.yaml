@@ -1,0 +1,5 @@
+name: Async
+package: '@nanostores/async'
+purpose: Need computed values from async sources?
+repo: https://github.com/nanostores/async
+docs: https://github.com/nanostores/async#readme

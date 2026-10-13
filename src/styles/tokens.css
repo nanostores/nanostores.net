@@ -1,0 +1,167 @@
+/* Shared reference palette; semantic tokens recompute at each role boundary. */
+:root {
+  --radius-control: 4px;
+  --radius-card: 8px;
+
+  /* Spacing scale: a 4px base, the only steps layout uses. */
+  --space-1: 4px; /* hairline, underline offset */
+  --space-2: 8px; /* inside a group: kicker to heading, chip rows */
+  --space-3: 12px; /* control padding-block */
+  --space-4: 16px; /* control padding-inline, circle to caption */
+  --space-5: 24px; /* block to block inside a section */
+  --space-6: 32px; /* page margin on tablets */
+  --space-7: 48px; /* column gap, page margin on desktops */
+
+  /*
+   * The line unit L: one line of body text (18/28). Section heights, the
+   * circle and the tech match are whole multiples of it. The scale of
+   * spacing above is for gaps inside a group; L is for the blocks.
+   */
+  --line-unit: 28px;
+  --section-pad: var(--line-unit); /* 2L from 37.5rem */
+  --circle-size: calc(5 * var(--line-unit)); /* 6L from 37.5rem */
+
+  /* Type scale: four sizes, two line heights, both on the 4px grid. */
+  --text-13: 13px;
+  --text-15: 15px;
+  --text-18: 18px;
+  --text-24: 24px;
+  --text-lead: 16px; /* the lead is 16/28 on phones, 18/28 from 37.5rem */
+  --leading-small: 20px; /* 13 and 15 */
+  --leading-body: var(--line-unit); /* 18 and 24 */
+
+  /* One column A for text, one B beside it from 64rem. */
+  --page-margin: 16px; /* 32px from 37.5rem, 48px from 64rem */
+  /* The manuscript leaf's side margins: 48px from 37.5rem, 120px from 64rem. */
+  --leaf-pad: 24px;
+  /*
+   * The sheet: the leaf and the header on it share one width, centered on
+   * the desk from 37.5rem. Phones use the full viewport, without ruled sides.
+   */
+  --sheet-margin: 0px;
+  --sheet-edge: 0px;
+  --sheet-width: min(960px, 100% - 2 * var(--sheet-margin));
+  --sheet-offset: max(var(--sheet-margin), (100vw - 960px) / 2);
+  --content-max: 1200px;
+  --col-a: 624px; /* the longest heading on one line, plus slack */
+  --col-b-min: 328px;
+  --col-gap: var(--space-7);
+  /* Instrument Sans 680 at 24/28: measured browser cap/ascent/descent 18/23/6. */
+  --heading-trim: 4.5px;
+
+  --site-header-height: 80px;
+  --site-header-gutter: var(--page-margin);
+  /* The header and phone content share a 24px gutter inside the sheet. */
+  --site-header-sheet-gutter: 24px;
+  --site-header-gap: 24px;
+  --site-control-height: 44px;
+  --site-menu-button-size: 32px;
+  --site-nav-gap: 36px;
+  --header-h: var(--site-header-height);
+}
+
+@media (width >= 37.5rem) {
+  :root {
+    --page-margin: var(--space-6);
+    --section-pad: calc(2 * var(--line-unit));
+    --circle-size: calc(6 * var(--line-unit));
+    --text-lead: var(--text-18);
+    --leaf-pad: 48px;
+    --sheet-margin: 16px;
+    --sheet-edge: 1px;
+    --site-header-sheet-gutter: var(--space-5);
+  }
+}
+@media (width >= 64rem) {
+  :root {
+    --page-margin: var(--space-7);
+    --leaf-pad: 120px;
+  }
+}
+
+:root {
+  color-scheme: light;
+  --brand-filter: none;
+  --bg: 0.972 0.02 86;
+  --desk: 0.935 0.022 84;
+  --slip: 0.938 0.026 84;
+  --ribbon: 0.995 0.008 90;
+  --fg: 0.22 0.035 50;
+  --secondary: 0.42 0.035 55;
+  --rule: 0.86 0.03 80;
+  --accent: 0.48 0.185 33;
+  --lapis: 0.42 0.15 262;
+  --ochre: 0.945 0.075 92;
+  --cut-edge: 0 0 0 / 0%;
+  --on-accent: 0.995 0.008 90;
+}
+:root[data-theme='dark'],
+.ink {
+  color-scheme: dark;
+  --brand-filter: invert(1);
+  --bg: 0.185 0.016 60;
+  --desk: 0.145 0.012 60;
+  --slip: 0.225 0.02 62;
+  --ribbon: 0.255 0.022 65;
+  --fg: 0.95 0.02 85;
+  --secondary: 0.86 0.026 80;
+  --rule: 0.46 0.025 65;
+  --accent: 0.84 0.115 45;
+  --lapis: 0.86 0.08 255;
+  --ochre: 0.26 0.05 75;
+  --cut-edge: 0.9 0.03 85;
+  --on-accent: 0.185 0.016 60;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --brand-filter: invert(1);
+    --bg: 0.185 0.016 60;
+    --desk: 0.145 0.012 60;
+    --slip: 0.225 0.02 62;
+    --ribbon: 0.255 0.022 65;
+    --fg: 0.95 0.02 85;
+    --secondary: 0.86 0.026 80;
+    --rule: 0.46 0.025 65;
+    --accent: 0.84 0.115 45;
+    --lapis: 0.86 0.08 255;
+    --ochre: 0.26 0.05 75;
+    --cut-edge: 0.9 0.03 85;
+    --on-accent: 0.185 0.016 60;
+  }
+}
+:root,
+.ink {
+  --page: oklch(var(--bg));
+  --text: oklch(var(--fg));
+  --text-2: oklch(var(--secondary));
+  --text-3: var(--text-2);
+  --line: oklch(var(--rule));
+  --line-strong: var(--line);
+  --tint: oklch(var(--slip));
+  --tint-2: oklch(var(--ochre));
+  --control: oklch(var(--slip));
+  --control-hover: color-mix(in oklab, var(--control), var(--text) 8%);
+  --underline: oklch(var(--secondary) / 50%);
+  --accent-color: oklch(var(--accent));
+  --on-accent-color: oklch(var(--on-accent));
+  --surface-raised: oklch(var(--slip));
+  --ribbon-color: oklch(var(--ribbon));
+  --desk-color: oklch(var(--desk));
+  --cut-edge-color: oklch(var(--cut-edge));
+  --code-foreground: var(--text);
+  --code-background: var(--surface-raised);
+  --code-token-constant: var(--text);
+  --code-token-function: var(--text);
+  --code-token-string: oklch(var(--lapis));
+  --code-token-string-expression: oklch(var(--lapis));
+  --code-token-parameter: var(--text);
+  --code-token-link: oklch(var(--lapis));
+  --code-token-keyword: var(--text-2);
+  --code-token-punctuation: var(--text);
+  --code-token-comment: var(--text-2);
+}
+.ink {
+  background: var(--page);
+  color: var(--text);
+}

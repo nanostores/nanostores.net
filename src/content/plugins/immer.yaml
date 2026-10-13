@@ -1,0 +1,6 @@
+name: Immer
+package: '@illuxiza/nanostores-immer'
+purpose: Need Immer-style immutable updates?
+maintainer: community
+repo: https://github.com/illuxiza/nanostores-immer
+docs: https://github.com/illuxiza/nanostores-immer#readme

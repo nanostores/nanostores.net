@@ -1,0 +1,219 @@
+/* Shared decorative assets and code margin dots; line pitch is 13px × 1.65. */
+:root {
+  --double-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 9'%3E%3Cpath d='M0 2.6 Q3 0.6 6 2.6 T12 2.6 M0 6.4 Q3 4.4 6 6.4 T12 6.4' fill='none' stroke='black' stroke-width='1.05'/%3E%3C/svg%3E");
+  --code-pitch: 21.45px;
+  /* ⁜ (U+205C, dotted cross): no installed font has it, so it is drawn. */
+  --gloss-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 0.6V9.4M0.6 5H9.4' stroke='black' stroke-width='0.9'/%3E%3Cg%3E%3Ccircle cx='2.3' cy='2.3' r='1.05'/%3E%3Ccircle cx='7.7' cy='2.3' r='1.05'/%3E%3Ccircle cx='2.3' cy='7.7' r='1.05'/%3E%3Ccircle cx='7.7' cy='7.7' r='1.05'/%3E%3C/g%3E%3C/svg%3E");
+}
+/*
+ * Dots follow the pitch where they are used, so a code block with
+ * its own size (12px code: 19.8px) sets only --code-pitch.
+ */
+:root,
+.code-window .code {
+  --code-dots: radial-gradient(
+    circle at 5px calc(var(--code-pitch) * 0.746),
+    var(--line) 1px,
+    transparent 1.2px
+  );
+}
+/* Expressive Code is a public plugin output; no Starlight internals are selected. */
+.expressive-code pre {
+  background-image: var(--code-dots);
+  background-size: 10px var(--code-pitch);
+  background-repeat: repeat-y;
+  background-position: 4px 18px;
+}
+.expressive-code .header .title::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 9px;
+  margin-inline-end: 10px;
+
+  mask: var(--double-wave) center / contain no-repeat;
+}
+/*
+ * A Lombard initial as the first letter of a numbered or asterisked heading
+ * (HeadingInitial.astro). The letter stays plain inline text, so the
+ * heading reads and copies as its words; it is only made transparent. The
+ * Lombard is ::after, a zero-width inline-block set right to left: it
+ * draws from the plain letter's right edge leftwards, over the letter, and
+ * the wider Lombard hangs a little into the margin. It sits on the line's
+ * baseline with zero line-height, so the line box stays the heading's and
+ * nothing moves when hovering the heading swaps the two. Colors alternate
+ * in roles.css.
+ */
+.first {
+  color: transparent;
+  transition: color 0.15s ease-in;
+}
+.first::after {
+  content: attr(data-letter) / '';
+  display: inline-block;
+  width: 0;
+  direction: rtl;
+  text-indent: 0;
+  /*
+   * The Lombard drops below the line, top on the heading's cap line. It may
+   * drop 0.28em of the heading: a wrapped heading's next caps start 0.4em
+   * below the baseline (1.125 line height minus 0.72em caps). So the letter
+   * is 1em tall: Jacquard's capitals are 0.57em, hence 1.75em, shifted down
+   * 0.28 / 1.75 = 0.16em without touching the layout; 0.05em left leaves a
+   * hair of air before the next letter (Jacquard has almost no bearing).
+   */
+  font-family: 'Jacquard 12', serif;
+  font-size: 1.75em;
+  font-weight: 400;
+  font-stretch: normal;
+  font-synthesis: none;
+  letter-spacing: 0;
+  line-height: 0;
+  translate: -0.05em 0.16em;
+  transition: opacity 0.15s ease-in;
+}
+/*
+ * Phones have a 24px margin: a smaller Lombard (0.8em tall, 1.4em) hangs
+ * about 11px into it. Top still on the caps: 0.08 / 1.4 = 0.057em down.
+ */
+@media (width < 37.5rem) {
+  .first::after {
+    font-size: 1.4em;
+    translate: -0.05em 0.057em;
+  }
+}
+@media (hover: hover) {
+  :hover > .first {
+    color: inherit;
+  }
+  :hover > .first::after {
+    opacity: 0;
+  }
+}
+/*
+ * A chapter mark sits at the heading's right edge below 64rem;
+ * from 64rem it sits near the sheet's left edge, clear of the Lombard.
+ * A heading-sized strut aligns the
+ * smaller Fragment Mono mark to the first heading line's baseline.
+ */
+.chapter-mark {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.chapter-mark :is(.number, .star) {
+  color: var(--text-2);
+  font-size: var(--text-13);
+  line-height: var(--leading-small);
+}
+/* A chapter without a number has no kicker. */
+.chapter-mark:not(:has(.number, .star)) {
+  display: none;
+}
+.leaf .chapter-mark {
+  position: absolute;
+  display: grid;
+  grid-template-columns: var(--leaf-pad) minmax(0, 1fr);
+  align-items: baseline;
+  margin: 0;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 32px;
+  font-weight: 680;
+  line-height: 1.125;
+  pointer-events: none;
+}
+.leaf .chapter-mark::before {
+  content: '\200b';
+  grid-area: 1 / 1;
+  justify-self: start;
+}
+/* Faded; 23px digits are 16px, the heading's lowercase height. */
+.leaf .chapter-mark :is(.number, .star) {
+  grid-area: 1 / 1;
+  justify-self: start;
+  margin-inline-start: var(--space-5);
+  color: color-mix(in oklab, var(--text-2) 50%, var(--page));
+  font-size: 23px;
+  line-height: 36px;
+}
+@media (width < 64rem) {
+  .leaf .chapter-mark {
+    width: var(--space-6);
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .leaf .chapter-mark :is(.number, .star) {
+    justify-self: end;
+    margin-inline-start: 0;
+    color: color-mix(in oklab, var(--text-2) 70%, var(--page));
+    line-height: var(--leading-small);
+  }
+}
+@media (width < 37.5rem) {
+  .leaf .chapter-mark {
+    font-size: 28px;
+    line-height: 1.15;
+  }
+}
+/*
+ * A reference mark (signe de renvoi), ⁜: a scribe set it beside a passage
+ * and again beside its gloss. Here it marks terms whose code can be read
+ * and the top of that code where it is open. Cap height of the text next
+ * to it, fixed size; the color is in roles.css.
+ */
+.gloss-mark {
+  display: inline-block;
+  flex: none;
+  width: 0.7em;
+  height: 0.7em;
+  background: currentColor;
+  mask: var(--gloss-mark) center / contain no-repeat;
+}
+/*
+ * A scene's catalogue mark (Shelfmark.astro), inside its Meme: set
+ * vertically along the paper's right edge, like a call number on a spine.
+ * The scene's right edge is the text column's, so the paper's edge is
+ * --leaf-pad further right.
+ *
+ * Its frame spans the circle plus the section's padding above and below,
+ * less a small gap (--space-2) so the mark never touches the section's
+ * edge; its middle is the circle's. Auto margins centre the mark while it
+ * fits; a longer one leaves no free space, the auto margins become 0 and
+ * the mark sits at the main start, which column-reverse makes the bottom:
+ * it ends just above the section's bottom edge, never below it, and grows
+ * up into the empty margin.
+ */
+.shelfmark-frame {
+  position: absolute;
+  --shelf-reach: calc(var(--section-pad) - var(--space-2));
+  top: calc(-1 * var(--shelf-reach));
+  right: calc(var(--space-3) - var(--leaf-pad));
+  z-index: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  block-size: calc(var(--size) + 2 * var(--shelf-reach));
+  pointer-events: none;
+}
+.shelfmark {
+  color: var(--text-2);
+  font:
+    400 10px/1.4 'Fragment Mono',
+    monospace;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  text-decoration: none;
+  writing-mode: vertical-rl;
+  /* Physical: in vertical text the block axis is horizontal. */
+  margin-top: auto;
+  margin-bottom: auto;
+  pointer-events: auto;
+}
+a.shelfmark:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+/* Phones have a 24px margin: the mark keeps 4px from the edge. */
+@media (width < 37.5rem) {
+  .shelfmark-frame {
+    right: calc(var(--space-1) - var(--leaf-pad));
+  }
+}

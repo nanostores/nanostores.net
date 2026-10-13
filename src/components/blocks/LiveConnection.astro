@@ -1,0 +1,75 @@
+---
+import { getEntry } from 'astro:content'
+import CodeWindow from '../primitives/CodeWindow.astro'
+const { anchors } = (await getEntry('situations', 'live-connection'))!.data
+---
+
+<div class="live-connection">
+  <CodeWindow
+    anchors={anchors}
+    file="live-connection/prices.ts"
+    caption="stores/prices.ts"
+    store
+  />
+  <div class="lifecycle">
+    <div>
+      <span>first subscriber</span>
+      <strong>Opens</strong>
+    </div>
+    <div>
+      <span>more subscribers</span>
+      <strong>Same connection</strong>
+    </div>
+    <div>
+      <span>last one leaves</span>
+      <strong>Closes</strong>
+    </div>
+  </div>
+</div>
+<style>
+  .live-connection {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    min-width: 0;
+  }
+  .lifecycle {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-block: 1px solid var(--line);
+  }
+  .lifecycle > div {
+    display: grid;
+    gap: 2px;
+    padding: 14px;
+  }
+  .lifecycle > div:first-child {
+    padding-left: 0;
+  }
+  .lifecycle > div + div {
+    border-left: 1px solid var(--line);
+  }
+  .lifecycle span {
+    color: var(--text-3);
+    font:
+      12px 'Fragment Mono',
+      monospace;
+  }
+  .lifecycle strong {
+    font-size: 15px;
+    font-weight: 400;
+  }
+  @media (max-width: 600px) {
+    .lifecycle {
+      grid-template-columns: 1fr;
+    }
+    .lifecycle > div,
+    .lifecycle > div:first-child {
+      padding: 10px 0;
+    }
+    .lifecycle > div + div {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+  }
+</style>

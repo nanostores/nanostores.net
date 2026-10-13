@@ -1,0 +1,47 @@
+:root,
+:root[data-theme='light'],
+:root[data-theme='dark'] {
+  --sl-font: 'Instrument Sans', system-ui, sans-serif;
+  --sl-font-mono: 'Fragment Mono', ui-monospace, monospace;
+  --sl-color-white: var(--text);
+  --sl-color-gray-1: var(--text);
+  --sl-color-gray-2: var(--text-2);
+  --sl-color-gray-3: var(--text-3);
+  --sl-color-gray-4: var(--line-strong);
+  --sl-color-gray-5: var(--line);
+  --sl-color-gray-6: var(--page);
+  --sl-color-gray-7: var(--tint);
+  --sl-color-black: var(--page);
+  --sl-color-accent-low: var(--tint);
+  --sl-color-accent: var(--text);
+  --sl-color-accent-high: var(--text);
+  --sl-color-text: var(--text);
+  --sl-color-text-accent: var(--text);
+  --sl-color-bg-nav: var(--page);
+  --sl-color-bg-sidebar: var(--page);
+  --sl-color-bg-inline-code: var(--tint);
+  --sl-color-hairline: var(--line);
+  --sl-color-hairline-light: var(--line);
+  --sl-color-hairline-shade: var(--line);
+  --sl-shadow-md: none;
+  --sl-content-width: 52rem;
+  --sl-nav-height: var(--site-header-height);
+  /* Docs sit on the sheet: the header strip has the leaf header's gutter. */
+  --site-header-gutter: var(--site-header-sheet-gutter);
+  --sl-nav-pad-x: var(--site-header-gutter);
+  --sl-menu-button-size: var(--site-menu-button-size);
+  /* PageFrame fits the navigation and article inside the header's sheet. */
+  --sl-sidebar-width: 15rem;
+  --sl-sidebar-pad-x: var(--site-header-sheet-gutter);
+  --sl-content-pad-x: var(--site-header-sheet-gutter);
+  /* The TOC lives in the sheet instead of a third fixed column. */
+  --sl-mobile-toc-height: 0rem;
+}
+
+/* Shared reference heading metrics; docs keep their existing size scale. */
+h1,
+h2,
+h3 {
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 680;
+}

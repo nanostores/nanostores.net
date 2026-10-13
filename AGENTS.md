@@ -1,0 +1,53 @@
+## Development
+
+For interactive development, `pnpm start` runs the dev server in the terminal; stop it with `Ctrl+C`.
+
+When an agent needs a server to keep running after its launch command returns, use background mode:
+
+```
+pnpm run dev --background --host 0.0.0.0 --port 4321
+```
+
+Manage the background server with `pnpm run astro dev stop`, `pnpm run astro dev status`, and `pnpm run astro dev logs`. Astro's background launcher has a fixed 30-second startup timeout. To verify a slow foreground start in a container, run `pnpm start` in a managed terminal session and stop it with `Ctrl+C` afterward.
+
+## Quality checks
+
+Run `pnpm run check` for the required fresh production build and Node output checks: core pages, nonempty documentation exports, internal navigation links, HTML anchors. The build validates content schemas, collection references, vendored sources. `pnpm run test:build` is an alias for `check`. Run `pnpm run test` when changing documentation transforms, code-region extraction, link checking or their dependencies; unit tests are outside mandatory CI. Run `pnpm run check:types` when changing TypeScript, Astro components, configuration or dependencies. Run `pnpm run check:snippets` and `pnpm run test:snippets` when changing executable examples or updating the libraries they use. Follow [QA](docs/qa.md) for visible code fragments, documentation export contents, editorial, Starlight CSS, browser, layout and keyboard checks relevant to your change, and report what you actually checked. Output checks do not validate browser layout or focus behavior. Playwright is not a project dependency.
+
+The React rendering test shown on `/why/` is a text-only `*.tsx.txt` example. Review it manually following [QA](docs/qa.md); snippet type and behavior checks cover executable examples.
+
+## Content
+
+- Keep site copy short. A page shows only what the reader needs to recognize their situation and decide.
+- The homepage matches a person with one problem or one view and should be remembered when the need comes.
+- Start from a situation, the opinion or an objection. Use the reader's own terms as the hook.
+- Claims about users need a source, or are marked as a hypothesis.
+
+Decided deliberately; change only by asking:
+
+- Quotes are exact; users' words are never invented.
+- Quote Andrey Sitnik by name only with his OK.
+- Sizes come from `{coreSize}`, never as a number in copy.
+- "Hook-free core API", not "no hooks".
+- No comparison pages.
+
+## Code
+
+New situation: add `src/content/situations/<slug>.md`, snippets in `src/snippets/<slug>/`, one block in `src/components/blocks/`, its entry in `blocks/index.ts`, the section body inline in `src/pages/index.astro`, the id in `src/config/order.ts`. Do not add layout variants, generic section components or new collections. Its `anchors` are the reader's own terms from the snippets (their APIs, or else their stack), not Nano Stores APIs and not repeating `landmarks`; review them when editing the situation following [QA](docs/qa.md).
+
+Docs: handwritten pages live in `src/content/docs/docs/`. Concepts, framework integrations, guides and handbook chapters are imported from the versioned Nano Stores README in `src/vendor/`; ecosystem package pages come from vendored plugin READMEs. Update upstream content in its source repository, then run `pnpm run sync:readme` to refresh the vendored files. There is no generated API reference.
+
+Header: main and docs render the same `HeaderContent` — a strip of paper with three slots: brand (start), search (middle, docs only), `SiteNav` (end). Only the middle slot may differ between pages; compare positions on `/` and `/docs/` using [QA](docs/qa.md). On leaf pages and in docs the strip is the top of the sheet: as wide as `.leaf` (`--sheet-width`), centered on the desk, its sides and bottom rule the sheet's rules; in docs Starlight's fixed header is painted as desk by `.site-header-desk`, which also frames the docs content as one wide sheet. Sizes are tokens in `src/styles/tokens.css` and reach Starlight through `--sl-*` in `starlight.css`. Every header query lives in `src/styles/header.css`; components have none. The slots switch with container queries on the strip (`site-header`, its content box), so home and docs switch together: the byline, the nav gap and the search label (`site-header-search`). Viewport media queries remain only for what follows the viewport: `50rem` (Starlight's md: the menu button and the sidebar popover) and `37.5rem` (phone gap). Docs override Starlight's `Header` and `MobileMenuToggle`; the strip is positioned inside Starlight's fixed header, so after a Starlight upgrade follow the header checks in [QA](docs/qa.md). Review private Starlight selectors in `starlight.css` and `header.css` manually following [QA](docs/qa.md) when changing styles or updating Starlight; document any necessary exception with a comment on why no public option exists.
+
+## Documentation
+
+Full documentation: https://docs.astro.build
+
+Consult these guides before working on related tasks:
+
+- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
+- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
+- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
+- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
+- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
+- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)

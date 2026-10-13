@@ -1,0 +1,6 @@
+name: qs
+package: '@vp-tw/nanostores-qs'
+purpose: Need only the query string as stores?
+maintainer: community
+repo: https://github.com/VdustR/nanostores-qs
+docs: https://github.com/VdustR/nanostores-qs#readme

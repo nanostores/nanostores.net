@@ -1,0 +1,6 @@
+name: dataLayer
+package: '@vp-tw/nanostores-data-layer'
+purpose: Need Google Tag Manager dataLayer pushes as a store?
+maintainer: community
+repo: https://github.com/vp-tw/nanostores-data-layer
+docs: https://github.com/vp-tw/nanostores-data-layer#readme

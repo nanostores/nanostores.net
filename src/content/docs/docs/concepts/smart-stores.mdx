@@ -1,0 +1,44 @@
+---
+title: Smart stores
+description: A smart store owns its loading, lifecycle and derived values. Components only read it.
+sidebar:
+  order: 11
+---
+
+import { Code } from '@astrojs/starlight/components'
+import { region } from '../../../../lib/snippets'
+
+A smart store is a store that owns its own work: it loads or subscribes to data, decides when to start and stop, and computes derived values. A component only reads the result.
+
+## What it is built from
+
+Core has no separate "smart store" API. The behavior comes from three pieces you already have:
+
+- `onMount` starts the work when the first listener subscribes and cleans up after the last one leaves. See [Lazy Stores](/docs/concepts/lazy-stores/).
+- `task` marks asynchronous work so that server-side rendering and tests can wait for it. See [Tasks](/docs/concepts/tasks/).
+- `computed` derives values from other stores and recalculates when they change. See [Computed Stores](/docs/concepts/computed-stores/).
+
+## Example
+
+A store that opens a WebSocket connection while something is subscribed to it, and closes the connection afterwards:
+
+<Code
+  code={region('live-connection/prices.ts')}
+  lang="ts"
+  title="stores/prices.ts"
+/>
+
+Nothing connects until a component or another store subscribes to `$prices`. After the last subscriber goes away, Nano Stores waits one second before running cleanup and closing the socket. A new subscription during that delay keeps the store mounted. See [Lazy Stores](/docs/concepts/lazy-stores/) for the lifecycle details.
+
+## Ready-made smart stores
+
+Plugins from the ecosystem for common jobs:
+
+- [Persistent](/docs/ecosystem/persistent/): keeps a store in `localStorage` and syncs it between browser tabs.
+- [Query](/docs/ecosystem/query/): fetches data into stores with caching and revalidation.
+- [Router](/docs/ecosystem/router/): keeps the current URL and route params in stores.
+- [I18n](/docs/ecosystem/i18n/): holds the current locale and translations.
+
+To see what stores are doing, use [Devtools](/docs/ecosystem/devtools/): it shows every store and change in the Redux DevTools extension.
+
+The full list of packages is on the [Ecosystem](/ecosystem/) page.

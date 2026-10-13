@@ -1,0 +1,42 @@
+---
+import { getEntry } from 'astro:content'
+import CodeWindow from '../primitives/CodeWindow.astro'
+const { anchors } = (await getEntry('situations', 'multi-framework'))!.data
+---
+
+<div class="framework-files">
+  <CodeWindow
+    anchors={anchors}
+    file="multi-framework/session.ts"
+    caption="your-lib/session.ts · core"
+    store
+  />
+  <CodeWindow
+    anchors={anchors}
+    file="multi-framework/react.tsx"
+    caption="React users"
+  />
+  <CodeWindow
+    anchors={anchors}
+    file="multi-framework/Account.vue"
+    caption="Vue users"
+  />
+  <CodeWindow
+    anchors={anchors}
+    file="multi-framework/Account.svelte"
+    caption="Svelte users · no adapter"
+  />
+  <CodeWindow
+    anchors={anchors}
+    file="multi-framework/vanilla.ts"
+    caption="Vanilla JS users · no framework"
+  />
+</div>
+<style>
+  /* Top to bottom: the core, then each framework reading it. */
+  .framework-files {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+  }
+</style>

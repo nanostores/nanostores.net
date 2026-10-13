@@ -1,0 +1,57 @@
+---
+import { getEntry } from 'astro:content'
+import CodeWindow from '../primitives/CodeWindow.astro'
+interface Props {
+  // Parallel text: before and after side by side at 12px, row for row.
+  parallel?: boolean
+}
+const { parallel = false } = Astro.props
+const { anchors } = (await getEntry('situations', 'logic-outside-hooks'))!.data
+---
+
+<div class:list={['hooks-before-after', { parallel }]}>
+  <div class="pair">
+    <CodeWindow
+      anchors={anchors}
+      file="logic-outside-hooks/before.tsx"
+      caption="Before · logic in hooks"
+      gloss={parallel}
+    />
+    <CodeWindow
+      anchors={anchors}
+      file="logic-outside-hooks/after.tsx"
+      caption="After · logic in a store"
+      store
+    />
+  </div>
+</div>
+<style>
+  /* Top to bottom: the familiar code first, then the store. */
+  .pair {
+    display: grid;
+    gap: 16px;
+  }
+  /*
+   * Parallel text, as a scribe set a text beside its translation. The
+   * snippets are broken by sense to 42 columns (the Prettier override) and
+   * their blank lines keep the matching statements on one row; 12px code
+   * fits two such columns in the text column. Where two no longer fit
+   * (2 × (42ch + window padding)), the after follows the before.
+   */
+  .parallel {
+    container: parallel-text / inline-size;
+  }
+  .parallel :global(.code) {
+    --code-pitch: 19.8px;
+  }
+  .parallel :global(.code pre) {
+    font-size: 12px;
+  }
+  @container parallel-text (min-width: 44rem) {
+    .parallel .pair {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0;
+      align-items: start;
+    }
+  }
+</style>

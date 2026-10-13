@@ -1,0 +1,360 @@
+---
+import { getCollection, getEntries, type CollectionEntry } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { blocks } from '../../components/blocks'
+import { chapterNumber } from '../../lib/chapter'
+import HeadingInitial from '../../components/primitives/HeadingInitial.astro'
+import jacquard from '@fontsource/jacquard-12/files/jacquard-12-latin-400-normal.woff2?url'
+export async function getStaticPaths() {
+  return (await getCollection('situations')).map((situation) => ({
+    params: { slug: situation.id },
+    props: { situation },
+  }))
+}
+const { situation } = Astro.props as {
+  situation: CollectionEntry<'situations'>
+}
+const plugins = await getEntries(situation.data.deep.plugins)
+const next = await getEntries(situation.data.deep.next)
+const Block = blocks[situation.id as keyof typeof blocks]
+if (!Block) throw Error(`Missing situation block: ${situation.id}`)
+// The same chapter mark as the home section: number and Lombard initial.
+const number = chapterNumber(situation.id)
+---
+
+<BaseLayout
+  title={situation.data.seo.title}
+  description={situation.data.seo.description}
+  preload={[jacquard]}
+>
+  <article class="leaf" data-deep-id={situation.id}>
+    <header class="deep-hero">
+      <div class="container hero-inner">
+        <a class="back mono" href="/">
+          <span class="hand" aria-hidden="true">
+            ☜
+          </span>{' '}
+          All situations
+        </a>
+        <div class="title">
+          <div class="chapter-mark">
+            {number > 0 && <span class="number mono">{number}</span>}
+          </div>
+          <h1>
+            <HeadingInitial text={situation.data.title} number={number} />
+          </h1>
+        </div>
+        <div class="columns">
+          <div class="copy">
+            <p class="lead">{situation.data.mechanism}</p>
+          </div>
+          <p class="anchors" aria-label="Familiar terms in the code below">
+            {situation.data.anchors.map((anchor) => (
+              <code>{anchor}</code>
+            ))}
+          </p>
+        </div>
+      </div>
+    </header>
+    <div class="deep-block">
+      <div class="container">
+        <Block />
+      </div>
+    </div>
+    <div class="deep-content container">
+      <p class="stop">
+        {situation.data.boundary.text}
+        {situation.data.boundary.strong && (
+          <b> {situation.data.boundary.strong}</b>
+        )}
+      </p>
+      <div class="start">
+        <div class="install">
+          <span class="install-cap" aria-hidden="true">
+            <span>$</span>
+          </span>
+          <code>npm install nanostores</code>
+          <button
+            type="button"
+            data-install-copy
+            aria-label="Copy install command"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+              <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+            </svg>
+          </button>
+        </div>
+        <span
+          class="copy-status"
+          data-copy-status
+          role="status"
+          aria-live="polite"
+        ></span>
+        <a href="/docs/getting-started/" data-track="deep_cta_click">
+          Getting started →
+        </a>
+      </div>
+      <p class="next">
+        {next.map((item) => (
+          <a href={`/for/${item.id}/`} data-track="deep_cta_click">
+            {item.data.toc} →
+          </a>
+        ))}
+        {plugins.map((plugin) => (
+          <a href={plugin.data.docs} data-track="deep_cta_click">
+            {plugin.data.name} ↗
+          </a>
+        ))}
+      </p>
+    </div>
+  </article>
+  <script>
+    import { track } from '../../lib/analytics'
+    import { $copied, copiedInstall } from '../../state/site'
+    const id =
+      document.querySelector<HTMLElement>('[data-deep-id]')?.dataset.deepId
+    const referrer = document.referrer ? new URL(document.referrer) : null
+    const from =
+      referrer?.origin !== location.origin
+        ? 'external'
+        : referrer.pathname === '/'
+          ? 'home'
+          : 'internal'
+    track('deep_view', { situationId: id, from })
+    $copied.subscribe((copied) => {
+      const status = document.querySelector('[data-copy-status]')
+      if (status) status.textContent = copied ? 'Copied!' : ''
+    })
+    document
+      .querySelector('[data-install-copy]')
+      ?.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText('npm install nanostores')
+          copiedInstall()
+          track('install_copy', { situationId: id })
+        } catch {
+          /* Clipboard may be unavailable outside a secure context. */
+        }
+      })
+    document
+      .querySelectorAll<HTMLAnchorElement>('[data-track="deep_cta_click"]')
+      .forEach((link) =>
+        link.addEventListener('click', () =>
+          track('deep_cta_click', { situationId: id, from, target: link.href }),
+        ),
+      )
+  </script>
+</BaseLayout>
+<style>
+  /*
+   * One leaf (layout.css): the heading, the code and the closing lines share
+   * its margins. A single rule, as between home sections, parts the code
+   * from what follows.
+   */
+  .deep-block {
+    padding-block: 0 48px;
+  }
+  .hero-inner,
+  .deep-block > .container,
+  .deep-content {
+    width: 100%;
+    max-width: none;
+    padding-inline: var(--leaf-pad);
+  }
+  /* The code is a figure: like a miniature, it may take the margins too. */
+  @media (width >= 64rem) {
+    .deep-block > .container {
+      padding-inline: var(--space-6);
+    }
+  }
+  .hero-inner {
+    display: grid;
+    gap: 20px;
+    padding-block: 32px 40px;
+  }
+  .back {
+    justify-self: start;
+    color: var(--text-3);
+    text-decoration: none;
+  }
+  /* A hand points back home, the pair of the home page's ☞. */
+  .back .hand {
+    display: inline-block;
+    width: 1.1em;
+    margin-right: 0.3em;
+    font:
+      1.6em/0 'Noto Sans Symbols 2',
+      serif;
+    vertical-align: -0.12em;
+  }
+  /*
+   * The chapter mark (ornaments.css) repeats the home section's: at the
+   * heading's right edge below 64rem, then in the left margin on its baseline.
+   */
+  .title {
+    position: relative;
+  }
+  .chapter-mark {
+    margin-bottom: var(--space-2);
+  }
+  @media (width >= 64rem) {
+    .chapter-mark {
+      top: 0;
+      left: calc(-1 * var(--leaf-pad));
+      right: calc(-1 * var(--leaf-pad));
+    }
+  }
+  /* The page opens with the home section as is: same reading scale. */
+  .deep-hero h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 680;
+    line-height: 1.125;
+  }
+  .deep-hero .lead {
+    font-size: 21px;
+    line-height: 1.55;
+  }
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 56px;
+  }
+  .copy {
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+  }
+  .anchors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin: 0;
+  }
+  .anchors code {
+    font:
+      400 19px/1.35 'Fragment Mono',
+      monospace;
+  }
+  .anchors code:not(:last-child)::after {
+    content: '·';
+    margin-left: 20px;
+    color: var(--text-3);
+  }
+  /* After the code: one line each to stop, to start, to go on. */
+  .deep-content {
+    display: grid;
+    gap: 20px;
+    padding-block: 32px 64px;
+    box-shadow: inset 0 1px var(--line);
+  }
+  .deep-content p {
+    margin: 0;
+  }
+  .stop {
+    color: var(--text-2);
+  }
+  .start {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+  }
+  /*
+   * The install line as in the concept: the prompt is a blackletter `$` in a
+   * rubric block, the command is touched with the ochre wash of file names.
+   * Colors are in roles.css.
+   */
+  .install {
+    display: flex;
+    align-items: stretch;
+    min-height: 52px;
+    background: var(--tint-2);
+  }
+  .install-cap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 9px;
+    font:
+      44px/1 'Jacquard 12',
+      serif;
+    user-select: none;
+  }
+  /* Jacquard's `$` sits low in its em box: lifted to the optical centre. */
+  .install-cap span {
+    position: relative;
+    top: -0.12em;
+  }
+  .install code {
+    align-self: center;
+    padding: 0 12px 0 16px;
+    font:
+      15px 'Fragment Mono',
+      monospace;
+    white-space: nowrap;
+  }
+  .install button {
+    display: grid;
+    place-items: center;
+    align-self: center;
+    width: 44px;
+    height: 44px;
+    margin-right: 4px;
+    border: 0;
+    background: transparent;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .install button:hover {
+    background: color-mix(in oklab, var(--text) 8%, transparent);
+  }
+  .copy-status {
+    color: var(--text-2);
+    font-size: 13px;
+  }
+  .start a,
+  .next a {
+    font-weight: 500;
+  }
+  .next {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+    color: var(--text-2);
+  }
+  @media (max-width: 700px) {
+    .columns {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+  @media (width < 64rem) {
+    .chapter-mark {
+      top: 0;
+      right: 0;
+    }
+    .title:has(.number) h1 {
+      padding-inline-end: var(--space-6);
+    }
+  }
+  @media (width < 37.5rem) {
+    .deep-hero h1 {
+      font-size: 28px;
+      line-height: 1.15;
+    }
+    .deep-hero .lead {
+      font-size: 18px;
+    }
+  }
+</style>

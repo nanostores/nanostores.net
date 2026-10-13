@@ -1,0 +1,56 @@
+---
+import '../styles/global.css'
+import instrument from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-standard-normal.woff2?url'
+import ThemeProvider from '../components/layout/ThemeProvider.astro'
+import SiteHeader from '../components/layout/SiteHeader.astro'
+import SiteFooter from '../components/layout/SiteFooter.astro'
+interface Props {
+  title: string
+  description: string
+  noindex?: boolean
+  // Other fonts the first screen needs.
+  preload?: string[]
+}
+const { title, description, noindex = false, preload = [] } = Astro.props
+// Preload the shared variable face used by the first screen.
+const fonts = [instrument, ...preload]
+const canonical = new URL(Astro.url.pathname, Astro.site)
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <ThemeProvider />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&amp;text=%E2%98%9C%E2%98%9E&amp;display=optional"
+    />
+    {fonts.map((href) => (
+      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+    ))}
+    <link rel="canonical" href={canonical} />
+    <meta name="description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip" href="#main">
+      Skip to content
+    </a>
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>
