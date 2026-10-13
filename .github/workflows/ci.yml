@@ -84,6 +84,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'nanostores/nanostores.net'
     permissions:
       contents: read
+      id-token: write
       packages: write
     concurrency:
       group: publish-image
@@ -105,3 +106,30 @@ jobs:
         run: |
           docker tag nanostores-site:ci ghcr.io/nanostores/nanostores.net:latest
           docker push ghcr.io/nanostores/nanostores.net:latest
+      - name: Deploy image
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            let token = await core.getIDToken('https://api.cloud.hplush.dev')
+            let response = await fetch(
+              'https://api.cloud.hplush.dev/deploy/nanostores.net',
+              { method: 'POST', headers: { authorization: `Bearer ${token}` } }
+            )
+            let answer = await response.text()
+            if (response.ok) core.info(answer)
+            else core.setFailed(`${response.status} ${response.statusText}: ${answer}`)
+      - name: Clean previous images
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSIONS="orgs/nanostores/packages/container/nanostores.net/versions"
+          IDS=$(gh api --paginate "$VERSIONS?per_page=100" \
+            | jq -r '.[] | select(.metadata.container.tags == []) | .id')
+          if [ -n "$IDS" ]; then
+            for ID in $IDS; do
+              echo "Deleting version $ID"
+              gh api -X DELETE "$VERSIONS/$ID" --silent
+            done
+          else
+            echo "No untagged images"
+          fi

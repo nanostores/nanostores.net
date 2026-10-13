@@ -1,0 +1,47 @@
+name: Start Preview Deployment
+on:
+  pull_request:
+    types:
+      - labeled
+      - synchronize
+      - opened
+permissions:
+  contents: read
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'deploy-preview')
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Node.js, pnpm and dependencies
+        uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          runtime: node@24
+          require-lockfile: true
+      - name: Build site
+        run: pnpm run build
+      - name: Build Docker image
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          docker build --provenance=false \
+            --output=type=docker,oci-mediatypes=false \
+            -t "ghcr.io/nanostores/nanostores.net:preview-$PR_NUMBER" .
+          docker save -o image.tar "ghcr.io/nanostores/nanostores.net:preview-$PR_NUMBER"
+      - name: Save PR number
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: echo "$PR_NUMBER" > ./preview-id
+      - name: Save image for deploy
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: preview-image
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            preview-id
+            image.tar

@@ -1,0 +1,24 @@
+name: Close Preview
+on:
+  pull_request:
+    types:
+      - closed
+permissions:
+  contents: read
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'deploy-preview')
+    steps:
+      - name: Save PR number
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: echo "$PR_NUMBER" > ./preview-id
+      - name: Save data for another workflow
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: preview-id
+          retention-days: 1
+          if-no-files-found: error
+          path: preview-id

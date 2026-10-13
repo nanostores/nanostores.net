@@ -1,0 +1,111 @@
+name: Deploy Preview
+on:
+  workflow_run:
+    workflows:
+      - Start Preview Deployment
+    types:
+      - completed
+permissions:
+  actions: read
+  contents: read
+  deployments: write
+  id-token: write
+  packages: write
+  pull-requests: read
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' && github.repository == 'nanostores/nanostores.net'
+    concurrency:
+      group: deploy-preview-${{ github.event.workflow_run.head_branch }}
+      cancel-in-progress: false
+    steps:
+      - name: Download image from prepare step
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: preview-image
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./untrusted/
+      - name: Extract PR number
+        id: pr
+        run: |
+          PR_NUMBER=$(cat ./untrusted/preview-id)
+          if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "Invalid preview-id: $PR_NUMBER"
+            exit 1
+          fi
+          echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+      - name: Check preview label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          LABELS=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" \
+            --json labels --jq '.labels[].name')
+          if ! echo "$LABELS" | grep -qx 'deploy-preview'; then
+            echo "PR #$PR_NUMBER does not have the deploy-preview label"
+            exit 1
+          fi
+      - name: Notify about new deployment
+        id: deployment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          REF: ${{ github.event.workflow_run.head_commit.id }}
+        run: |
+          ID=$(jq -n --arg ref "$REF" --arg environment "preview-$PR_NUMBER" '{
+              auto_merge: false,
+              description: "Preview deployment",
+              environment: $environment,
+              ref: $ref,
+              required_contexts: [],
+              transient_environment: true
+            }' \
+            | gh api "repos/$GITHUB_REPOSITORY/deployments" --input - --jq '.id')
+          gh api "repos/$GITHUB_REPOSITORY/deployments/$ID/statuses" \
+            -f state=in_progress \
+            -f log_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            > /dev/null
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+      - name: Load Docker image
+        run: docker load -i ./untrusted/image.tar
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push Docker image
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: docker push "ghcr.io/nanostores/nanostores.net:preview-$PR_NUMBER"
+      - name: Deploy the preview
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            let token = await core.getIDToken('https://api.cloud.hplush.dev')
+            let response = await fetch(
+              `https://api.cloud.hplush.dev/deploy/preview-${process.env.PR_NUMBER}.nanostores.hplush.dev`,
+              { method: 'POST', headers: { authorization: `Bearer ${token}` } }
+            )
+            let answer = await response.text()
+            if (response.ok) core.info(answer)
+            else core.setFailed(`${response.status} ${response.statusText}: ${answer}`)
+      - name: Update deployment status
+        if: always() && steps.deployment.outputs.id
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_STATUS: ${{ job.status }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then STATE=success; else STATE=failure; fi
+          gh api "repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses" \
+            -f state="$STATE" \
+            -f environment_url="https://preview-$PR_NUMBER.nanostores.hplush.dev/" \
+            -f log_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            > /dev/null
