@@ -2,6 +2,8 @@
 :root {
   --double-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 9'%3E%3Cpath d='M0 2.6 Q3 0.6 6 2.6 T12 2.6 M0 6.4 Q3 4.4 6 6.4 T12 6.4' fill='none' stroke='black' stroke-width='1.05'/%3E%3C/svg%3E");
   --code-pitch: 21.45px;
+  /* A manicule, ☞, drawn so no symbols font is loaded; mirrored it is ☜. */
+  --manicule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 2.5 24 11' fill='none' stroke='black' stroke-width='1.1' stroke-linejoin='round' stroke-linecap='round'%3E%3Crect x='0.8' y='3.6' width='2.6' height='9.3' rx='0.5'/%3E%3Cpath d='M3.4 4.6C5.6 3.4 7.6 2.9 10 3.1H22a1.35 1.35 0 0 1 0 2.7H13a1.1 1.1 0 0 1 0 2.2a1.1 1.1 0 0 1-0.3 2.2a1.1 1.1 0 0 1-0.5 2.2H7.2C5.6 12.4 4.4 12.4 3.4 12M13 8H11M12.7 10.2H10.8M6.6 6.2C8.6 5.4 10.6 5.4 13 5.8'/%3E%3C/svg%3E");
   /* ⁜ (U+205C, dotted cross): no installed font has it, so it is drawn. */
   --gloss-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 0.6V9.4M0.6 5H9.4' stroke='black' stroke-width='0.9'/%3E%3Cg%3E%3Ccircle cx='2.3' cy='2.3' r='1.05'/%3E%3Ccircle cx='7.7' cy='2.3' r='1.05'/%3E%3Ccircle cx='2.3' cy='7.7' r='1.05'/%3E%3Ccircle cx='7.7' cy='7.7' r='1.05'/%3E%3C/g%3E%3C/svg%3E");
 }
@@ -167,6 +169,21 @@
   height: 0.7em;
   background: currentColor;
   mask: var(--gloss-mark) center / contain no-repeat;
+}
+/*
+ * A pointing hand beside a link (why.astro, for/[slug].astro). It points
+ * right; .manicule-back mirrors it to point back. The text's color.
+ */
+.manicule {
+  display: inline-block;
+  flex: none;
+  width: 1.6em;
+  aspect-ratio: 24 / 11;
+  background: currentColor;
+  mask: var(--manicule) center / contain no-repeat;
+}
+.manicule-back {
+  transform: scaleX(-1);
 }
 /*
  * A scene's catalogue mark (Shelfmark.astro), inside its Meme: set

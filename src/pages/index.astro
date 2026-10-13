@@ -620,22 +620,24 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
   /*
    * A manicule points at the mechanism link. It hangs in the margin so the
    * text column keeps its edge; on phones there is no room, so it stands
-   * inline. content's empty alt text keeps it away from screen readers.
-   * A fixed width keeps the hand and the text in place when the symbols
-   * font arrives (it swaps in late).
+   * inline. It is drawn (ornaments.css), so it is only a mask: the
+   * pseudo-element has no content for screen readers. It is one line high,
+   * so the hand sits on the middle of the first line.
    */
   .copy .lead {
     position: relative;
   }
   .copy .lead::before {
-    content: '☞' / '';
+    content: '';
     position: absolute;
     right: 100%;
     display: inline-block;
     width: 1.1em;
+    height: var(--leading-body);
     margin-right: 0.35em;
-    font-family: 'Noto Sans Symbols 2', serif;
-    text-align: right;
+    background: currentColor;
+    mask: var(--manicule) right center / contain no-repeat;
+    vertical-align: top;
   }
   @media (width < 64rem) {
     .home-leaf .way-mark {
