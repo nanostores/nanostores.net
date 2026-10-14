@@ -99,6 +99,8 @@ export default defineConfig({
         PageFrame: './src/components/docs/PageFrame.astro',
         TwoColumnContent: './src/components/docs/TwoColumnContent.astro',
         PageSidebar: './src/components/docs/PageSidebar.astro',
+        Sidebar: './src/components/docs/Sidebar.astro',
+        MobileMenuFooter: './src/components/docs/MobileMenuFooter.astro',
         Header: './src/components/docs/Header.astro',
         MobileMenuToggle: './src/components/docs/MobileMenuToggle.astro',
         ThemeProvider: './src/components/docs/ThemeProvider.astro',
@@ -109,32 +111,38 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Docs',
+          collapsed: true,
           items: [
             { label: 'Overview', link: '/docs/' },
             { label: 'Getting started', link: '/docs/getting-started/' },
+            {
+              label: 'Core concepts',
+              items: [{ autogenerate: { directory: 'docs/concepts' } }],
+            },
+            {
+              label: 'Frameworks',
+              items: [{ autogenerate: { directory: 'docs/frameworks' } }],
+            },
+            {
+              label: 'Guides',
+              items: [{ autogenerate: { directory: 'docs/guides' } }],
+            },
+            {
+              label: 'Handbook',
+              items: [{ autogenerate: { directory: 'docs/handbook' } }],
+            },
           ],
         },
-        {
-          label: 'Core concepts',
-          items: [{ autogenerate: { directory: 'docs/concepts' } }],
-        },
-        {
-          label: 'Frameworks',
-          items: [{ autogenerate: { directory: 'docs/frameworks' } }],
-        },
+        apiSidebar(),
         {
           label: 'Ecosystem',
-          items: [{ autogenerate: { directory: 'docs/ecosystem' } }],
+          collapsed: true,
+          items: [
+            { label: 'All packages', link: '/ecosystem/' },
+            { autogenerate: { directory: 'docs/ecosystem' } },
+          ],
         },
-        {
-          label: 'Guides',
-          items: [{ autogenerate: { directory: 'docs/guides' } }],
-        },
-        {
-          label: 'Handbook',
-          items: [{ autogenerate: { directory: 'docs/handbook' } }],
-        },
-        apiSidebar(),
+        { label: 'GitHub', link: 'https://github.com/nanostores/nanostores' },
       ],
       plugins: [
         starlightTypeDoc({

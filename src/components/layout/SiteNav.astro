@@ -14,7 +14,10 @@ const current = (href: string) => {
       : undefined
 }
 const apiCurrent = current('/docs/api/')
-const docsCurrent = apiCurrent ? undefined : current('/docs/')
+const ecosystemCurrent =
+  current('/ecosystem/') ?? (current('/docs/ecosystem/') ? 'true' : undefined)
+const docsCurrent =
+  apiCurrent || ecosystemCurrent ? undefined : current('/docs/')
 ---
 
 <nav class:list={['site-links', { mobile }]} aria-label="Main navigation">
@@ -24,7 +27,7 @@ const docsCurrent = apiCurrent ? undefined : current('/docs/')
   <a href="/docs/api/" aria-current={apiCurrent}>
     API
   </a>
-  <a href="/ecosystem/" aria-current={current('/ecosystem/')}>
+  <a href="/ecosystem/" aria-current={ecosystemCurrent}>
     Ecosystem
   </a>
   <a class="github" href="https://github.com/nanostores/nanostores">

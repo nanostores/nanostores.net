@@ -5,6 +5,8 @@ import type {} from 'mdast-util-to-hast'
 import {
   apiAnchor,
   apiMemberAnchor,
+  apiNavigation,
+  hasStoreMethods,
   storeMethods,
   type ApiExport,
   type ApiGroup,
@@ -53,10 +55,6 @@ const trimRules = (nodes: RootContent[]) => {
   return nodes
 }
 
-// The store methods section follows the group with the store constructors.
-const hasStoreMethods = (group: ApiGroup): boolean =>
-  group.names.includes('atom')
-
 const disclosure = (label: string, body: RootContent[]): RootContent[] => [
   { type: 'html', value: `<details>\n<summary>${label}</summary>` },
   ...body,
@@ -85,29 +83,7 @@ function apiIndex(groups: ApiGroup[]): RootContent {
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
       .replaceAll('"', '&quot;')
-  const indexGroups = groups.flatMap((group) => {
-    const entry = {
-      label: group.label,
-      anchor: slug(group.label),
-      items: group.names.map((name) => ({
-        label: name,
-        anchor: apiAnchor(name),
-      })),
-    }
-    return hasStoreMethods(group)
-      ? [
-          entry,
-          {
-            label: 'Store methods',
-            anchor: 'store-methods',
-            items: storeMethods.map(({ owner, name }) => ({
-              label: `${name}()`,
-              anchor: apiMemberAnchor(owner, name),
-            })),
-          },
-        ]
-      : [entry]
-  })
+  const indexGroups = apiNavigation(groups)
   const renderGroup = (group: (typeof indexGroups)[number]) => {
     const sectionLink = `<a href="#${group.anchor}">${escape(group.label)}</a>`
     const items = `<ul>${group.items

@@ -48,6 +48,13 @@ const { hasSidebar } = Astro.locals.starlightRoute
           .forEach((element) => {
             element.inert = open
           })
+        if (!open) {
+          document
+            .querySelector<HTMLButtonElement>(
+              'button[popovertarget="starlight__sidebar"]',
+            )
+            ?.focus({ preventScroll: true })
+        }
       })
     }
   }

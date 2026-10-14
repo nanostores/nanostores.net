@@ -1,0 +1,34 @@
+---
+import Sidebar from '@astrojs/starlight/components/Sidebar.astro'
+
+const activeIndex = Astro.locals.starlightRoute.sidebar.findIndex(
+  (entry) => entry.type === 'group' && !entry.collapsed,
+)
+---
+
+<docs-sidebar data-active-index={activeIndex}>
+  <Sidebar />
+</docs-sidebar>
+
+<script>
+  class DocsSidebar extends HTMLElement {
+    connectedCallback() {
+      // Starlight restores disclosure state across pages. Reapply the active
+      // top-level section, while preserving the reader's nested group choices.
+      const list = this.querySelector('ul')
+      Array.from(list?.children ?? []).forEach((item, index) => {
+        const group = item.querySelector<HTMLDetailsElement>(':scope > details')
+        if (group) group.open = index === Number(this.dataset.activeIndex)
+      })
+      this.addEventListener('click', (event) => {
+        const link = (event.target as Element).closest('a')
+        if (!link) return
+        const url = new URL(link.href)
+        if (url.pathname !== location.pathname || !url.hash) return
+        const pane = this.closest<HTMLElement>('docs-sidebar-pane')
+        if (pane?.matches(':popover-open')) pane.hidePopover()
+      })
+    }
+  }
+  customElements.define('docs-sidebar', DocsSidebar)
+</script>

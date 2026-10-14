@@ -85,7 +85,7 @@ When changing `src/styles/starlight.css`, `src/styles/header.css` or updating St
 
 After changes to TypeDoc or API transforms, review the affected sections in the production build:
 
-- Confirm that the index and article preserve the maintained group and export order in `src/config/api-groups.ts`.
+- Confirm that the sidebar, index and article preserve the maintained group and export order in `src/config/api-groups.ts`; switching between Docs, API and Ecosystem opens the matching sidebar section.
 - Read `atom`, `computed` and `$store.setKey()` on a phone and desktop. Signatures and examples remain readable; open `Other overloads` and `Type details` to check that secondary information is available.
 - Follow an index link and an API search result to the intended description.
 

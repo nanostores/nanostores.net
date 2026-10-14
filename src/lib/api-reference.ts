@@ -233,9 +233,43 @@ export const apiMemberAnchor = (owner: string, name: string): string =>
     ? `store-${slug(name)}`
     : `${apiAnchor(owner)}-${slug(name)}`
 
-// Page-local navigation belongs to the API index and table of contents.
+// Shared by the page index and sidebar; preserve the configured export order.
+export const hasStoreMethods = (group: ApiGroup): boolean =>
+  group.names.includes('atom')
+
+export function apiNavigation(groups: ApiGroup[]) {
+  return groups.flatMap((group) => {
+    const entry = {
+      label: group.label,
+      anchor: slug(group.label),
+      items: group.names.map((name) => ({
+        label: name,
+        anchor: apiAnchor(name),
+      })),
+    }
+    return hasStoreMethods(group)
+      ? [
+          entry,
+          {
+            label: 'Store methods',
+            anchor: 'store-methods',
+            items: storeMethods.map(({ owner, name }) => ({
+              label: `${name}()`,
+              anchor: apiMemberAnchor(owner, name),
+            })),
+          },
+        ]
+      : [entry]
+  })
+}
+
 export function apiSidebar() {
-  return { label: 'API reference', link: '/docs/api/' }
+  // Page pagination is calculated before route middleware adds section links.
+  return {
+    label: 'API',
+    collapsed: true,
+    items: [{ label: 'Overview', link: '/docs/api/' }],
+  }
 }
 
 // TypeDoc renders this as the /docs/api/ page.

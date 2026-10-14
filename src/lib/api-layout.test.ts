@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { fromMarkdown } from 'mdast-util-from-markdown'
 import type { Nodes, Root } from 'mdast'
 import { layoutApi, remarkApiLayout } from './api-layout'
-import type { ApiExport } from './api-reference'
+import { apiNavigation, type ApiExport } from './api-reference'
 
 // Controlled metadata keeps these transform tests independent of package docs.
 const api = (kind: ApiExport['kind']): ApiExport => ({
@@ -124,6 +124,12 @@ describe('single API Markdown layout', () => {
       'type-mapstore',
       'type-atom',
     ])
+    expect(
+      apiNavigation(groups).flatMap((group) => [
+        group.anchor,
+        ...group.items.map((item) => item.anchor),
+      ]),
+    ).toEqual(navigationIds)
     expect(new Set(ids).size).toBe(ids.length)
     expect(urls).toContain('/docs/api/#type-atom')
     expect(urls).toContain('/docs/api/#store-get')
