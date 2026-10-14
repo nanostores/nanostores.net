@@ -142,7 +142,6 @@ export default defineConfig({
             { autogenerate: { directory: 'docs/ecosystem' } },
           ],
         },
-        { label: 'GitHub', link: 'https://github.com/nanostores/nanostores' },
       ],
       plugins: [
         starlightTypeDoc({
