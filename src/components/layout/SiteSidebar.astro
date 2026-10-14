@@ -1,0 +1,143 @@
+---
+import { getCollection } from 'astro:content'
+import { getEcosystemGroups } from '../../lib/ecosystem'
+import { siteNavigation, navigationSection } from '../../lib/site-navigation'
+import SidebarList from './SidebarList.astro'
+interface Props {
+  ecosystemGroups?: Awaited<ReturnType<typeof getEcosystemGroups>>
+}
+const { ecosystemGroups } = Astro.props
+const [docs, ecosystem] = await Promise.all([
+  getCollection('docs'),
+  ecosystemGroups ? Promise.resolve(ecosystemGroups) : getEcosystemGroups(),
+])
+const path = Astro.url.pathname.replace(/\/+$/, '')
+const activeSection = navigationSection(path)
+---
+
+<site-sidebar data-section={activeSection} data-pagefind-ignore="all">
+  <SidebarList
+    entries={siteNavigation(docs, ecosystem)}
+    path={path}
+    activeSection={activeSection}
+  />
+</site-sidebar>
+
+<script>
+  import {
+    trackSectionLinks,
+    revealSectionLink,
+  } from '../../lib/section-navigation'
+  class SiteSidebar extends HTMLElement {
+    stopTracking?: () => void
+    connectedCallback() {
+      const storageKey = 'nanostores-sidebar-groups'
+      const groups = Array.from(
+        this.querySelectorAll<HTMLDetailsElement>('details[data-nav-group]'),
+      )
+      const links = Array.from(this.querySelectorAll<HTMLAnchorElement>('a'))
+      const pane = this.closest<HTMLElement>('[data-sidebar-pane]')
+      const openBranch = (link: HTMLAnchorElement) => {
+        for (
+          let group = link.closest('details');
+          group && this.contains(group);
+          group = group.parentElement?.closest('details') ?? null
+        )
+          group.open = true
+      }
+      // Stable group IDs keep manual choices across pages with the same tree.
+      try {
+        const state: Record<string, boolean> = JSON.parse(
+          sessionStorage.getItem(storageKey) || '{}',
+        )
+        for (const group of groups) {
+          const open = state[group.dataset.navGroup!]
+          if (typeof open === 'boolean') group.open = open
+        }
+      } catch {
+        /* Navigation remains usable when storage is unavailable. */
+      }
+      const currentPage = links.find(
+        (link) => link.getAttribute('aria-current') === 'page',
+      )
+      const fragmentLink = links.find((link) => {
+        const url = new URL(link.href)
+        return (
+          url.pathname === location.pathname &&
+          url.hash &&
+          url.hash === location.hash
+        )
+      })
+      const current = fragmentLink ?? currentPage
+      if (current) openBranch(current)
+      const save = () => {
+        try {
+          sessionStorage.setItem(
+            storageKey,
+            JSON.stringify(
+              Object.fromEntries(
+                groups.map((group) => [group.dataset.navGroup!, group.open]),
+              ),
+            ),
+          )
+        } catch {
+          /* Storage is a progressive enhancement. */
+        }
+      }
+      this.addEventListener('toggle', save, true)
+      save()
+      let readingLink: HTMLAnchorElement | undefined
+      const reveal = () => {
+        if (
+          !readingLink ||
+          !pane ||
+          (pane instanceof HTMLDetailsElement && !pane.open)
+        )
+          return
+        revealSectionLink(readingLink, pane)
+      }
+      const localLinks = links.filter((link) => {
+        const url = new URL(link.href)
+        return url.pathname === location.pathname && url.hash
+      })
+      if (localLinks.length) {
+        this.stopTracking = trackSectionLinks(localLinks, (link) => {
+          readingLink = link
+          if (link) currentPage?.removeAttribute('aria-current')
+          else currentPage?.setAttribute('aria-current', 'page')
+          reveal()
+        })
+      }
+      pane?.addEventListener('toggle', (event) => {
+        if ((event as ToggleEvent).newState === 'open') reveal()
+      })
+      this.addEventListener('click', (event) => {
+        const link = (event.target as Element).closest('a')
+        if (!link) return
+        save()
+        const url = new URL(link.href)
+        if (url.pathname !== location.pathname || !url.hash || !pane) return
+        if (pane.matches(':popover-open')) pane.hidePopover()
+        else if (
+          pane instanceof HTMLDetailsElement &&
+          matchMedia('(width < 50rem)').matches
+        ) {
+          pane.open = false
+          pane
+            .querySelector<HTMLElement>(':scope > summary')
+            ?.focus({ preventScroll: true })
+        }
+      })
+    }
+    disconnectedCallback() {
+      this.stopTracking?.()
+    }
+  }
+  customElements.define('site-sidebar', SiteSidebar)
+</script>
+
+<style>
+  site-sidebar {
+    display: block;
+  }
+</style>

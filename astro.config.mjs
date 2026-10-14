@@ -11,6 +11,7 @@ import starlightTypeDoc from 'starlight-typedoc'
 import starlightLlmsTxt from 'starlight-llms-txt'
 import pluginDocs from './src/config/plugin-docs.json' with { type: 'json' }
 import { apiGroups } from './src/config/api-groups.ts'
+import { docsSections } from './src/config/docs-navigation.ts'
 import { remarkApiLayout } from './src/lib/api-layout.ts'
 import {
   apiOverview,
@@ -117,22 +118,10 @@ export default defineConfig({
           items: [
             { label: 'Overview', link: '/docs/' },
             { label: 'Getting started', link: '/docs/getting-started/' },
-            {
-              label: 'Core concepts',
-              items: [{ autogenerate: { directory: 'docs/concepts' } }],
-            },
-            {
-              label: 'Frameworks',
-              items: [{ autogenerate: { directory: 'docs/frameworks' } }],
-            },
-            {
-              label: 'Guides',
-              items: [{ autogenerate: { directory: 'docs/guides' } }],
-            },
-            {
-              label: 'Handbook',
-              items: [{ autogenerate: { directory: 'docs/handbook' } }],
-            },
+            ...docsSections.map(({ label, directory }) => ({
+              label,
+              items: [{ autogenerate: { directory } }],
+            })),
           ],
         },
         apiSidebar(),

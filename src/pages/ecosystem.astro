@@ -1,258 +1,10 @@
 ---
-import { getCollection, getEntry } from 'astro:content'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import CodeWindow from '../components/primitives/CodeWindow.astro'
-import { pluginDocs } from '../lib/plugin-config'
+import SiteSidebar from '../components/layout/SiteSidebar.astro'
+import { getEcosystemGroups } from '../lib/ecosystem'
 
-type Snippet = { file: string; caption: string }
-type Module = { name: string; href: string; note: string }
-type RowInput = {
-  id?: string
-  indexTitle?: string
-  title: string
-  text?: string
-  read?: string
-  plugin?: string
-  module?: Module
-  alternative?: string
-  alternativeLead?: string
-  snippets?: Snippet[]
-  points?: string[]
-  boundary?: string
-  featured?: boolean
-}
-
-const readme = 'https://github.com/nanostores/nanostores'
-const adapter = (title: string, id: string, read: string): RowInput => ({
-  id: `framework-${id}`,
-  title,
-  read,
-  module: {
-    name: `@nanostores/${id}`,
-    href: `https://github.com/nanostores/${id}#readme`,
-    note: 'official',
-  },
-})
-const builtIn = (title: string, read: string, anchor: string): RowInput => ({
-  id: `framework-${anchor}`,
-  title,
-  read,
-  module: { name: 'built in', href: `${readme}#${anchor}`, note: 'no adapter' },
-})
-
-const frameworks: RowInput[] = [
-  adapter('React', 'react', 'useStore($cart)'),
-  adapter('Preact', 'preact', 'useStore($cart)'),
-  adapter('Vue', 'vue', 'useStore($cart)'),
-  {
-    ...builtIn('Svelte', '$cart — Svelte’s store contract', 'svelte'),
-    alternative: 'svelte-runes',
-    alternativeLead: 'Runes',
-  },
-  adapter('Solid', 'solid', 'useStore($cart)'),
-  adapter('Lit', 'lit', 'new StoreController(this, $cart)'),
-  adapter('Angular', 'angular', 'nanostores.useStore($cart)'),
-  adapter('Alpine.js', 'alpine', 'x-nano:cart="$cart"'),
-  {
-    ...builtIn(
-      'Vanilla JS · Web Components',
-      '$cart.subscribe(render)',
-      'vanilla-js',
-    ),
-    alternative: 'nanotags',
-    alternativeLead: 'Components',
-  },
-]
-
-// Order is a hypothesis: the worries people raise most often when choosing come first.
-const capabilities: RowInput[] = [
-  {
-    id: 'persistence',
-    title: 'Persistence',
-    text: 'Swap atom for persistentJSON. The value is saved to localStorage, and other open tabs get every change.',
-    plugin: 'persistent',
-    snippets: [{ file: 'ecosystem/persistence.ts', caption: 'stores/cart.ts' }],
-    boundary:
-      'On the server there is no localStorage: the store starts from its initial value.',
-  },
-  {
-    id: 'data-fetching',
-    title: 'Data fetching',
-    text: 'A fetcher store loads on the first subscriber, caches by key and shares the result. Every widget just reads $products.',
-    plugin: 'query',
-    snippets: [{ file: 'ecosystem/query.ts', caption: 'stores/products.ts' }],
-    boundary:
-      'Already on TanStack Query? Keep it for server data and use stores for client state.',
-  },
-  {
-    id: 'url',
-    title: 'Routing',
-    text: 'The router is a store of the current page. Read the query string as one more computed store.',
-    plugin: 'router',
-    alternative: 'qs',
-    alternativeLead: 'Only the query string',
-    snippets: [{ file: 'ecosystem/router.ts', caption: 'stores/router.ts' }],
-  },
-  {
-    id: 'i18n',
-    title: 'Translations',
-    text: 'Components declare their strings in the base language. Translations for the current locale load on demand.',
-    plugin: 'i18n',
-    snippets: [{ file: 'ecosystem/i18n.ts', caption: 'stores/i18n.ts' }],
-  },
-  {
-    id: 'media-query',
-    title: 'Media queries',
-    text: 'No plugin needed. onMount starts listening when the first component subscribes and stops after the last one leaves.',
-    module: {
-      name: 'onMount',
-      href: '/docs/api/#onmount',
-      note: 'core',
-    },
-    alternative: 'media-query',
-    alternativeLead: 'Ready-made store',
-    snippets: [
-      { file: 'ecosystem/media-query.ts', caption: 'stores/layout.ts' },
-    ],
-  },
-  {
-    id: 'nested-state',
-    title: 'Nested state',
-    text: 'Update a field by its path instead of copying the whole object by hand.',
-    plugin: 'deepmap',
-    snippets: [
-      { file: 'ecosystem/nested-form.ts', caption: 'stores/checkout.ts' },
-    ],
-    boundary: 'Flat object? map in the core has setKey too.',
-  },
-]
-
-const devtoolsRows: RowInput[] = [
-  {
-    id: 'redux-devtools',
-    indexTitle: 'Redux DevTools',
-    featured: true,
-    title: 'Which line wrote this value?',
-    text: 'Every store appears in the Redux DevTools panel, named after the variable you wrote. Each change gets its own timeline row with a diff and a stack trace to the line that wrote it.',
-    plugin: 'nanostores-devtools',
-    points: [
-      'No setup per store',
-      'Dev builds only — production gets empty functions',
-      'Vite, webpack, Rspack · trackStores() elsewhere',
-    ],
-    snippets: [
-      { file: 'ecosystem/devtools-vite.ts', caption: 'vite.config.ts' },
-      { file: 'ecosystem/devtools-connect.ts', caption: 'main.ts' },
-    ],
-  },
-  {
-    id: 'logger',
-    indexTitle: 'Logger',
-    title: 'Print every change to the console',
-    text: 'No browser extension: store changes and lifecycle events appear in the console under the names you pass.',
-    plugin: 'logger',
-    snippets: [{ file: 'ecosystem/logger.ts', caption: 'dev.ts' }],
-  },
-  {
-    id: 'vue-devtools',
-    indexTitle: 'Vue Devtools',
-    title: 'Already working in Vue Devtools?',
-    text: 'The Vue integration adds your stores to the Vue Devtools panel.',
-    plugin: 'vue-devtools',
-  },
-]
-
-const plugins = await getCollection('plugins')
-const situations = await getCollection('situations')
-const plugin = async (id: string) => {
-  const entry = await getEntry('plugins', id)
-  if (!entry) throw Error(`Missing plugin: ${id}`)
-  return entry
-}
-const docsPage = new Map(
-  pluginDocs.map((p) => [p.id, `/docs/ecosystem/${p.slug}/`]),
-)
-const toModule = (entry: (typeof plugins)[number]): Module => ({
-  name: entry.data.package,
-  href: docsPage.get(entry.id) ?? entry.data.docs,
-  note: entry.data.maintainer,
-})
-const resolve = async (row: RowInput) => {
-  const entry = row.plugin ? await plugin(row.plugin) : null
-  const module = row.module ?? (entry ? toModule(entry) : null)
-  if (!module) throw Error(`Row without a module: ${row.title}`)
-  return {
-    ...row,
-    module,
-    alternative: row.alternative
-      ? toModule(await plugin(row.alternative))
-      : null,
-    usedIn: row.plugin
-      ? situations.filter((s) =>
-          s.data.deep.plugins.some((p) => p.id === row.plugin),
-        )
-      : [],
-  }
-}
-
-const shown = new Set(
-  [...frameworks, ...capabilities, ...devtoolsRows].flatMap((r) => [
-    r.plugin,
-    r.alternative,
-  ]),
-)
-const more: RowInput[] = plugins
-  .filter((p) => !shown.has(p.id))
-  .sort(
-    (a, b) =>
-      Number(a.data.maintainer === 'community') -
-        Number(b.data.maintainer === 'community') ||
-      a.data.name.localeCompare(b.data.name),
-  )
-  .map((p) => ({ title: p.data.purpose, plugin: p.id }))
-
-const groups = [
-  {
-    id: 'frameworks',
-    title: 'Framework adapters',
-    lead: null,
-    link: {
-      href: '/for/multi-framework/',
-      text: 'One state for several frameworks →',
-    },
-    compact: true,
-    tone: null,
-    rows: await Promise.all(frameworks.map(resolve)),
-    more: [],
-    boundary: null,
-  },
-  {
-    id: 'capabilities',
-    title: 'Store utilities',
-    lead: 'Persistence, data fetching, routing, translations, media queries, and nested state.',
-    link: null,
-    compact: false,
-    tone: null,
-    rows: await Promise.all(capabilities.map(resolve)),
-    more: await Promise.all(more.map(resolve)),
-    boundary: null,
-  },
-  {
-    id: 'devtools',
-    title: 'Devtools',
-    lead: 'Your stores in the Redux DevTools panel, named for you. Or a plain console log when that is enough.',
-    link: null,
-    compact: false,
-    tone: 'ink',
-    rows: await Promise.all(devtoolsRows.map(resolve)),
-    more: [],
-    boundary: {
-      text: 'nanostores-devtools only reads state, so there is no time travel.',
-      strong:
-        'Built your workflow around it? Redux Toolkit is the stronger fit.',
-    },
-  },
-]
+const groups = await getEcosystemGroups()
 ---
 
 <BaseLayout
@@ -261,83 +13,10 @@ const groups = [
 >
   <div class="leaf ecosystem-leaf">
     <aside class="ecosystem-index" data-pagefind-ignore="all">
-      <details class="index-panel" open>
+      <details class="index-panel" data-sidebar-pane open>
         <summary class="index-toggle">Navigation</summary>
         <nav aria-label="Sidebar navigation">
-          <ul class="sidebar-sections">
-            <li>
-              <a class="index-section-link" href="/docs/">
-                Docs
-              </a>
-            </li>
-            <li>
-              <a class="index-section-link" href="/docs/api/">
-                API
-              </a>
-            </li>
-            <li>
-              <details class="ecosystem-section" open>
-                <summary>
-                  <span class="index-group">Ecosystem</span>
-                  <svg
-                    class="index-caret"
-                    viewBox="0 0 24 24"
-                    width="20"
-                    height="20"
-                    aria-hidden="true"
-                  >
-                    <path d="m9 5 7 7-7 7" />
-                  </svg>
-                </summary>
-                <ul class="index-groups">
-                  {groups.map((group, i) => (
-                    <li>
-                      <details class="index-group-panel" open>
-                        <summary>
-                          <span class="index-group">{group.title}</span>
-                          <svg
-                            class="index-caret"
-                            viewBox="0 0 24 24"
-                            width="20"
-                            height="20"
-                            aria-hidden="true"
-                          >
-                            <path d="m9 5 7 7-7 7" />
-                          </svg>
-                        </summary>
-                        <ul>
-                          <li>
-                            <a
-                              href={`#${group.id}`}
-                              data-index-link
-                              aria-label={`${group.title} overview`}
-                              aria-current={i === 0 ? 'location' : undefined}
-                            >
-                              Overview
-                            </a>
-                          </li>
-                          {group.rows.map((row) => (
-                            <li>
-                              <a href={`#${row.id}`} data-index-link>
-                                {row.indexTitle ?? row.title}
-                              </a>
-                            </li>
-                          ))}
-                          {group.more.length > 0 && (
-                            <li>
-                              <a href="#more-packages" data-index-link>
-                                More packages
-                              </a>
-                            </li>
-                          )}
-                        </ul>
-                      </details>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            </li>
-          </ul>
+          <SiteSidebar ecosystemGroups={groups} />
         </nav>
       </details>
     </aside>
@@ -473,10 +152,6 @@ const groups = [
   </div>
 
   <script>
-    import {
-      trackSectionLinks,
-      revealSectionLink,
-    } from '../lib/section-navigation'
     import { track } from '../lib/analytics'
     document
       .querySelectorAll<HTMLAnchorElement>('[data-package]')
@@ -493,31 +168,6 @@ const groups = [
     }
     adaptIndex()
     desktop.addEventListener('change', adaptIndex)
-    const links = [
-      ...panel.querySelectorAll<HTMLAnchorElement>('[data-index-link]'),
-    ]
-    panel.addEventListener('click', (event) => {
-      if (
-        !desktop.matches &&
-        (event.target as Element).closest('[data-index-link]')
-      ) {
-        panel.open = false
-      }
-    })
-
-    let readingLink: HTMLAnchorElement | undefined
-    const reveal = () => {
-      if (readingLink && panel.open) revealSectionLink(readingLink, panel)
-    }
-    panel.addEventListener('toggle', reveal)
-    trackSectionLinks(
-      links,
-      (link) => {
-        readingLink = link
-        reveal()
-      },
-      true,
-    )
   </script>
 </BaseLayout>
 <style>
@@ -547,90 +197,6 @@ const groups = [
   }
   .index-panel nav {
     margin-top: var(--space-4);
-    font-size: 16px;
-    line-height: 1.4;
-  }
-  .index-panel ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .sidebar-sections > li + li {
-    margin-top: var(--space-3);
-  }
-  .index-panel .index-section-link {
-    color: var(--text);
-    font-weight: 600;
-    font-size: 18px;
-  }
-  .ecosystem-section > .index-groups {
-    margin-inline-start: var(--space-2);
-    padding-inline-start: var(--space-2);
-    border-inline-start: 1px solid var(--line);
-  }
-  .index-groups > li + li {
-    margin-top: var(--space-3);
-  }
-  .index-groups ul > li {
-    margin-inline-start: var(--space-2);
-    border-inline-start: 1px solid var(--line);
-    padding-inline-start: var(--space-2);
-  }
-  .index-group-panel > summary,
-  .ecosystem-section > summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-inline: var(--space-2);
-    line-height: 1.4;
-    list-style: none;
-    cursor: pointer;
-    user-select: none;
-  }
-  .index-group-panel > summary::-webkit-details-marker,
-  .ecosystem-section > summary::-webkit-details-marker {
-    display: none;
-  }
-  .index-caret {
-    flex-shrink: 0;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    transition: transform 0.2s ease-in-out;
-  }
-  .index-group-panel[open] > summary .index-caret,
-  .ecosystem-section[open] > summary .index-caret {
-    transform: rotate(90deg);
-  }
-  .index-panel a {
-    display: block;
-    padding: 0.3em var(--space-2);
-    border-radius: var(--radius-control);
-    color: var(--text-2);
-    text-decoration: none;
-    overflow-wrap: anywhere;
-  }
-  .index-panel .index-group {
-    color: var(--text);
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1.4;
-    padding-block: 0.2em;
-    flex: 1;
-  }
-  .index-panel a:hover,
-  .index-panel a:focus {
-    color: var(--text);
-  }
-  .index-panel a[aria-current] {
-    font-weight: 600;
-    color: var(--page);
-    background: var(--text);
-  }
-  .index-panel a:focus-visible,
-  .index-group-panel > summary:focus-visible {
-    outline: 2px solid var(--text);
-    outline-offset: 2px;
   }
   @media (width >= 50rem) {
     .ecosystem-leaf {
@@ -644,7 +210,6 @@ const groups = [
       position: sticky;
       top: var(--space-5);
       max-height: calc(100svh - 2 * var(--space-5));
-      padding: var(--space-4) var(--site-header-sheet-gutter);
       scrollbar-gutter: stable;
     }
     .index-panel > summary {
@@ -652,14 +217,6 @@ const groups = [
     }
     .index-panel nav {
       margin-top: 0;
-      font-size: 14px;
-    }
-    .index-panel .index-section-link,
-    .index-panel .index-group {
-      font-size: 16px;
-    }
-    .index-groups > li + li {
-      margin-top: var(--space-2);
     }
   }
   @media print {

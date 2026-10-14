@@ -264,7 +264,7 @@ export function apiNavigation(groups: ApiGroup[]) {
 }
 
 export function apiSidebar() {
-  // Page pagination is calculated before route middleware adds section links.
+  // Starlight uses page links for pagination; SiteSidebar adds section links.
   return {
     label: 'API',
     collapsed: true,
