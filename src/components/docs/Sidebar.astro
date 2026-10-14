@@ -11,7 +11,14 @@ const activeIndex = Astro.locals.starlightRoute.sidebar.findIndex(
 </docs-sidebar>
 
 <script>
+  import {
+    trackSectionLinks,
+    revealSectionLink,
+  } from '../../lib/section-navigation'
+
   class DocsSidebar extends HTMLElement {
+    stopTracking?: () => void
+
     connectedCallback() {
       // Starlight restores disclosure state across pages. Reapply the active
       // top-level section, while preserving the reader's nested group choices.
@@ -20,15 +27,50 @@ const activeIndex = Astro.locals.starlightRoute.sidebar.findIndex(
         const group = item.querySelector<HTMLDetailsElement>(':scope > details')
         if (group) group.open = index === Number(this.dataset.activeIndex)
       })
+      const pane = this.closest<HTMLElement>('docs-sidebar-pane')
+      const pageLink = Array.from(
+        this.querySelectorAll<HTMLAnchorElement>('a'),
+      ).find((link) => link.getAttribute('aria-current') === 'page')
+      let readingLink: HTMLAnchorElement | undefined
+      const reveal = () => {
+        if (readingLink && pane) revealSectionLink(readingLink, pane)
+      }
+      const sectionLinks = Array.from(
+        this.querySelectorAll<HTMLAnchorElement>('a[href*="#"]'),
+      ).filter((link) => new URL(link.href).pathname === location.pathname)
+      if (sectionLinks.length) {
+        this.stopTracking = trackSectionLinks(sectionLinks, (link) => {
+          readingLink = link
+          if (link) pageLink?.removeAttribute('aria-current')
+          else pageLink?.setAttribute('aria-current', 'page')
+          reveal()
+        })
+        pane?.addEventListener('toggle', (event) => {
+          if ((event as ToggleEvent).newState === 'open') reveal()
+        })
+      }
       this.addEventListener('click', (event) => {
         const link = (event.target as Element).closest('a')
         if (!link) return
         const url = new URL(link.href)
         if (url.pathname !== location.pathname || !url.hash) return
-        const pane = this.closest<HTMLElement>('docs-sidebar-pane')
         if (pane?.matches(':popover-open')) pane.hidePopover()
       })
+    }
+
+    disconnectedCallback() {
+      this.stopTracking?.()
     }
   }
   customElements.define('docs-sidebar', DocsSidebar)
 </script>
+
+<style>
+  docs-sidebar :global(a[aria-current='page']),
+  docs-sidebar :global(a[aria-current='location']) {
+    font-weight: 600;
+    color: var(--page);
+    background: var(--text);
+    border-radius: var(--radius-control);
+  }
+</style>

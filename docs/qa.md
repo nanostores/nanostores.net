@@ -87,7 +87,7 @@ After changes to TypeDoc or API transforms, review the affected sections in the 
 
 - Confirm that the sidebar, index and article preserve the maintained group and export order in `src/config/api-groups.ts`; switching between Docs, API and Ecosystem opens the matching sidebar section.
 - Read `atom`, `computed` and `$store.setKey()` on a phone and desktop. Signatures and examples remain readable; open `Other overloads` and `Type details` to check that secondary information is available.
-- Follow an index link and an API search result to the intended description.
+- Follow an index link and an API search result to the intended description; scroll through a long section and reopen the mobile menu to check that the current API entry stays highlighted and visible.
 
 ## Documentation and themes
 

@@ -262,53 +262,81 @@ const groups = [
   <div class="leaf ecosystem-leaf">
     <aside class="ecosystem-index">
       <details class="index-panel" open>
-        <summary class="index-toggle">Index</summary>
-        <nav aria-label="Ecosystem index">
-          <ul class="index-groups">
-            {groups.map((group, i) => (
-              <li>
-                <details class="index-group-panel" open>
-                  <summary>
-                    <span class="index-group">{group.title}</span>
-                    <svg
-                      class="index-caret"
-                      viewBox="0 0 24 24"
-                      width="20"
-                      height="20"
-                      aria-hidden="true"
-                    >
-                      <path d="m9 5 7 7-7 7" />
-                    </svg>
-                  </summary>
-                  <ul>
+        <summary class="index-toggle">Navigation</summary>
+        <nav aria-label="Sidebar navigation">
+          <ul class="sidebar-sections">
+            <li>
+              <a class="index-section-link" href="/docs/">
+                Docs
+              </a>
+            </li>
+            <li>
+              <a class="index-section-link" href="/docs/api/">
+                API
+              </a>
+            </li>
+            <li>
+              <details class="ecosystem-section" open>
+                <summary>
+                  <span class="index-group">Ecosystem</span>
+                  <svg
+                    class="index-caret"
+                    viewBox="0 0 24 24"
+                    width="20"
+                    height="20"
+                    aria-hidden="true"
+                  >
+                    <path d="m9 5 7 7-7 7" />
+                  </svg>
+                </summary>
+                <ul class="index-groups">
+                  {groups.map((group, i) => (
                     <li>
-                      <a
-                        href={`#${group.id}`}
-                        data-index-link
-                        aria-label={`${group.title} overview`}
-                        aria-current={i === 0 ? 'location' : undefined}
-                      >
-                        Overview
-                      </a>
+                      <details class="index-group-panel" open>
+                        <summary>
+                          <span class="index-group">{group.title}</span>
+                          <svg
+                            class="index-caret"
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            aria-hidden="true"
+                          >
+                            <path d="m9 5 7 7-7 7" />
+                          </svg>
+                        </summary>
+                        <ul>
+                          <li>
+                            <a
+                              href={`#${group.id}`}
+                              data-index-link
+                              aria-label={`${group.title} overview`}
+                              aria-current={i === 0 ? 'location' : undefined}
+                            >
+                              Overview
+                            </a>
+                          </li>
+                          {group.rows.map((row) => (
+                            <li>
+                              <a href={`#${row.id}`} data-index-link>
+                                {row.indexTitle ?? row.title}
+                              </a>
+                            </li>
+                          ))}
+                          {group.more.length > 0 && (
+                            <li>
+                              <a href="#more-packages" data-index-link>
+                                More packages
+                              </a>
+                            </li>
+                          )}
+                        </ul>
+                      </details>
                     </li>
-                    {group.rows.map((row) => (
-                      <li>
-                        <a href={`#${row.id}`} data-index-link>
-                          {row.indexTitle ?? row.title}
-                        </a>
-                      </li>
-                    ))}
-                    {group.more.length > 0 && (
-                      <li>
-                        <a href="#more-packages" data-index-link>
-                          More packages
-                        </a>
-                      </li>
-                    )}
-                  </ul>
-                </details>
-              </li>
-            ))}
+                  ))}
+                </ul>
+              </details>
+            </li>
           </ul>
         </nav>
       </details>
@@ -445,6 +473,10 @@ const groups = [
   </div>
 
   <script>
+    import {
+      trackSectionLinks,
+      revealSectionLink,
+    } from '../lib/section-navigation'
     import { track } from '../lib/analytics'
     document
       .querySelectorAll<HTMLAnchorElement>('[data-package]')
@@ -464,10 +496,6 @@ const groups = [
     const links = [
       ...panel.querySelectorAll<HTMLAnchorElement>('[data-index-link]'),
     ]
-    const entries = links.map((link) => ({
-      link,
-      target: document.getElementById(link.hash.slice(1))!,
-    }))
     panel.addEventListener('click', (event) => {
       if (
         !desktop.matches &&
@@ -477,37 +505,19 @@ const groups = [
       }
     })
 
-    // Use document order, including headings above the viewport, so long
-    // examples keep their index entry selected until the next heading arrives.
-    let scheduled = false
-    let activeLink: HTMLAnchorElement | undefined
-    const updateIndex = () => {
-      scheduled = false
-      let active = entries[0]
-      for (const entry of entries) {
-        if (entry.target.getBoundingClientRect().top <= 96) active = entry
-      }
-      if (active.link !== activeLink) {
-        const group =
-          active.link.closest<HTMLDetailsElement>('.index-group-panel')
-        if (group) group.open = true
-        activeLink = active.link
-      }
-      for (const entry of entries) {
-        if (entry === active)
-          entry.link.setAttribute('aria-current', 'location')
-        else entry.link.removeAttribute('aria-current')
-      }
+    let readingLink: HTMLAnchorElement | undefined
+    const reveal = () => {
+      if (readingLink && panel.open) revealSectionLink(readingLink, panel)
     }
-    const scheduleUpdate = () => {
-      if (scheduled) return
-      scheduled = true
-      requestAnimationFrame(updateIndex)
-    }
-    addEventListener('scroll', scheduleUpdate, { passive: true })
-    addEventListener('resize', scheduleUpdate)
-    addEventListener('hashchange', scheduleUpdate)
-    updateIndex()
+    panel.addEventListener('toggle', reveal)
+    trackSectionLinks(
+      links,
+      (link) => {
+        readingLink = link
+        reveal()
+      },
+      true,
+    )
   </script>
 </BaseLayout>
 <style>
@@ -545,6 +555,19 @@ const groups = [
     padding: 0;
     list-style: none;
   }
+  .sidebar-sections > li + li {
+    margin-top: var(--space-3);
+  }
+  .index-panel .index-section-link {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 18px;
+  }
+  .ecosystem-section > .index-groups {
+    margin-inline-start: var(--space-2);
+    padding-inline-start: var(--space-2);
+    border-inline-start: 1px solid var(--line);
+  }
   .index-groups > li + li {
     margin-top: var(--space-3);
   }
@@ -553,7 +576,8 @@ const groups = [
     border-inline-start: 1px solid var(--line);
     padding-inline-start: var(--space-2);
   }
-  .index-group-panel > summary {
+  .index-group-panel > summary,
+  .ecosystem-section > summary {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -563,7 +587,8 @@ const groups = [
     cursor: pointer;
     user-select: none;
   }
-  .index-group-panel > summary::-webkit-details-marker {
+  .index-group-panel > summary::-webkit-details-marker,
+  .ecosystem-section > summary::-webkit-details-marker {
     display: none;
   }
   .index-caret {
@@ -573,7 +598,8 @@ const groups = [
     stroke-width: 2;
     transition: transform 0.2s ease-in-out;
   }
-  .index-group-panel[open] > summary .index-caret {
+  .index-group-panel[open] > summary .index-caret,
+  .ecosystem-section[open] > summary .index-caret {
     transform: rotate(90deg);
   }
   .index-panel a {
@@ -628,6 +654,7 @@ const groups = [
       margin-top: 0;
       font-size: 14px;
     }
+    .index-panel .index-section-link,
     .index-panel .index-group {
       font-size: 16px;
     }
