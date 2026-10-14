@@ -93,6 +93,8 @@ export default defineConfig({
         './src/styles/fonts.css',
         './src/styles/ornaments.css',
         './src/styles/header.css',
+        './src/styles/navigation.css',
+        './src/styles/navigation.css',
         './src/styles/starlight.css',
       ],
       components: {

@@ -4,6 +4,8 @@
 @import './ornaments.css';
 @import './layout.css';
 @import './header.css';
+@import './navigation.css';
+@import './navigation.css';
 * {
   box-sizing: border-box;
 }

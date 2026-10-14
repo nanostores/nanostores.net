@@ -1,0 +1,14 @@
+/* Shared states for our navigation roots and native disclosure controls. */
+:where(docs-sidebar, .docs-page-toc, .index-panel) a:not([aria-current]):hover,
+:where(docs-sidebar, .docs-page-toc, .index-panel) summary:hover {
+  background: var(--control);
+  color: var(--text);
+  border-radius: var(--radius-control);
+}
+
+:where(docs-sidebar, .docs-page-toc, .index-panel)
+  :is(a, summary):focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
