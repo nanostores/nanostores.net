@@ -13,11 +13,16 @@ const current = (href: string) => {
       ? 'true'
       : undefined
 }
+const apiCurrent = current('/docs/api/')
+const docsCurrent = apiCurrent ? undefined : current('/docs/')
 ---
 
 <nav class:list={['site-links', { mobile }]} aria-label="Main navigation">
-  <a href="/docs/" aria-current={current('/docs/')}>
+  <a href="/docs/" aria-current={docsCurrent}>
     Docs
+  </a>
+  <a href="/docs/api/" aria-current={apiCurrent}>
+    API
   </a>
   <a href="/ecosystem/" aria-current={current('/ecosystem/')}>
     Ecosystem

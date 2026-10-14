@@ -14,9 +14,9 @@ A smart store is a store that owns its own work: it loads or subscribes to data,
 
 Core has no separate "smart store" API. The behavior comes from three pieces you already have:
 
-- `onMount` starts the work when the first listener subscribes and cleans up after the last one leaves. See [Lazy Stores](/docs/concepts/lazy-stores/).
-- `task` marks asynchronous work so that server-side rendering and tests can wait for it. See [Tasks](/docs/concepts/tasks/).
-- `computed` derives values from other stores and recalculates when they change. See [Computed Stores](/docs/concepts/computed-stores/).
+- `onMount` starts the work when the first listener subscribes and cleans up after the last one leaves. See [Lazy Stores](/docs/concepts/lazy-stores/) and the [`onMount`](/docs/api/#onmount) reference.
+- `task` marks asynchronous work so that server-side rendering and tests can wait for it. See [Tasks](/docs/concepts/tasks/) and the [`task`](/docs/api/#task) reference.
+- `computed` derives values from other stores and recalculates when they change. See [Computed Stores](/docs/concepts/computed-stores/) and the [`computed`](/docs/api/#computed) reference.
 
 ## Example
 

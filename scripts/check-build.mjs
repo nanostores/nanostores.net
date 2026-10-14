@@ -7,6 +7,7 @@ const requiredPages = [
   'index.html',
   'docs/index.html',
   'docs/getting-started/index.html',
+  'docs/api/index.html',
 ]
 const exports = ['llms.txt', 'llms-full.txt', 'llms-small.txt']
 
@@ -49,6 +50,12 @@ try {
       if (problem) errors.push(`${file} → ${href} (${problem})`)
     }
   }
+  const ids = pages.get('docs/api/index.html').ids
+  const seen = new Set()
+  for (const id of ids) {
+    if (seen.has(id)) errors.push(`docs/api/index.html: repeated id ${id}`)
+    seen.add(id)
+  }
   for (const name of exports) {
     for (const href of markdownLinks(readFileSync(join(root, name), 'utf8'))) {
       // Combined sets lose the source page for bare fragments.
@@ -59,7 +66,7 @@ try {
   }
   if (errors.length) throw new Error(errors.join('\n'))
   console.info(
-    `Build checks passed: ${pages.size} HTML pages, required outputs, navigation links and ${exports.length} documentation exports.`,
+    `Build checks passed: ${pages.size} HTML pages, required outputs, navigation links, API IDs and ${exports.length} documentation exports.`,
   )
 } catch (error) {
   console.error(`Build checks failed:\n${error.message}`)

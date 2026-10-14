@@ -20,7 +20,7 @@ jobs:
           require-lockfile: true
       - name: Check formatting
         run: pnpm run format:check
-      - name: Build and check content and navigation
+      - name: Build and check content, navigation and API
         run: pnpm run check
       - name: Pack build artifacts
         run: tar -cf dist.tar dist
@@ -58,7 +58,7 @@ jobs:
           curl --fail --silent --show-error --retry 10 --retry-delay 1 \
             --retry-connrefused --retry-all-errors http://127.0.0.1:8000/ > /dev/null
           docker exec nanostores-site /bin/httpcheck http://localhost:8000/
-          for path in /docs/ /docs/getting-started/ /llms.txt /llms-full.txt /llms-small.txt /icon.svg /manifest.webmanifest; do
+          for path in /docs/ /docs/getting-started/ /docs/api/ /llms.txt /llms-full.txt /llms-small.txt /icon.svg /manifest.webmanifest; do
             curl --fail --silent --show-error "http://127.0.0.1:8000$path" > /dev/null
           done
           asset=$(find dist/_astro -type f -name '*.css' -print -quit)
