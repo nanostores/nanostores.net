@@ -48,7 +48,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
       Skip to content
     </a>
     <SiteHeader />
-    <main id="main">
+    <main
+      id="main"
+      data-pagefind-body
+      data-pagefind-meta={`title:${title.replace(/ \| Nano Stores$/, '')}`}
+    >
       <slot />
     </main>
     <SiteFooter />

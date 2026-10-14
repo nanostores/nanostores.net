@@ -227,6 +227,9 @@ importers:
       '@nanostores/vue':
         specifier: ^1.1.0
         version: 1.1.0(@nanostores/logger@1.1.0(nanostores@1.5.5))(nanostores@1.5.5)(vue@3.5.43(typescript@6.0.3))
+      '@pagefind/default-ui':
+        specifier: ^1.5.2
+        version: 1.5.2
       '@types/hast':
         specifier: ^3.0.5
         version: 3.0.5

@@ -70,7 +70,7 @@ When changing `src/styles/starlight.css`, `src/styles/header.css` or updating St
 
 - Keep `starlight.css` focused on public `--sl-*` tokens, headings and article content under `.sl-markdown-content`.
 - Keep `header.css` selectors scoped to our header markup and page layout. Review new dependencies on Starlight's internal classes, IDs or attributes.
-- Prefer public tokens or component overrides. If a private selector is necessary, leave a comment explaining why no public option exists. The search button's `[data-open-modal]` selectors are an existing exception for the icon-only presentation.
+- Prefer public tokens or component overrides. If a private selector is necessary, leave a comment explaining why no public option exists.
 - Follow the header layout, search, mobile menu and keyboard checks in this checklist on the production preview.
 
 ## Interaction and keyboard
@@ -91,7 +91,7 @@ After changes to TypeDoc or API transforms, review the affected sections in the 
 
 ## Documentation and themes
 
-- Check the mobile docs menu and on-page contents. For changes outside the API, search for a term from the affected page and follow a result.
+- Check the mobile docs menu and on-page contents. Open search from home, Docs and Ecosystem; follow a page and an API result, then check `Ctrl/⌘ K`, Escape and focus return.
 - Switch the system/browser emulation between light and dark. Paper, text, code and controls remain readable, and a reload starts with the matching theme.
 - Disable JavaScript and reload home, docs and Ecosystem. Main content, links and code remain readable; the Ecosystem index can still be used.
 - Check heading order, descriptive image labels, readable contrast and focus visibility with browser accessibility tools when changing those elements. Manual QA does not replace a full accessibility audit.
