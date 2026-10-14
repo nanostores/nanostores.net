@@ -87,6 +87,9 @@ const html = await snippet(file, anchors)
       400 13px/1.65 'Fragment Mono',
       monospace;
     min-width: max-content;
+    /* Keep iOS from enlarging wide code blocks independently. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   /* The browser sets code to its own monospace; keep Fragment Mono. */
   .code :global(code) {
