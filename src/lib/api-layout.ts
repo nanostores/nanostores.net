@@ -53,6 +53,10 @@ const trimRules = (nodes: RootContent[]) => {
   return nodes
 }
 
+// The store methods section follows the group with the store constructors.
+const hasStoreMethods = (group: ApiGroup): boolean =>
+  group.names.includes('atom')
+
 const disclosure = (label: string, body: RootContent[]): RootContent[] => [
   { type: 'html', value: `<details>\n<summary>${label}</summary>` },
   ...body,
@@ -90,7 +94,7 @@ function apiIndex(groups: ApiGroup[]): RootContent {
         anchor: apiAnchor(name),
       })),
     }
-    return group.label === 'Stores'
+    return hasStoreMethods(group)
       ? [
           entry,
           {
@@ -309,7 +313,7 @@ export function layoutApi(
             ]),
       )
     }
-    if (group.label === 'Stores') {
+    if (hasStoreMethods(group)) {
       output.push(heading('Store methods', 2, 'store-methods'))
       for (const method of storeMethods) {
         const id = apiMemberAnchor(method.owner, method.name)
@@ -325,7 +329,7 @@ export function layoutApi(
   tree.children = output
 
   // Astro's slugger does not reserve explicit IDs. Namespace technical
-  // headings so a generic parameter called Stores cannot shadow #stores.
+  // headings so a generic parameter called Stores cannot shadow a group ID.
   const used = new Set(
     output.flatMap((node) =>
       node.type === 'heading' && node.data?.hProperties?.id
