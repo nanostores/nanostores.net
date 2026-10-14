@@ -91,7 +91,7 @@ After changes to TypeDoc or API transforms, review the affected sections in the 
 
 ## Documentation and themes
 
-- Check the mobile docs menu and on-page contents. Open search from home, Docs and Ecosystem; follow a page and an API result, then check `Ctrl/⌘ K`, Escape and focus return.
+- Check the mobile docs menu and on-page contents. Search appears only in Docs/API and Ecosystem; check that home, Why and situation pages have none. Follow a page and an API search result, then check `Ctrl/⌘ K`, Escape and focus return.
 - Switch the system/browser emulation between light and dark. Paper, text, code and controls remain readable, and a reload starts with the matching theme.
 - Disable JavaScript and reload home, docs and Ecosystem. Main content, links and code remain readable; the Ecosystem index can still be used.
 - Check heading order, descriptive image labels, readable contrast and focus visibility with browser accessibility tools when changing those elements. Manual QA does not replace a full accessibility audit.

@@ -1,8 +1,11 @@
 ---
 import HeaderContent from '../layout/HeaderContent.astro'
+
+const search =
+  Astro.url.pathname === '/docs' || Astro.url.pathname.startsWith('/docs/')
 ---
 
 <!-- Starlight's fixed header spans the viewport: it becomes desk, and the
      header content is the strip of paper on it (header.css). -->
 <div class="site-header-desk" aria-hidden="true"></div>
-<HeaderContent sheet />
+<HeaderContent sheet search={search} />

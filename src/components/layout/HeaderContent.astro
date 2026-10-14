@@ -5,15 +5,14 @@ import SiteSearch from './SiteSearch.astro'
 interface Props {
   // Docs: the content draws its own strip of paper inside Starlight's header.
   sheet?: boolean
+  search?: boolean
 }
-const { sheet = false } = Astro.props
+const { sheet = false, search = false } = Astro.props
 ---
 
 <div class:list={['site-header-inner', { 'site-header-sheet': sheet }]}>
   <Brand />
-  <div class="site-header-search">
-    <SiteSearch />
-  </div>
+  <div class="site-header-search">{search && <SiteSearch />}</div>
   <div class="site-header-actions">
     <SiteNav />
   </div>

@@ -2,10 +2,12 @@
 import HeaderContent from './HeaderContent.astro'
 import SiteMenuButton from './SiteMenuButton.astro'
 import SiteNav from './SiteNav.astro'
+
+const search = Astro.url.pathname.replace(/\/+$/, '') === '/ecosystem'
 ---
 
 <header class="site-header">
-  <HeaderContent />
+  <HeaderContent search={search} />
   <SiteMenuButton target="site-main-menu" label="Navigation menu" />
   <div id="site-main-menu" class="site-menu" popover="auto">
     <SiteNav mobile />
