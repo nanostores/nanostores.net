@@ -6,12 +6,8 @@ import type { ApiGroup } from '../lib/api-reference'
 // listed once; `src/lib/api-reference.test.ts` and the build check it.
 export const apiGroups: ApiGroup[] = [
   {
-    label: 'Stores',
-    names: ['atom', 'map'],
-  },
-  {
-    label: 'Derived state & effects',
-    names: ['computed', 'batched', 'effect', 'batch'],
+    label: 'Main',
+    names: ['atom', 'map', 'computed', 'batched', 'effect', 'batch'],
   },
   {
     label: 'Lifecycle',
