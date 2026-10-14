@@ -31,10 +31,8 @@ const number = chapterNumber(situation.id)
     <header class="deep-hero">
       <div class="container hero-inner">
         <a class="back mono" href="/">
-          <span class="hand" aria-hidden="true">
-            ☜
-          </span>{' '}
-          All situations
+          <span class="manicule manicule-back" aria-hidden="true"></span> All
+          situations
         </a>
         <div class="title">
           <div class="chapter-mark">
@@ -187,14 +185,9 @@ const number = chapterNumber(situation.id)
     text-decoration: none;
   }
   /* A hand points back home, the pair of the home page's ☞. */
-  .back .hand {
-    display: inline-block;
-    width: 1.1em;
+  .back .manicule {
     margin-right: 0.3em;
-    font:
-      1.6em/0 'Noto Sans Symbols 2',
-      serif;
-    vertical-align: -0.12em;
+    vertical-align: -0.1em;
   }
   /*
    * The chapter mark (ornaments.css) repeats the home section's: at the
