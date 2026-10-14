@@ -1,0 +1,132 @@
+---
+import type { NavigationEntry } from '../../lib/site-navigation'
+interface Props {
+  entries: NavigationEntry[]
+  path: string
+  activeSection: string
+  nested?: boolean
+}
+const { entries, path, activeSection, nested = false } = Astro.props
+const containsPage = (entry: NavigationEntry): boolean =>
+  entry.type === 'link'
+    ? entry.href.replace(/\/+$/, '') === path
+    : entry.items.some(containsPage)
+---
+
+<ul class:list={['sidebar-list', { root: !nested }]}>
+  {entries.map((entry) => (
+    <li>
+      {entry.type === 'link' ? (
+        <a
+          href={entry.href}
+          aria-current={containsPage(entry) ? 'page' : undefined}
+        >
+          {entry.label}
+        </a>
+      ) : (
+        <details
+          data-nav-group={entry.id}
+          open={
+            entry.id === activeSection ||
+            containsPage(entry) ||
+            !entry.collapsed
+          }
+        >
+          <summary
+            aria-current={entry.id === activeSection ? 'true' : undefined}
+          >
+            <span>{entry.label}</span>
+            <svg
+              class="caret"
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              aria-hidden="true"
+            >
+              <path d="m9 5 7 7-7 7" />
+            </svg>
+          </summary>
+          <Astro.self
+            entries={entry.items}
+            path={path}
+            activeSection={activeSection}
+            nested
+          />
+        </details>
+      )}
+    </li>
+  ))}
+</ul>
+
+<style>
+  .sidebar-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  .root > li + li {
+    margin-top: var(--space-3);
+  }
+  .sidebar-list .sidebar-list > li {
+    margin-inline-start: var(--space-2);
+    padding-inline-start: var(--space-2);
+    border-inline-start: 1px solid var(--line);
+  }
+  a {
+    display: block;
+    padding: 0.3em var(--space-2);
+    border-radius: var(--radius-control);
+    color: var(--text-2);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  a:hover,
+  a:focus {
+    color: var(--text);
+  }
+  a[aria-current='page'],
+  a[aria-current='location'] {
+    font-weight: 600;
+    color: var(--page);
+    background: var(--text);
+  }
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: 0.2em var(--space-2);
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .caret {
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    transition: transform 0.2s ease-in-out;
+  }
+  details[open] > summary .caret {
+    transform: rotate(90deg);
+  }
+  @media (width >= 50rem) {
+    .sidebar-list {
+      font-size: 14px;
+    }
+    summary {
+      font-size: 16px;
+    }
+    .root > li + li {
+      margin-top: var(--space-2);
+    }
+  }
+</style>

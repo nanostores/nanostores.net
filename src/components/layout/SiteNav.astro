@@ -13,13 +13,21 @@ const current = (href: string) => {
       ? 'true'
       : undefined
 }
+const apiCurrent = current('/docs/api/')
+const ecosystemCurrent =
+  current('/ecosystem/') ?? (current('/docs/ecosystem/') ? 'true' : undefined)
+const docsCurrent =
+  apiCurrent || ecosystemCurrent ? undefined : current('/docs/')
 ---
 
 <nav class:list={['site-links', { mobile }]} aria-label="Main navigation">
-  <a href="/docs/" aria-current={current('/docs/')}>
+  <a href="/docs/" aria-current={docsCurrent}>
     Docs
   </a>
-  <a href="/ecosystem/" aria-current={current('/ecosystem/')}>
+  <a href="/docs/api/" aria-current={apiCurrent}>
+    API
+  </a>
+  <a href="/ecosystem/" aria-current={ecosystemCurrent}>
     Ecosystem
   </a>
   <a class="github" href="https://github.com/nanostores/nanostores">
@@ -42,7 +50,9 @@ const current = (href: string) => {
     text-decoration: none;
     white-space: nowrap;
   }
-  .site-links a[aria-current] {
+  .site-links a[aria-current],
+  .site-links a:not(.github):hover,
+  .site-links a:not(.github):focus-visible {
     text-decoration: underline;
     text-decoration-thickness: 2px;
     text-underline-offset: 8px;

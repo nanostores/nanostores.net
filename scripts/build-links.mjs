@@ -7,6 +7,8 @@ export function readPage(html) {
   let canonical
   /** @type {string[]} */
   const links = []
+  /** @type {string[]} */
+  const ids = []
   const anchors = new Set()
   /** @param {import('parse5').DefaultTreeAdapterMap['node']} node */
   function walk(node) {
@@ -14,7 +16,10 @@ export function readPage(html) {
       const attrs = Object.fromEntries(
         node.attrs.map(({ name, value }) => [name, value]),
       )
-      if (attrs.id) anchors.add(attrs.id)
+      if (attrs.id) {
+        ids.push(attrs.id)
+        anchors.add(attrs.id)
+      }
       if (node.tagName === 'a' && attrs.name) anchors.add(attrs.name)
       if ((node.tagName === 'a' || node.tagName === 'area') && 'href' in attrs)
         links.push(attrs.href)
@@ -25,7 +30,7 @@ export function readPage(html) {
   }
   // A tree parser reads markup without browser APIs or script execution.
   walk(parse(html))
-  return { canonical, links, anchors }
+  return { canonical, links, ids, anchors }
 }
 
 /** @param {string} markdown */

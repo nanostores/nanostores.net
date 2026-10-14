@@ -115,26 +115,33 @@ body:has(.leaf) .site-header {
   }
 }
 
-/*
- * Starlight has no public option for an icon-only search button, so hide its
- * label and shortcut whenever the search slot is too narrow for them.
- * Below 50rem Starlight already renders the icon-only button.
- * Review this private-selector exception when updating Starlight (docs/qa.md).
- */
+/* Collapse our shared search control when the header slot is narrow. */
 @media (width >= 50rem) {
   @container site-header-search (width < 10rem) {
-    .site-header-search [data-open-modal] {
+    .site-header-search .search-trigger {
       width: 40px;
       justify-content: center;
+      padding: 0;
     }
-
-    .site-header-search [data-open-modal] > :is(span, kbd) {
+    .site-header-search :is(.search-label, .search-shortcut) {
       display: none;
     }
   }
 }
 
 @media (width < 50rem) {
+  .site-header-search .search-trigger {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    justify-content: center;
+  }
+  .site-header-search :is(.search-label, .search-shortcut) {
+    display: none;
+  }
   .site-menu-button {
     position: absolute;
     top: calc((var(--site-header-height) - var(--site-menu-button-size)) / 2);

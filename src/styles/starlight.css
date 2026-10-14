@@ -45,3 +45,107 @@ h3 {
   font-family: 'Instrument Sans', sans-serif;
   font-weight: 680;
 }
+
+.sl-markdown-content .api-index {
+  margin-block: var(--space-6);
+  padding-block: var(--space-5);
+  border-block: 1px solid var(--line);
+  font-size: var(--text-15);
+  line-height: var(--leading-small);
+}
+
+.sl-markdown-content .api-index-title {
+  margin: 0 0 var(--space-5);
+  color: var(--text-3);
+  font-size: var(--text-13);
+}
+
+.sl-markdown-content .api-index-main,
+.sl-markdown-content .api-index-secondary {
+  display: grid;
+  gap: var(--space-5) var(--space-6);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.sl-markdown-content .api-index-main > :last-child {
+  grid-column: 1 / -1;
+}
+
+.sl-markdown-content .api-index-secondary {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+
+.sl-markdown-content .api-index-section {
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+}
+
+.sl-markdown-content .api-index a {
+  color: var(--text-2);
+  text-decoration: none;
+}
+
+.sl-markdown-content .api-index a:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
+
+.sl-markdown-content .api-index a:focus-visible,
+.sl-markdown-content .api-index summary:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: var(--space-1);
+  border-radius: var(--radius-control);
+}
+
+.sl-markdown-content .api-index ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sl-markdown-content .api-index li {
+  min-width: 0;
+}
+
+.sl-markdown-content .api-index code {
+  padding: 0;
+  background: none;
+  font-size: var(--text-13);
+  overflow-wrap: anywhere;
+}
+
+.sl-markdown-content details.api-index-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sl-markdown-content .api-index summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.sl-markdown-content .api-index-count {
+  margin-inline-start: var(--space-1);
+  color: var(--text-3);
+  font-size: var(--text-13);
+  font-weight: 400;
+}
+
+.sl-markdown-content .api-index-expanded {
+  margin-top: var(--space-3);
+}
+
+@media (width >= 50rem) {
+  .sl-markdown-content .api-index-main,
+  .sl-markdown-content .api-index-secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

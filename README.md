@@ -20,7 +20,7 @@ Open forwarded port 4321 in your browser. The server runs in the terminal and sh
 - `src/components/` and `src/styles/` — UI and styles.
 - `src/snippets/` — displayed code examples.
 
-Documentation imports versioned Nano Stores and plugin READMEs from `src/vendor/`. Do not edit the build output in `dist/`.
+Documentation imports versioned Nano Stores and plugin READMEs from `src/vendor/`. API documentation is generated from Nano Stores types; do not edit `src/content/docs/docs/api/` or `dist/`.
 
 ## Checks
 
@@ -29,7 +29,7 @@ pnpm run format:check
 pnpm run check
 ```
 
-`check` builds the site and validates pages, documentation exports, internal links and anchors.
+`check` builds the site and validates pages, documentation exports, internal links and API anchors.
 
 See [QA](docs/qa.md) for manual checks and additional commands, and [AGENTS.md](AGENTS.md) for contribution rules.
 

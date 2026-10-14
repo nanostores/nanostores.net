@@ -1,0 +1,4 @@
+{
+  "compilerOptions": { "strict": true, "skipLibCheck": true, "noEmit": true },
+  "files": ["node_modules/nanostores/index.d.ts"]
+}
