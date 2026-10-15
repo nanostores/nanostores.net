@@ -32,6 +32,9 @@ pnpm test
 
 See [QA](docs/qa.md) for manual checks and additional commands, and [AGENTS.md](AGENTS.md) for contribution rules.
 
+See [Analytics](docs/analytics.md) for the bundled Plausible tracker, event schema,
+production origin gate, Nginx proxy and dashboard setup.
+
 ## Container
 
 CI checks the static nginx image and publishes
