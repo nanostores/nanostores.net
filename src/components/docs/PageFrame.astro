@@ -1,9 +1,11 @@
 ---
 import MobileMenuToggle from './MobileMenuToggle.astro'
+import Analytics from '../layout/Analytics.astro'
 
 const { hasSidebar } = Astro.locals.starlightRoute
 ---
 
+<Analytics />
 <div class="page docs-sheet">
   <header class="header">
     <slot name="header" />
