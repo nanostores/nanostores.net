@@ -132,15 +132,6 @@ const number = chapterNumber(situation.id)
     import { $copied, copiedInstall } from '../../state/site'
     const id =
       document.querySelector<HTMLElement>('[data-deep-id]')?.dataset.deepId
-    const referrer = document.referrer ? new URL(document.referrer) : null
-    const from = !referrer
-      ? 'direct'
-      : referrer.origin !== location.origin
-        ? 'external'
-        : referrer.pathname === '/'
-          ? 'home'
-          : 'internal'
-    track('deep_view', { situationId: id, from })
     $copied.subscribe((copied) => {
       const status = document.querySelector('[data-copy-status]')
       if (status) status.textContent = copied ? 'Copied!' : ''
