@@ -1,8 +1,5 @@
-import { $activeSection, $openCode, setCodeOpen } from '../state/site'
+import { $openCode, setCodeOpen } from '../state/site'
 import { track } from '../lib/analytics'
-import { activeSection, createSectionTracker } from '../lib/section-analytics'
-
-const sections = [...document.querySelectorAll<HTMLElement>('.situation')]
 
 // Code popovers: the store owns which section's code is open; the popover
 // and its arrow render it. CSS anchors place both under the Show code
@@ -48,40 +45,3 @@ $openCode.listen((open, _old, situationId) => {
       contentType: situationId === 'small-ecosystem' ? 'objections' : 'code',
     })
 })
-const sectionTracker = createSectionTracker(track)
-let suspended = false
-let frame = 0
-function active() {
-  const id =
-    document.hidden || suspended
-      ? null
-      : activeSection(
-          sections.map((section) => {
-            const { top, bottom } = section.getBoundingClientRect()
-            return { id: section.dataset.situationId!, top, bottom }
-          }),
-          innerHeight,
-        )
-  $activeSection.set(id)
-  sectionTracker.update(id)
-}
-function scheduleActive() {
-  if (frame) return
-  frame = requestAnimationFrame(() => {
-    frame = 0
-    active()
-  })
-}
-// Four rects per animation frame keep the viewport rule exact at any height.
-addEventListener('scroll', scheduleActive, { passive: true })
-addEventListener('resize', scheduleActive)
-document.addEventListener('visibilitychange', active)
-addEventListener('pagehide', () => {
-  suspended = true
-  active()
-})
-addEventListener('pageshow', () => {
-  suspended = false
-  active()
-})
-active()
