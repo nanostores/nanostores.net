@@ -157,7 +157,14 @@ const groups = await getEcosystemGroups()
       .querySelectorAll<HTMLAnchorElement>('[data-package]')
       .forEach((link) =>
         link.addEventListener('click', () =>
-          track('package_click', { target: link.dataset.package }),
+          track('package_click', {
+            package: link.dataset.package,
+            target:
+              link.origin === location.origin
+                ? link.pathname + link.search + link.hash
+                : link.href,
+            placement: 'ecosystem-package',
+          }),
         ),
       )
 

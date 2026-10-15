@@ -41,14 +41,22 @@ $openCode.listen((open, _old, id) => {
   }
 })
 $openCode.listen((open, _old, situationId) => {
-  if (situationId && open[situationId]) track('code_expand', { situationId })
+  if (situationId && open[situationId])
+    track('content_expand', {
+      situationId,
+      contentType: situationId === 'small-ecosystem' ? 'objections' : 'code',
+    })
 })
 document.addEventListener('click', (event) => {
   const target = (event.target as Element).closest<HTMLElement>('[data-track]')
   if (!target) return
   track(target.dataset.track as EventName, {
     situationId: target.dataset.situationId,
-    target: target.dataset.target,
+    target:
+      target instanceof HTMLAnchorElement
+        ? target.pathname + target.search + target.hash
+        : target.dataset.target,
+    placement: target.dataset.placement,
   })
 })
 

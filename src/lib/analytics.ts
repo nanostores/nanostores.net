@@ -3,19 +3,19 @@ import { order } from '../config/order'
 export type EventName =
   | 'section_view'
   | 'section_dwell'
-  | 'section_cta_click'
-  | 'toc_click'
-  | 'exit_click'
+  | 'cta_click'
   | 'install_copy'
-  | 'code_expand'
+  | 'content_expand'
   | 'deep_view'
-  | 'deep_cta_click'
   | 'package_click'
 export type EventProps = {
   situationId?: string
   ms?: number
   target?: string
   from?: string
+  placement?: string
+  package?: string
+  contentType?: 'code' | 'objections'
 }
 export type TrackedProps = Omit<EventProps, 'situationId'> & {
   situationId: string | null
@@ -23,8 +23,9 @@ export type TrackedProps = Omit<EventProps, 'situationId'> & {
   page: string
 }
 export interface Adapter {
-  send(event: EventName, props: TrackedProps): void
+  send(event: EventName, props: TrackedProps, options: EventOptions): void
 }
+export type EventOptions = { interactive: boolean }
 export const consoleAdapter: Adapter = {
   send: (event, props) => console.info('[Nano Stores]', event, props),
 }
@@ -43,5 +44,9 @@ export function track(event: EventName, props: EventProps = {}) {
     position: index >= 0 ? index + 1 : null,
     page: location.pathname,
   }
-  adapter.send(event, tracked)
+  adapter.send(event, tracked, {
+    interactive: !['section_view', 'section_dwell', 'deep_view'].includes(
+      event,
+    ),
+  })
 }

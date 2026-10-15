@@ -171,7 +171,8 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
               <p class="lead">
                 <a
                   href={`/for/${hooks.id}/`}
-                  data-track="section_cta_click"
+                  data-track="cta_click"
+                  data-placement="situation"
                   data-situation-id={hooks.id}
                 >
                   {hooks.data.mechanism}
@@ -202,7 +203,8 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
               <p class="lead">
                 <a
                   href={`/for/${islands.id}/`}
-                  data-track="section_cta_click"
+                  data-track="cta_click"
+                  data-placement="situation"
                   data-situation-id={islands.id}
                 >
                   {islands.data.mechanism}
@@ -226,7 +228,8 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
               <p class="lead">
                 <a
                   href={`/for/${frameworks.id}/`}
-                  data-track="section_cta_click"
+                  data-track="cta_click"
+                  data-placement="situation"
                   data-situation-id={frameworks.id}
                 >
                   {frameworks.data.mechanism}
@@ -256,7 +259,8 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
               <p class="lead">
                 <a
                   href={`/for/${context.id}/`}
-                  data-track="section_cta_click"
+                  data-track="cta_click"
+                  data-placement="situation"
                   data-situation-id={context.id}
                 >
                   {context.data.mechanism}
@@ -351,7 +355,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
             />
           </h2>
           <p class="lead">
-            <a href="/why/" data-track="exit_click" data-target="why">
+            <a href="/why/" data-track="cta_click" data-placement="philosophy">
               UI as a skin: components render, stores decide what is true.
             </a>
           </p>
@@ -369,8 +373,8 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
       <h2 id="getting-started-title">
         <a
           href="/docs/getting-started/"
-          data-track="exit_click"
-          data-target="docs"
+          data-track="cta_click"
+          data-placement="home-start"
         >
           Getting started →
         </a>
