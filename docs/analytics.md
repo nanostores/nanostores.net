@@ -71,7 +71,7 @@ Keep port 8000 private; revalidate visitor IP forwarding after hosting changes.
 
 - In Plausible, confirm `nanostores.net` and create custom-event goals for `outbound_click`, `install_copy` and `content_expand`; filter by `target` / `package` / `situationId`. Use pageview goals for `/docs/getting-started/` and other internal destinations. Do not also install the hosted snippet or enable automatic outbound tracking.
 - `install_copy` measures copying, not completed installation; outbound clicks measure a handoff, not package adoption.
-- Run [QA](qa.md); focused tests: `src/lib/analytics.test.ts`. Check copy success, content expansion, single outbound click delivery and silent internal navigation. SDK engagement handles background time; custom section timers are absent. On production, verify pageviews and custom events in the dashboard; localhost / preview builds must send nothing.
+- Follow the manual checks in [QA](qa.md): copy success, content expansion, single outbound click delivery and silent internal navigation. SDK engagement handles background time; custom section timers are absent. On production, verify pageviews and custom events in the dashboard; localhost / preview builds must send nothing.
 
 Proxy diagnostic, without recording an event:
 
