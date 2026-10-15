@@ -72,6 +72,7 @@ if (
 ) {
   init({
     domain: 'nanostores.net',
+    endpoint: '/api/event',
     autoCapturePageviews: true,
     outboundLinks: false,
     fileDownloads: false,
