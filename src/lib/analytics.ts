@@ -1,19 +1,10 @@
 import { order } from '../config/order'
 import { init, track as plausibleTrack } from '@plausible-analytics/tracker'
 
-export type EventName =
-  | 'section_view'
-  | 'section_dwell'
-  | 'cta_click'
-  | 'install_copy'
-  | 'content_expand'
-  | 'package_click'
+export type EventName = 'outbound_click' | 'install_copy' | 'content_expand'
 export type EventProps = {
   situationId?: string
-  ms?: number
   target?: string
-  from?: string
-  placement?: string
   package?: string
   contentType?: 'code' | 'objections'
 }
@@ -64,7 +55,7 @@ function pageProps() {
 
 let adapter: Adapter = import.meta.env.DEV ? consoleAdapter : noopAdapter
 // Every browser entry imports this module. ESM initializes it once, before any
-// immediate section events, regardless of Astro's script ordering.
+// custom events, regardless of Astro's script ordering.
 if (
   import.meta.env.PROD &&
   typeof window !== 'undefined' &&
@@ -94,7 +85,5 @@ export function track(event: EventName, props: EventProps = {}) {
     position: index >= 0 ? index + 1 : null,
     page: location.pathname,
   }
-  adapter.send(event, tracked, {
-    interactive: !['section_view', 'section_dwell'].includes(event),
-  })
+  adapter.send(event, tracked, { interactive: true })
 }

@@ -97,32 +97,14 @@ const number = chapterNumber(situation.id)
           role="status"
           aria-live="polite"
         ></span>
-        <a
-          href="/docs/getting-started/"
-          data-track="cta_click"
-          data-placement="situation-start"
-        >
-          Getting started →
-        </a>
+        <a href="/docs/getting-started/">Getting started →</a>
       </div>
       <p class="next">
         {next.map((item) => (
-          <a
-            href={`/for/${item.id}/`}
-            data-track="cta_click"
-            data-placement="situation-next"
-          >
-            {item.data.toc} →
-          </a>
+          <a href={`/for/${item.id}/`}>{item.data.toc} →</a>
         ))}
         {plugins.map((plugin) => (
-          <a
-            href={plugin.data.docs}
-            data-track="cta_click"
-            data-placement="situation-next"
-          >
-            {plugin.data.name} ↗
-          </a>
+          <a href={plugin.data.docs}>{plugin.data.name} ↗</a>
         ))}
       </p>
     </div>

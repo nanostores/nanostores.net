@@ -61,9 +61,17 @@ const groups = await getEcosystemGroups()
                               <a
                                 class="module"
                                 href={row.module.href}
-                                data-package={row.module.name}
-                                data-track="package_click"
-                                data-placement="ecosystem-package"
+                                data-package={
+                                  row.module.href.startsWith('http') &&
+                                  row.module.name !== 'built in'
+                                    ? row.module.name
+                                    : undefined
+                                }
+                                data-track={
+                                  row.module.href.startsWith('http')
+                                    ? 'outbound_click'
+                                    : undefined
+                                }
                               >
                                 {row.module.name}
                                 {row.module.href.startsWith('http')
@@ -76,9 +84,16 @@ const groups = await getEcosystemGroups()
                                   {row.alternativeLead}:{' '}
                                   <a
                                     href={row.alternative.href}
-                                    data-package={row.alternative.name}
-                                    data-track="package_click"
-                                    data-placement="ecosystem-alternative"
+                                    data-package={
+                                      row.alternative.href.startsWith('http')
+                                        ? row.alternative.name
+                                        : undefined
+                                    }
+                                    data-track={
+                                      row.alternative.href.startsWith('http')
+                                        ? 'outbound_click'
+                                        : undefined
+                                    }
                                   >
                                     {row.alternative.name} ↗
                                   </a>{' '}
@@ -111,12 +126,7 @@ const groups = await getEcosystemGroups()
                             <div class="row-foot">
                               {row.boundary && <p>{row.boundary}</p>}
                               {row.usedIn.map((s) => (
-                                <a
-                                  href={`/for/${s.id}/`}
-                                  data-track="cta_click"
-                                  data-placement="ecosystem-situation"
-                                  data-situation-id={s.id}
-                                >
+                                <a href={`/for/${s.id}/`}>
                                   Used in: {s.data.toc} →
                                 </a>
                               ))}
@@ -148,15 +158,11 @@ const groups = await getEcosystemGroups()
       ))}
 
       <section class="next container">
-        <a
-          href="/docs/getting-started/"
-          data-track="cta_click"
-          data-placement="ecosystem-start"
-        >
+        <a href="/docs/getting-started/">
           <strong>Getting started →</strong>
           <span>Your first store and component in a few minutes.</span>
         </a>
-        <a href="/" data-track="cta_click" data-placement="ecosystem-next">
+        <a href="/">
           <strong>Find your situation →</strong>
           <span>Islands, Context, live data, several frameworks.</span>
         </a>
