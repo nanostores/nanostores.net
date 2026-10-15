@@ -97,18 +97,30 @@ const number = chapterNumber(situation.id)
           role="status"
           aria-live="polite"
         ></span>
-        <a href="/docs/getting-started/" data-track="deep_cta_click">
+        <a
+          href="/docs/getting-started/"
+          data-track="cta_click"
+          data-placement="situation-start"
+        >
           Getting started →
         </a>
       </div>
       <p class="next">
         {next.map((item) => (
-          <a href={`/for/${item.id}/`} data-track="deep_cta_click">
+          <a
+            href={`/for/${item.id}/`}
+            data-track="cta_click"
+            data-placement="situation-next"
+          >
             {item.data.toc} →
           </a>
         ))}
         {plugins.map((plugin) => (
-          <a href={plugin.data.docs} data-track="deep_cta_click">
+          <a
+            href={plugin.data.docs}
+            data-track="cta_click"
+            data-placement="situation-next"
+          >
             {plugin.data.name} ↗
           </a>
         ))}
@@ -121,8 +133,9 @@ const number = chapterNumber(situation.id)
     const id =
       document.querySelector<HTMLElement>('[data-deep-id]')?.dataset.deepId
     const referrer = document.referrer ? new URL(document.referrer) : null
-    const from =
-      referrer?.origin !== location.origin
+    const from = !referrer
+      ? 'direct'
+      : referrer.origin !== location.origin
         ? 'external'
         : referrer.pathname === '/'
           ? 'home'
@@ -144,10 +157,18 @@ const number = chapterNumber(situation.id)
         }
       })
     document
-      .querySelectorAll<HTMLAnchorElement>('[data-track="deep_cta_click"]')
+      .querySelectorAll<HTMLAnchorElement>('[data-track="cta_click"]')
       .forEach((link) =>
         link.addEventListener('click', () =>
-          track('deep_cta_click', { situationId: id, from, target: link.href }),
+          track('cta_click', {
+            situationId: id,
+            from,
+            target:
+              link.origin === location.origin
+                ? link.pathname + link.search + link.hash
+                : link.href,
+            placement: link.dataset.placement,
+          }),
         ),
       )
   </script>
