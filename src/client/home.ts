@@ -1,5 +1,5 @@
 import { $activeSection, $openCode, setCodeOpen } from '../state/site'
-import { track, type EventName } from '../lib/analytics'
+import { track } from '../lib/analytics'
 import { activeSection, createSectionTracker } from '../lib/section-analytics'
 
 const sections = [...document.querySelectorAll<HTMLElement>('.situation')]
@@ -48,19 +48,6 @@ $openCode.listen((open, _old, situationId) => {
       contentType: situationId === 'small-ecosystem' ? 'objections' : 'code',
     })
 })
-document.addEventListener('click', (event) => {
-  const target = (event.target as Element).closest<HTMLElement>('[data-track]')
-  if (!target) return
-  track(target.dataset.track as EventName, {
-    situationId: target.dataset.situationId,
-    target:
-      target instanceof HTMLAnchorElement
-        ? target.pathname + target.search + target.hash
-        : target.dataset.target,
-    placement: target.dataset.placement,
-  })
-})
-
 const sectionTracker = createSectionTracker(track)
 let suspended = false
 let frame = 0

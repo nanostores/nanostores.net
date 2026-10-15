@@ -156,21 +156,6 @@ const number = chapterNumber(situation.id)
           /* Clipboard may be unavailable outside a secure context. */
         }
       })
-    document
-      .querySelectorAll<HTMLAnchorElement>('[data-track="cta_click"]')
-      .forEach((link) =>
-        link.addEventListener('click', () =>
-          track('cta_click', {
-            situationId: id,
-            from,
-            target:
-              link.origin === location.origin
-                ? link.pathname + link.search + link.hash
-                : link.href,
-            placement: link.dataset.placement,
-          }),
-        ),
-      )
   </script>
 </BaseLayout>
 <style>
