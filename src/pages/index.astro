@@ -169,14 +169,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
           <div class="columns">
             <div class="copy">
               <p class="lead">
-                <a
-                  href={`/for/${hooks.id}/`}
-                  data-track="cta_click"
-                  data-placement="situation"
-                  data-situation-id={hooks.id}
-                >
-                  {hooks.data.mechanism}
-                </a>
+                <a href={`/for/${hooks.id}/`}>{hooks.data.mechanism}</a>
               </p>
             </div>
             <Meme {...memes[hooks.id]} />
@@ -201,14 +194,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
           <div class="columns">
             <div class="copy">
               <p class="lead">
-                <a
-                  href={`/for/${islands.id}/`}
-                  data-track="cta_click"
-                  data-placement="situation"
-                  data-situation-id={islands.id}
-                >
-                  {islands.data.mechanism}
-                </a>
+                <a href={`/for/${islands.id}/`}>{islands.data.mechanism}</a>
               </p>
             </div>
           </div>
@@ -226,12 +212,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
           <div class="columns">
             <div class="copy">
               <p class="lead">
-                <a
-                  href={`/for/${frameworks.id}/`}
-                  data-track="cta_click"
-                  data-placement="situation"
-                  data-situation-id={frameworks.id}
-                >
+                <a href={`/for/${frameworks.id}/`}>
                   {frameworks.data.mechanism}
                 </a>
               </p>
@@ -257,14 +238,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
           <div class="columns">
             <div class="copy">
               <p class="lead">
-                <a
-                  href={`/for/${context.id}/`}
-                  data-track="cta_click"
-                  data-placement="situation"
-                  data-situation-id={context.id}
-                >
-                  {context.data.mechanism}
-                </a>
+                <a href={`/for/${context.id}/`}>{context.data.mechanism}</a>
               </p>
             </div>
             <CodePreview
@@ -309,13 +283,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
             <dd>
               Persistence, data fetching, routing, i18n: separate official
               packages. Each one is a store you add only when you need it.{' '}
-              <a
-                href="/ecosystem/"
-                data-track="cta_click"
-                data-placement="objections"
-              >
-                Ecosystem →
-              </a>
+              <a href="/ecosystem/">Ecosystem →</a>
             </dd>
           </div>
           <div>
@@ -323,13 +291,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
             <dd>
               Every store and change in Redux DevTools, with a stack trace to
               the line that wrote it. No time travel.{' '}
-              <a
-                href="/docs/ecosystem/devtools/"
-                data-track="cta_click"
-                data-placement="objections"
-              >
-                Devtools →
-              </a>
+              <a href="/docs/ecosystem/devtools/">Devtools →</a>
             </dd>
           </div>
           <div>
@@ -337,11 +299,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
             <dd>
               On the client, yes. On the server a store is shared by all
               requests, so keep per-request data out of it.{' '}
-              <a
-                href="https://docs.astro.build/en/recipes/sharing-state-islands/"
-                data-track="cta_click"
-                data-placement="objections"
-              >
+              <a href="https://docs.astro.build/en/recipes/sharing-state-islands/">
                 Astro recipe →
               </a>
             </dd>
@@ -349,11 +307,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
           <div>
             <dt>Is it still moving?</dt>
             <dd>
-              <a
-                href="https://github.com/nanostores/nanostores/blob/main/CHANGELOG.md"
-                data-track="cta_click"
-                data-placement="objections"
-              >
+              <a href="https://github.com/nanostores/nanostores/blob/main/CHANGELOG.md">
                 Changelog →
               </a>
             </dd>
@@ -375,7 +329,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
             />
           </h2>
           <p class="lead">
-            <a href="/why/" data-track="cta_click" data-placement="philosophy">
+            <a href="/why/">
               UI as a skin: components render, stores decide what is true.
             </a>
           </p>
@@ -391,13 +345,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
       aria-labelledby="getting-started-title"
     >
       <h2 id="getting-started-title">
-        <a
-          href="/docs/getting-started/"
-          data-track="cta_click"
-          data-placement="home-start"
-        >
-          Getting started →
-        </a>
+        <a href="/docs/getting-started/">Getting started →</a>
       </h2>
       <p class="lead">
         Install, Create a store, Derive a value, Read it in a component
