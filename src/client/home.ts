@@ -1,5 +1,6 @@
 import { $activeSection, $openCode, setCodeOpen } from '../state/site'
 import { track, type EventName } from '../lib/analytics'
+import { activeSection, createSectionTracker } from '../lib/section-analytics'
 
 const sections = [...document.querySelectorAll<HTMLElement>('.situation')]
 
@@ -60,49 +61,40 @@ document.addEventListener('click', (event) => {
   })
 })
 
-let enteredAt = performance.now()
-const seen = new Set<string>()
+const sectionTracker = createSectionTracker(track)
+let suspended = false
+let frame = 0
 function active() {
-  let best: { id: string; visible: number } | undefined
-  for (const section of sections) {
-    const rect = section.getBoundingClientRect()
-    const visible = Math.max(
-      0,
-      Math.min(rect.bottom, innerHeight) - Math.max(rect.top, 0),
-    )
-    // Sections can be shorter than half the screen: a section is active
-    // when half of it is visible; the most visible one wins.
-    const coverage = visible / Math.min(rect.height, innerHeight)
-    if (coverage >= 0.5 && (!best || visible > best.visible))
-      best = { id: section.dataset.situationId!, visible }
-  }
-  const previous = $activeSection.get()
-  const id = best?.id || null
-  if (id === previous) return
-  const now = performance.now()
-  if (previous)
-    track('section_dwell', {
-      situationId: previous,
-      ms: Math.round(now - enteredAt),
-    })
+  const id =
+    document.hidden || suspended
+      ? null
+      : activeSection(
+          sections.map((section) => {
+            const { top, bottom } = section.getBoundingClientRect()
+            return { id: section.dataset.situationId!, top, bottom }
+          }),
+          innerHeight,
+        )
   $activeSection.set(id)
-  enteredAt = now
-  if (id && !seen.has(id)) {
-    seen.add(id)
-    track('section_view', { situationId: id })
-  }
+  sectionTracker.update(id)
 }
-const observer = new IntersectionObserver(active, {
-  threshold: [0, 0.25, 0.5, 0.75, 1],
-})
-sections.forEach((section) => observer.observe(section))
-addEventListener('resize', active)
+function scheduleActive() {
+  if (frame) return
+  frame = requestAnimationFrame(() => {
+    frame = 0
+    active()
+  })
+}
+// Four rects per animation frame keep the viewport rule exact at any height.
+addEventListener('scroll', scheduleActive, { passive: true })
+addEventListener('resize', scheduleActive)
+document.addEventListener('visibilitychange', active)
 addEventListener('pagehide', () => {
-  const id = $activeSection.get()
-  if (id)
-    track('section_dwell', {
-      situationId: id,
-      ms: Math.round(performance.now() - enteredAt),
-    })
+  suspended = true
+  active()
+})
+addEventListener('pageshow', () => {
+  suspended = false
+  active()
 })
 active()
