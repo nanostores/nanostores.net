@@ -65,6 +65,7 @@ it('initializes once before immediate events and sends serializable properties',
     event: string,
   ) => Record<string, string>
   expect(config.autoCapturePageviews).toBe(true)
+  expect(config.endpoint).toBe('/api/event')
   expect(properties('pageview')).toEqual({
     page: '/for/islands/',
     situationId: 'islands',
