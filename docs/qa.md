@@ -98,6 +98,6 @@ After changes to TypeDoc or API transforms, review the affected sections in the 
 
 ## Analytics and reporting
 
-When changing analytics, use the dev server and inspect `[Nano Stores]` console events after a section view, code expansion and link click. Check the section, position and page fields. Production uses the no-op adapter.
+Follow [Analytics](analytics.md) for events, properties, Plausible setup and proxy verification. In development, inspect `[Nano Stores]` console events after content expansion, marked external link activation and successful install-command copy. Check situation, position, page, target and package. Internal navigation and scrolling must produce no custom events. Check background-tab time and back/forward restores for standard SDK pageview / engagement behavior. The production tracker runs only on `https://nanostores.net`; local production previews and other hosts use the no-op adapter. Verify production pageviews and custom events in Plausible after deployment; HTTP 202 alone does not prove ingestion.
 
 Report the routes, browser, widths and interactions actually checked, automated results, and any checks left undone. Record screenshots when they help explain a layout issue; do not report the checklist as passed merely because unit tests passed.

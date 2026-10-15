@@ -65,6 +65,7 @@ jobs:
           test -n "$asset"
           curl --fail --silent --show-error "http://127.0.0.1:8000/${asset#dist/}" > /dev/null
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8000/missing-page)" = 404
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8000/api/event)" = 405
       - name: Pack Docker image
         if: github.event_name == 'push' && github.repository == 'nanostores/nanostores.net'
         run: docker save -o image.tar nanostores-site:ci

@@ -169,13 +169,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
           <div class="columns">
             <div class="copy">
               <p class="lead">
-                <a
-                  href={`/for/${hooks.id}/`}
-                  data-track="section_cta_click"
-                  data-situation-id={hooks.id}
-                >
-                  {hooks.data.mechanism}
-                </a>
+                <a href={`/for/${hooks.id}/`}>{hooks.data.mechanism}</a>
               </p>
             </div>
             <Meme {...memes[hooks.id]} />
@@ -200,13 +194,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
           <div class="columns">
             <div class="copy">
               <p class="lead">
-                <a
-                  href={`/for/${islands.id}/`}
-                  data-track="section_cta_click"
-                  data-situation-id={islands.id}
-                >
-                  {islands.data.mechanism}
-                </a>
+                <a href={`/for/${islands.id}/`}>{islands.data.mechanism}</a>
               </p>
             </div>
           </div>
@@ -224,11 +212,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
           <div class="columns">
             <div class="copy">
               <p class="lead">
-                <a
-                  href={`/for/${frameworks.id}/`}
-                  data-track="section_cta_click"
-                  data-situation-id={frameworks.id}
-                >
+                <a href={`/for/${frameworks.id}/`}>
                   {frameworks.data.mechanism}
                 </a>
               </p>
@@ -254,13 +238,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
           <div class="columns">
             <div class="copy">
               <p class="lead">
-                <a
-                  href={`/for/${context.id}/`}
-                  data-track="section_cta_click"
-                  data-situation-id={context.id}
-                >
-                  {context.data.mechanism}
-                </a>
+                <a href={`/for/${context.id}/`}>{context.data.mechanism}</a>
               </p>
             </div>
             <CodePreview
@@ -351,7 +329,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
             />
           </h2>
           <p class="lead">
-            <a href="/why/" data-track="exit_click" data-target="why">
+            <a href="/why/">
               UI as a skin: components render, stores decide what is true.
             </a>
           </p>
@@ -367,13 +345,7 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
       aria-labelledby="getting-started-title"
     >
       <h2 id="getting-started-title">
-        <a
-          href="/docs/getting-started/"
-          data-track="exit_click"
-          data-target="docs"
-        >
-          Getting started →
-        </a>
+        <a href="/docs/getting-started/">Getting started →</a>
       </h2>
       <p class="lead">
         Install, Create a store, Derive a value, Read it in a component
