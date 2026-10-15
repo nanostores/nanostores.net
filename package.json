@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.6",
+    "@plausible-analytics/tracker": "0.4.6",
     "astro": "^7.3.8",
     "nanostores": "^1.5.5"
   },
