@@ -21,16 +21,36 @@ const docsCurrent =
 ---
 
 <nav class:list={['site-links', { mobile }]} aria-label="Main navigation">
-  <a href="/docs/" aria-current={docsCurrent}>
+  <a
+    data-track="cta_click"
+    data-placement="header"
+    href="/docs/"
+    aria-current={docsCurrent}
+  >
     Docs
   </a>
-  <a href="/docs/api/" aria-current={apiCurrent}>
+  <a
+    data-track="cta_click"
+    data-placement="header"
+    href="/docs/api/"
+    aria-current={apiCurrent}
+  >
     API
   </a>
-  <a href="/ecosystem/" aria-current={ecosystemCurrent}>
+  <a
+    data-track="cta_click"
+    data-placement="header"
+    href="/ecosystem/"
+    aria-current={ecosystemCurrent}
+  >
     Ecosystem
   </a>
-  <a class="github" href="https://github.com/nanostores/nanostores">
+  <a
+    class="github"
+    data-track="cta_click"
+    data-placement="header"
+    href="https://github.com/nanostores/nanostores"
+  >
     GitHub
   </a>
 </nav>
