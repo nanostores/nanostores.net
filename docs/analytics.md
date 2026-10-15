@@ -109,5 +109,8 @@ For local TLS inspection, use a test-only trust bundle; retain production TLS ve
 
 Validation on 2026-10-15: 46-page build, formatting, types, 87 unit tests, 8 snippet
 tests and Nginx diagnostic passed. Browser interactions checked at 1280×720 and
-390×844. Timed hidden-tab / BFCache browser verification and live dashboard / goal
-setup remain pending; interval semantics are covered by unit tests.
+390×844. Manual Edge 155 / CDP verification passed: 28,916 ms hidden was excluded
+from dwell; the resumed 23,026 ms visible interval matched the event. Back and
+Forward restored the same documents (`pageshow.persisted = true`), without a
+repeated `section_view`; resumed dwell excluded time away. Live dashboard / goal
+setup remains pending.
