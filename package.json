@@ -93,7 +93,7 @@
     {
       "name": "All files",
       "path": "dist/**/*",
-      "limit": "1.95 MB"
+      "limit": "1.87 MB"
     }
   ],
   "engines": {
