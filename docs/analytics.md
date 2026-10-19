@@ -35,7 +35,7 @@ SDK pageview / engagement ──────────────────
 ```
 
 1. `src/components/layout/Analytics.astro` loads `src/client/analytics.ts` on marketing and Starlight pages. Producers import `src/lib/analytics.ts`; ESM initializes it once, before events.
-2. Environment selects the adapter: production + exact origin `https://nanostores.net` → Plausible; development → `[Nano Stores]` console; other production origins → no-op. SSR does not initialize the SDK.
+2. `pickAdapter()` selects the adapter. Only the production build (`astro build`) on `https://nanostores.net` sends to Plausible; `astro dev` logs to the `[Nano Stores]` console; preview and other hosts get a no-op. SSR does not initialize the SDK.
 3. `src/lib/link-analytics.ts` delegates `click` / `auxclick` from `a[data-track="outbound_click"]` and accepts only external HTTP(S) destinations. Keyboard, modified and middle clicks produce one event; canceled / right-button activations are ignored. Homepage popovers and `/for/*` clipboard handlers call `track()` directly.
 4. `track()` adds `page`, `situationId` and `position`, marks custom events interactive, then calls `adapter.send()`. The Plausible adapter omits null / undefined properties and converts remaining values to strings.
 5. The SDK adds domain, full page URL, referrer and protocol fields, then sends JSON with `fetch(..., { keepalive: true })`. SDK pageviews bypass `track()` and get their properties through `customProperties`. Automatic outbound, download and form tracking are disabled; `localStorage.plausible_ignore="true"` suppresses SDK tracking.
