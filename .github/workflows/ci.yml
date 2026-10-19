@@ -22,6 +22,8 @@ jobs:
         run: pnpm run format:check
       - name: Build and check content, navigation and API
         run: pnpm run check
+      - name: Check size
+        run: pnpm run check:size
       - name: Pack build artifacts
         run: tar -cf dist.tar dist
       - name: Upload build artifacts

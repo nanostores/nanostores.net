@@ -9,6 +9,7 @@
     "check": "pnpm run build && node scripts/check-build.mjs",
     "check:types": "node --import ./scripts/windows-sandbox.mjs ./node_modules/astro/bin/astro.mjs check",
     "check:snippets": "vue-tsc -p src/snippets/tsconfig.json",
+    "check:size": "size-limit",
     "test": "node --import ./scripts/windows-sandbox.mjs ./node_modules/vitest/vitest.mjs run",
     "test:snippets": "node --import ./scripts/windows-sandbox.mjs ./node_modules/vitest/vitest.mjs run --config vitest.snippets.config.ts",
     "test:build": "pnpm run check",
@@ -44,6 +45,7 @@
     "@nanostores/router": "^2.0.0",
     "@nanostores/vue": "^1.1.0",
     "@pagefind/default-ui": "^1.5.2",
+    "@size-limit/file": "^14.2.0",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@types/react": "^19.3.0",
@@ -57,6 +59,7 @@
     "satteri": "^0.10.5",
     "sharp": "^0.35.5",
     "shiki": "^4.5.0",
+    "size-limit": "^14.2.0",
     "starlight-llms-txt": "^0.12.0",
     "starlight-typedoc": "^0.23.1",
     "typedoc": "^0.28.20",
@@ -67,6 +70,32 @@
     "vue": "^3.5.43",
     "vue-tsc": "^3.3.13"
   },
+  "size-limit": [
+    {
+      "name": "Site JS",
+      "path": [
+        "dist/_astro/*.js",
+        "!dist/_astro/ui-core.*.js"
+      ],
+      "brotli": false,
+      "limit": "14 kB"
+    },
+    {
+      "name": "Search JS",
+      "path": [
+        "dist/_astro/ui-core.*.js",
+        "dist/pagefind/pagefind.js",
+        "dist/pagefind/pagefind-worker.js"
+      ],
+      "brotli": false,
+      "limit": "181 kB"
+    },
+    {
+      "name": "All files",
+      "path": "dist/**/*",
+      "limit": "1.95 MB"
+    }
+  ],
   "engines": {
     "node": ">=26.0.0"
   },
