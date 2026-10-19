@@ -53,14 +53,18 @@ function pageProps() {
   })
 }
 
-let adapter: Adapter = import.meta.env.DEV ? consoleAdapter : noopAdapter
-// Every browser entry imports this module. ESM initializes it once, before any
-// custom events, regardless of Astro's script ordering.
-if (
-  import.meta.env.PROD &&
-  typeof window !== 'undefined' &&
-  location.origin === 'https://nanostores.net'
-) {
+// `import.meta.env.DEV` is set by `astro dev` and inlined into the bundle at
+// build time, so the Docker image needs no environment variables. Only the
+// production build on nanostores.net sends events: preview builds and other
+// hosts get a no-op, dev logs to the console.
+function pickAdapter(): Adapter {
+  if (import.meta.env.DEV) return consoleAdapter
+  if (
+    typeof window === 'undefined' ||
+    location.origin !== 'https://nanostores.net'
+  ) {
+    return noopAdapter
+  }
   init({
     domain: 'nanostores.net',
     endpoint: '/api/event',
@@ -70,8 +74,12 @@ if (
     formSubmissions: false,
     customProperties: (event) => (event === 'pageview' ? pageProps() : {}),
   })
-  adapter = plausibleAdapter
+  return plausibleAdapter
 }
+
+// Every browser entry imports this module. ESM initializes it once, before any
+// custom events, regardless of Astro's script ordering.
+let adapter = pickAdapter()
 export function setAdapter(next: Adapter) {
   adapter = next
 }
