@@ -31,9 +31,11 @@ const activeSection = navigationSection(path)
   class SiteSidebar extends HTMLElement {
     stopTracking?: () => void
     connectedCallback() {
-      const storageKey = 'nanostores-sidebar-groups'
       const groups = Array.from(
         this.querySelectorAll<HTMLDetailsElement>('details[data-nav-group]'),
+      )
+      const rootGroups = groups.filter(
+        (group) => !group.parentElement?.closest('details'),
       )
       const links = Array.from(this.querySelectorAll<HTMLAnchorElement>('a'))
       const pane = this.closest<HTMLElement>('[data-sidebar-pane]')
@@ -44,18 +46,6 @@ const activeSection = navigationSection(path)
           group = group.parentElement?.closest('details') ?? null
         )
           group.open = true
-      }
-      // Stable group IDs keep manual choices across pages with the same tree.
-      try {
-        const state: Record<string, boolean> = JSON.parse(
-          sessionStorage.getItem(storageKey) || '{}',
-        )
-        for (const group of groups) {
-          const open = state[group.dataset.navGroup!]
-          if (typeof open === 'boolean') group.open = open
-        }
-      } catch {
-        /* Navigation remains usable when storage is unavailable. */
       }
       const currentPage = links.find(
         (link) => link.getAttribute('aria-current') === 'page',
@@ -70,22 +60,14 @@ const activeSection = navigationSection(path)
       })
       const current = fragmentLink ?? currentPage
       if (current) openBranch(current)
-      const save = () => {
-        try {
-          sessionStorage.setItem(
-            storageKey,
-            JSON.stringify(
-              Object.fromEntries(
-                groups.map((group) => [group.dataset.navGroup!, group.open]),
-              ),
-            ),
-          )
-        } catch {
-          /* Storage is a progressive enhancement. */
-        }
+      // Opening a root section closes the others; nested groups stay independent.
+      for (const group of rootGroups) {
+        group.addEventListener('toggle', () => {
+          if (!group.open) return
+          for (const other of rootGroups)
+            if (other !== group) other.open = false
+        })
       }
-      this.addEventListener('toggle', save, true)
-      save()
       let readingLink: HTMLAnchorElement | undefined
       const reveal = () => {
         if (
@@ -114,7 +96,6 @@ const activeSection = navigationSection(path)
       this.addEventListener('click', (event) => {
         const link = (event.target as Element).closest('a')
         if (!link) return
-        save()
         const url = new URL(link.href)
         if (url.pathname !== location.pathname || !url.hash || !pane) return
         if (pane.matches(':popover-open')) pane.hidePopover()
