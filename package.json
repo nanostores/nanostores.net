@@ -20,7 +20,6 @@
     "format:check": "oxfmt --check",
     "preview": "node --import ./scripts/windows-sandbox.mjs ./node_modules/astro/bin/astro.mjs preview",
     "fetch:upstream": "node scripts/fetch-upstream.mjs",
-    "sync:readme": "node scripts/sync-readme.mjs",
     "sync:downloads": "node scripts/sync-downloads.mjs",
     "make:icons": "node scripts/make-icons.mjs",
     "astro": "node --import ./scripts/windows-sandbox.mjs ./node_modules/astro/bin/astro.mjs"

@@ -20,7 +20,7 @@ Open forwarded port 4321 in your browser. The server runs in the terminal and sh
 - `src/components/` and `src/styles/` — UI and styles.
 - `src/snippets/` — displayed code examples.
 
-Documentation imports versioned Nano Stores and plugin READMEs from `src/vendor/`. API documentation is generated from Nano Stores types; do not edit `src/content/docs/docs/api/` or `dist/`.
+Documentation and the API reference are built from the latest commits of the repositories in `src/config/upstream.json`; the build only reads their files. Run `pnpm run fetch:upstream --refresh` to get new commits, or replace `.upstream/<id>` with a symlink to your checkout. Do not edit `src/content/docs/docs/api/` or `dist/`.
 
 ## Checks
 
