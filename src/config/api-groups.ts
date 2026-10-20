@@ -15,7 +15,7 @@ export const apiGroups: ApiGroup[] = [
   },
   {
     label: 'Map helpers',
-    names: ['listenKeys', 'subscribeKeys', 'setPath', 'getPath', 'setByKey'],
+    names: ['listenKeys', 'subscribeKeys'],
   },
   {
     label: 'Tasks & testing',
@@ -67,6 +67,6 @@ export const apiGroups: ApiGroup[] = [
   },
   {
     label: 'Deprecated',
-    names: ['deepMap', 'getKey'],
+    names: ['deepMap', 'getKey', 'setPath', 'getPath', 'setByKey'],
   },
 ]
