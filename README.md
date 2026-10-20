@@ -25,11 +25,10 @@ Documentation imports versioned Nano Stores and plugin READMEs from `src/vendor/
 ## Checks
 
 ```sh
-pnpm run format:check
-pnpm run check
+pnpm test
 ```
 
-`check` builds the site and validates pages, documentation exports, internal links and API anchors.
+`test` runs formatting, unit and snippet tests, type checks and the production build with checks of pages, documentation exports, internal links and API anchors in parallel. CI runs the same command.
 
 See [QA](docs/qa.md) for manual checks and additional commands, and [AGENTS.md](AGENTS.md) for contribution rules.
 

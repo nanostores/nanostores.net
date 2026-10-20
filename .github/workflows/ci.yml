@@ -18,12 +18,8 @@ jobs:
           runtime: node@26
           cache: true
           require-lockfile: true
-      - name: Check formatting
-        run: pnpm run format:check
-      - name: Build and check content, navigation and API
-        run: pnpm run check
-      - name: Check size
-        run: pnpm run check:size
+      - name: Run tests, type checks, formatting, build and size checks
+        run: pnpm test
       - name: Pack build artifacts
         run: tar -cf dist.tar dist
       - name: Upload build artifacts

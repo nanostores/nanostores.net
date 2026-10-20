@@ -1,43 +1,39 @@
 # QA
 
-Mandatory automation builds the site and checks required output files, navigation links, HTML anchors and unique API IDs. Unit tests, types and executable examples are checked on demand. Visible code fragments, documentation export contents, browser layout, images, focus, native popovers, search and theme behavior are checked manually. Use the sections relevant to the change; run the full browser checklist before publishing a redesign.
+Mandatory automation (`pnpm test`, also run by CI) checks formatting, unit tests, Astro diagnostics and executable examples, builds the site and checks required output files, navigation links, HTML anchors and unique API IDs. Visible code fragments, documentation export contents, browser layout, images, focus, native popovers, search and theme behavior are checked manually. Use the sections relevant to the change; run the full browser checklist before publishing a redesign.
 
 ## Check according to the change
 
-| Change                                        | Required review beyond CI                                                                                                   |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Copy or situation metadata                    | Read the changed production page; check labels, claims and code-preview terms                                               |
-| TypeScript, Astro components or configuration | Run `pnpm run check:types`; check affected pages or interactions                                                            |
-| Displayed code example                        | Run `pnpm run check:snippets` and `pnpm run test:snippets`; verify the changed example's promised behavior and visible code |
-| Dependencies                                  | Run `pnpm run test`, types and snippet checks; review generated docs, API, search and affected browser interactions         |
-| Navigation or browser scripts                 | Check affected menus, popovers, Escape, focus, clipboard or demos                                                           |
-| Styles, images or fonts                       | Check affected pages on phone and desktop, both themes and keyboard navigation                                              |
-| README/API generation or docs navigation      | Run `pnpm run test`; inspect affected generated pages and exports; check production search and API anchors                  |
-| Publishing                                    | Check search, canonical URLs, sitemap and indexing settings; measure performance after significant asset or layout changes  |
+| Change                                        | Required review beyond CI                                                                                                  |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Copy or situation metadata                    | Read the changed production page; check labels, claims and code-preview terms                                              |
+| TypeScript, Astro components or configuration | Check affected pages or interactions                                                                                       |
+| Displayed code example                        | Verify the changed example's promised behavior and visible code                                                            |
+| Dependencies                                  | Review generated docs, API, search and affected browser interactions                                                       |
+| Navigation or browser scripts                 | Check affected menus, popovers, Escape, focus, clipboard or demos                                                          |
+| Styles, images or fonts                       | Check affected pages on phone and desktop, both themes and keyboard navigation                                             |
+| README/API generation or docs navigation      | Inspect affected generated pages and exports; check production search and API anchors                                      |
+| Publishing                                    | Check search, canonical URLs, sitemap and indexing settings; measure performance after significant asset or layout changes |
 
 No general asset crawler, screenshot suite, coverage target or load tests are required. The build validates content schemas, referenced collection entries, vendored README versions and their local images. Avoid duplicating those checks in unit tests. Review accent-color use and Starlight CSS boundaries manually when styles or Starlight change.
 
 ## Automated checks
 
 ```sh
-pnpm run format:check
-pnpm run check
+pnpm test
 ```
 
-`check` creates a fresh `dist/` and runs `scripts/check-build.mjs` with Node. It requires nonempty home, docs, Getting started and API pages, plus all three `llms` exports. It checks navigation links (root-relative, relative and same-origin absolute URLs), same-page and cross-page HTML anchors, unique API IDs and local links in the exports, including Markdown reference links. External URLs are not fetched. Bare fragments inside combined exports have no source-page context and are reviewed with the affected documentation. HTML is parsed with `parse5`; no browser, DOM environment or test runner is launched. `test:build` is a compatibility alias for `check`.
+`test` runs every `test:*` script in parallel and fails if any of them fails:
 
-## Unit tests, types and examples on demand
+- `test:format` checks formatting with `oxfmt`.
+- `test:unit` runs Vitest tests for documentation transforms, code-region extraction and the link checker. API helper tests use controlled examples; the build checks completeness against the installed package. For an extraction change, a targeted run is `pnpm run test:unit -- src/lib/snippet-regions.test.ts`.
+- `test:snippets` executes the existing behavior tests, including the store test displayed on `/why/`. To narrow them, pass a test path, such as `pnpm run test:snippets -- src/snippets/why/user.test.ts`.
+- `test:snippet-types` (`check:snippets`) checks executable TS, TSX and Vue examples; Svelte, text-only examples and code fences in Markdown are reviewed manually.
+- `test:astro` runs Astro diagnostics (`check:types`), then `check`, then `check:size` on the built `dist/`. Diagnostics and the build run one after another because both regenerate the API reference.
 
-```sh
-pnpm run test
-pnpm run check:types
-pnpm run check:snippets
-pnpm run test:snippets
-```
+`check` creates a fresh `dist/` and runs `scripts/check-build.mjs` with Node. It requires nonempty home, docs, Getting started and API pages, plus all three `llms` exports. It checks navigation links (root-relative, relative and same-origin absolute URLs), same-page and cross-page HTML anchors, unique API IDs and local links in the exports, including Markdown reference links. External URLs are not fetched. Bare fragments inside combined exports have no source-page context and are reviewed with the affected documentation. HTML is parsed with `parse5`; no browser, DOM environment or test runner is launched.
 
-`test` runs the existing Vitest tests for documentation transforms, code-region extraction and the link checker. Run them when changing those helpers or their dependencies. For an extraction change, a targeted run is `pnpm run test -- src/lib/snippet-regions.test.ts`. These tests are outside mandatory CI. API helper tests use controlled examples; the build checks completeness against the installed package.
-
-`check:types` runs Astro diagnostics. `check:snippets` checks executable TS, TSX and Vue examples; Svelte and text-only examples are reviewed manually. `test:snippets` executes the existing behavior tests, including the store test displayed on `/why/`. To narrow the behavior checks, pass a test path, such as `pnpm run test:snippets -- src/snippets/why/user.test.ts`. Snippet checks also apply when dependencies change without edits to the example files. Code fences in Markdown are reviewed manually.
+## Text-only examples
 
 The React rendering test on `/why/` is a text-only source at `src/snippets/why/before.test.tsx.txt`. It keeps TSX highlighting and the `Header.test.tsx` caption, but is neither compiled nor executed in this repository. When changing it or updating React, review the code and its visible output. If the behavior needs rechecking, copy it into a separate React/Vitest project with Testing Library, a DOM test environment and the component from `src/snippets/logic-outside-hooks/before.tsx`; confirm that the mocked user makes the rendered header show `Admin`. Renderer dependencies belong to that temporary check, not the site.
 
