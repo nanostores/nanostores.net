@@ -24,6 +24,32 @@ import { readLlmsGuidance } from './src/lib/llms-guidance.mjs'
 
 const siteUrl = 'https://nanostores.net/'
 
+/**
+ * @param {string | Buffer} source
+ * @returns {`sha256-${string}`}
+ */
+const sha256 = (source) =>
+  `sha256-${createHash('sha256').update(source).digest('base64')}`
+
+// Astro does not hash is:inline scripts, so the theme script is hashed here
+// from the same file it is rendered from.
+const themeHash = sha256(
+  readFileSync(new URL('./src/components/layout/theme.js', import.meta.url)),
+)
+
+// Starlight inlines this script, which restores synced tabs without a flash,
+// and Astro does not hash it. The body is rendered exactly as written.
+const tabsSource = readFileSync(
+  new URL(
+    './node_modules/@astrojs/starlight/dist/user-components/Tabs.astro',
+    import.meta.url,
+  ),
+  'utf8',
+)
+const tabsScript = tabsSource.match(/<script is:inline>(.*?)<\/script>/s)?.[1]
+if (!tabsScript) throw new Error('Starlight Tabs restore script not found')
+const tabsHash = sha256(tabsScript)
+
 const unusedPagefindFiles = [
   'pagefind-component-ui.css',
   'pagefind-component-ui.js',
@@ -54,8 +80,36 @@ const apiLayoutCacheKey = createHash('sha256')
 // https://astro.build/config
 export default defineConfig({
   site: siteUrl,
+  // Astro hashes inline styles of its own pages, but not those of Starlight
+  // components rendered inside Markdown, so every style stays in a file.
+  build: { inlineStylesheets: 'never' },
   // Keep the native Markdown parser beside its platform binding under pnpm.
   vite: { ssr: { external: ['satteri'] } },
+  // Blocks scripts injected through imported README Markdown. Astro hashes its
+  // own inline scripts and styles. Expressive Code writes inline style
+  // attributes, which only 'unsafe-inline' can allow.
+  security: {
+    csp: {
+      scriptDirective: {
+        resources: ["'self'", "'wasm-unsafe-eval'"],
+        hashes: [themeHash, tabsHash],
+      },
+      styleDirective: {
+        resources: [
+          "'self'",
+          'https://fonts.googleapis.com',
+          { resource: "'unsafe-inline'", kind: 'attribute' },
+        ],
+      },
+      directives: [
+        "default-src 'self'",
+        "img-src 'self' data: https:",
+        "font-src 'self' https://fonts.gstatic.com",
+        "connect-src 'self'",
+        "worker-src 'self'",
+      ],
+    },
+  },
   markdown: {
     processor: unified({
       remarkPlugins: [
