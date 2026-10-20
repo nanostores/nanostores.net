@@ -16,6 +16,8 @@ Run `pnpm test` before finishing a change; CI runs the same command. It runs eve
 
 The React rendering test shown on `/why/` is a text-only `*.tsx.txt` example. Review it manually following [QA](docs/qa.md); snippet type and behavior checks cover executable examples.
 
+Content-Security-Policy: Astro hashes its own inline scripts and styles into each page's meta tag (`security.csp` in `astro.config.mjs`), and nginx sends the header rules that cannot live in a meta tag. A new `is:inline` script is not hashed by Astro: add its hash to the config from the same source file, as for `ThemeProvider.astro`. `check` fails for an inline script or style missing from its page's policy. The policy applies only to the built site, not to `dev`.
+
 ## Content
 
 - Keep site copy short. A page shows only what the reader needs to recognize their situation and decide.
