@@ -24,6 +24,9 @@ jobs:
           require-lockfile: true
       - name: Build site
         run: pnpm run build
+        env:
+          # Same upstream commits as production during a rollback
+          UPSTREAM_PINS: ${{ vars.UPSTREAM_PINS }}
       - name: Build Docker image
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
