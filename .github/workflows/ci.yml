@@ -1,17 +1,33 @@
 name: CI
+# Docs come from the latest commits of the upstream repositories, see
+# docs/deploy.md. Upstream CI sends workflow_dispatch without inputs after a
+# push; the daily schedule picks up a lost signal.
 on:
   pull_request:
   push:
     branches: [main]
-permissions:
-  contents: read
+  workflow_dispatch:
+  schedule:
+    - cron: '23 4 * * *'
+permissions: {}
+# Builds of main wait in one queue: one runs, the newest signal waits and
+# replaces older waiting ones. It fetches upstream when it starts, so the
+# collapsed signals lose nothing.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.ref || 'deploy' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   site:
     name: Build and check site
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
     steps:
       - name: Checkout the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Install Node.js, pnpm and dependencies
         uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
@@ -20,6 +36,17 @@ jobs:
           require-lockfile: true
       - name: Run tests, type checks, formatting, build and size checks
         run: pnpm test
+        env:
+          # Repository variable for a rollback without commits, see docs/deploy.md
+          UPSTREAM_PINS: ${{ vars.UPSTREAM_PINS }}
+      - name: Summarize upstream commits
+        run: |
+          {
+            echo '| Repository | Commit |'
+            echo '| --- | --- |'
+            jq -r 'to_entries[] | "| \(.value.repo) | \(.value.sha)\(if .value.pinned then " (pinned)" else "" end) |"' \
+              .upstream/revisions.json
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Pack build artifacts
         run: tar -cf dist.tar dist
       - name: Upload build artifacts
@@ -33,10 +60,15 @@ jobs:
   image:
     name: Build and check image
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: site
+    permissions:
+      contents: read
     steps:
       - name: Checkout the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Download build artifacts
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -56,7 +88,7 @@ jobs:
           curl --fail --silent --show-error --retry 10 --retry-delay 1 \
             --retry-connrefused --retry-all-errors http://127.0.0.1:8000/ > /dev/null
           docker exec nanostores-site /bin/httpcheck http://localhost:8000/
-          for path in /docs/ /docs/getting-started/ /docs/api/ /llms.txt /llms-full.txt /llms-small.txt /icon.svg /manifest.webmanifest; do
+          for path in /docs/ /docs/getting-started/ /docs/api/ /llms.txt /llms-full.txt /llms-small.txt /icon.svg /manifest.webmanifest /upstream.json; do
             curl --fail --silent --show-error "http://127.0.0.1:8000$path" > /dev/null
           done
           asset=$(find dist/_astro -type f -name '*.css' -print -quit)
@@ -67,10 +99,10 @@ jobs:
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8000/missing-page)" = 404
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8000/api/event)" = 405
       - name: Pack Docker image
-        if: github.event_name == 'push' && github.repository == 'nanostores/nanostores.net'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'nanostores/nanostores.net'
         run: docker save -o image.tar nanostores-site:ci
       - name: Upload Docker image
-        if: github.event_name == 'push' && github.repository == 'nanostores/nanostores.net'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'nanostores/nanostores.net'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: image
@@ -81,8 +113,12 @@ jobs:
   publish:
     name: Publish image
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: image
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'nanostores/nanostores.net'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'nanostores/nanostores.net'
+    # Deployment secrets and OIDC belong to main only: the environment allows
+    # no other branch, whatever ref a dispatch names.
+    environment: production
     permissions:
       contents: read
       id-token: write
