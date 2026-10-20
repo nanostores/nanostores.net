@@ -89,11 +89,6 @@
       ],
       "brotli": false,
       "limit": "181 kB"
-    },
-    {
-      "name": "All files",
-      "path": "dist/**/*",
-      "limit": "1.87 MB"
     }
   ],
   "engines": {
