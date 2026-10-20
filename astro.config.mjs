@@ -4,6 +4,7 @@ import { unified } from '@astrojs/markdown-remark'
 import sitemap from '@astrojs/sitemap'
 import starlight from '@astrojs/starlight'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { rm } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -22,6 +23,16 @@ import {
 import { readLlmsGuidance } from './src/lib/llms-guidance.mjs'
 
 const siteUrl = 'https://nanostores.net/'
+
+const unusedPagefindFiles = [
+  'pagefind-component-ui.css',
+  'pagefind-component-ui.js',
+  'pagefind-highlight.js',
+  'pagefind-modular-ui.css',
+  'pagefind-modular-ui.js',
+  'pagefind-ui.css',
+  'pagefind-ui.js',
+]
 
 const apiEntry = './node_modules/nanostores/index.d.ts'
 const apiExports = readApiExports(apiEntry)
@@ -203,5 +214,22 @@ export default defineConfig({
         }),
       ],
     }),
+    {
+      // Starlight runs Pagefind in its astro:build:done hook, and Pagefind
+      // always writes every prebuilt search UI. The site loads only
+      // pagefind.js and its worker; its UI comes from @pagefind/default-ui
+      // in src/components/layout/SiteSearch.astro. Pagefind has no option
+      // to skip the UI files: https://github.com/Pagefind/pagefind/issues/1183
+      name: 'remove-unused-pagefind-ui',
+      hooks: {
+        'astro:build:done': async ({ dir }) => {
+          await Promise.all(
+            unusedPagefindFiles.map((file) =>
+              rm(new URL(`pagefind/${file}`, dir), { force: true }),
+            ),
+          )
+        },
+      },
+    },
   ],
 })
