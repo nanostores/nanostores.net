@@ -1,13 +1,7 @@
-<script is:inline>
-  // Shared with Starlight's public ThemeProvider override; runs before first
-  // paint. The site has no theme picker: it always follows the system.
-  ;(() => {
-    const media = matchMedia('(prefers-color-scheme: dark)')
-    const apply = () => {
-      document.documentElement.dataset.theme = media.matches ? 'dark' : 'light'
-    }
-    window.StarlightThemeProvider = { updatePickers() {} }
-    apply()
-    media.addEventListener('change', apply)
-  })()
-</script>
+---
+// Inline so it runs before first paint; astro.config.mjs hashes the same file
+// for the Content-Security-Policy.
+import theme from './theme.js?raw'
+---
+
+<script is:inline set:html={theme} />
