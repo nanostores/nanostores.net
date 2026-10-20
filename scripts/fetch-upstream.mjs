@@ -10,16 +10,20 @@
 // used as it is.
 import { execFileSync } from 'node:child_process'
 import {
+  copyFileSync,
   existsSync,
   lstatSync,
   mkdirSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
 import { readFile } from 'node:fs/promises'
+import { relativeImagePaths } from '../src/lib/plugin-images.mjs'
 import { parsePins, parseUpstream } from '../src/lib/upstream.mjs'
 
 const root = new URL('../.upstream/', import.meta.url)
+const images = new URL('../public/vendor/upstream/', import.meta.url)
 const refresh = process.argv.includes('--refresh')
 const upstream = parseUpstream(
   JSON.parse(
@@ -76,3 +80,21 @@ writeFileSync(
   new URL('revisions.json', root),
   `${JSON.stringify(revisions, null, 2)}\n`,
 )
+
+// Relative images of the READMEs are served from public/vendor/upstream/<id>/.
+// A missing image is reported by the build, which knows the page it is on.
+rmSync(images, { recursive: true, force: true })
+for (const { id } of upstream) {
+  const dir = new URL(`${id}/`, root)
+  const readme = readFileSync(new URL('README.md', dir), 'utf8')
+  for (const image of relativeImagePaths(readme)) {
+    if (image.split('/').includes('..')) {
+      throw new Error(`${id} README has an image outside the repo: ${image}`)
+    }
+    const from = new URL(image, dir)
+    if (!existsSync(from) || !lstatSync(from).isFile()) continue
+    const to = new URL(`${id}/${image}`, images)
+    mkdirSync(new URL('.', to), { recursive: true })
+    copyFileSync(from, to)
+  }
+}

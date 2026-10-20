@@ -32,3 +32,4 @@ visual-qa/
 
 # upstream repositories, see scripts/fetch-upstream.mjs
 .upstream/
+public/vendor/upstream/
