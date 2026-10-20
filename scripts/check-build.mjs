@@ -50,6 +50,14 @@ try {
       if (problem) errors.push(`${file} → ${href} (${problem})`)
     }
   }
+  // Inline code runs only when the page's policy lists its hash.
+  for (const [file, page] of pages) {
+    if (!page.csp) errors.push(`${file}: missing Content-Security-Policy meta`)
+    else
+      for (const { tag, hash } of page.inline)
+        if (!page.csp.includes(`'${hash}'`))
+          errors.push(`${file}: inline <${tag}> not allowed by CSP (${hash})`)
+  }
   const ids = pages.get('docs/api/index.html').ids
   const seen = new Set()
   for (const id of ids) {
@@ -66,7 +74,7 @@ try {
   }
   if (errors.length) throw new Error(errors.join('\n'))
   console.info(
-    `Build checks passed: ${pages.size} HTML pages, required outputs, navigation links, API IDs and ${exports.length} documentation exports.`,
+    `Build checks passed: ${pages.size} HTML pages, required outputs, navigation links, inline CSP hashes, API IDs and ${exports.length} documentation exports.`,
   )
 } catch (error) {
   console.error(`Build checks failed:\n${error.message}`)

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { parse } from 'parse5'
 import { fromMarkdown } from 'mdast-util-from-markdown'
 
@@ -10,6 +11,10 @@ export function readPage(html) {
   /** @type {string[]} */
   const ids = []
   const anchors = new Set()
+  /** @type {string | undefined} */
+  let csp
+  /** @type {{ tag: string, hash: string }[]} */
+  const inline = []
   /** @param {import('parse5').DefaultTreeAdapterMap['node']} node */
   function walk(node) {
     if ('tagName' in node) {
@@ -25,12 +30,27 @@ export function readPage(html) {
         links.push(attrs.href)
       if (node.tagName === 'link' && attrs.rel === 'canonical' && !canonical)
         canonical = attrs.href
+      if (
+        node.tagName === 'meta' &&
+        attrs['http-equiv']?.toLowerCase() === 'content-security-policy'
+      )
+        csp = attrs.content
+      if (
+        (node.tagName === 'script' && !('src' in attrs)) ||
+        node.tagName === 'style'
+      ) {
+        const body = node.childNodes
+          .map((child) => ('value' in child ? child.value : ''))
+          .join('')
+        const hash = createHash('sha256').update(body).digest('base64')
+        inline.push({ tag: node.tagName, hash: `sha256-${hash}` })
+      }
     }
     if ('childNodes' in node) for (const child of node.childNodes) walk(child)
   }
   // A tree parser reads markup without browser APIs or script execution.
   walk(parse(html))
-  return { canonical, links, ids, anchors }
+  return { canonical, links, ids, anchors, csp, inline }
 }
 
 /** @param {string} markdown */
