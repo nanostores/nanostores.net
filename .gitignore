@@ -29,3 +29,6 @@ visual-qa/
 
 # Local Netlify folder
 .netlify
+
+# upstream repositories, see scripts/fetch-upstream.mjs
+.upstream/
