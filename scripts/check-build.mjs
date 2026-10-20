@@ -6,6 +6,7 @@ import {
   markdownLinks,
   readPage,
 } from './build-links.mjs'
+import upstreamConfig from '../src/config/upstream.json' with { type: 'json' }
 
 const root = process.argv[2] ?? 'dist'
 const requiredPages = [
@@ -13,6 +14,7 @@ const requiredPages = [
   'docs/index.html',
   'docs/getting-started/index.html',
   'docs/api/index.html',
+  'upstream.json',
 ]
 const exports = ['llms.txt', 'llms-full.txt', 'llms-small.txt']
 
@@ -69,6 +71,15 @@ try {
       if (!cspAllows(page.csp, directive, url, site))
         errors.push(`${file}: ${url} not allowed by CSP ${directive}`)
   }
+  // Every upstream repository is listed with the commit it was built from.
+  const { upstream } = JSON.parse(readFileSync(join(root, 'upstream.json')))
+  for (const { id, repo } of upstreamConfig) {
+    const revision = upstream?.[id]
+    if (revision?.repo !== repo) errors.push(`upstream.json: no ${repo}`)
+    else if (!revision.local && !/^[0-9a-f]{40}$/.test(revision.sha ?? '')) {
+      errors.push(`upstream.json: ${id} has no commit`)
+    }
+  }
   const ids = pages.get('docs/api/index.html').ids
   const seen = new Set()
   for (const id of ids) {
@@ -85,7 +96,7 @@ try {
   }
   if (errors.length) throw new Error(errors.join('\n'))
   console.info(
-    `Build checks passed: ${pages.size} HTML pages, required outputs, navigation links, CSP for inline code and external resources, API IDs and ${exports.length} documentation exports.`,
+    `Build checks passed: ${pages.size} HTML pages, required outputs, navigation links, CSP for inline code and external resources, upstream commits, API IDs and ${exports.length} documentation exports.`,
   )
 } catch (error) {
   console.error(`Build checks failed:\n${error.message}`)
