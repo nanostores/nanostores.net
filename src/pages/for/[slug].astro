@@ -97,20 +97,14 @@ const number = chapterNumber(situation.id)
           role="status"
           aria-live="polite"
         ></span>
-        <a href="/docs/getting-started/" data-track="deep_cta_click">
-          Getting started →
-        </a>
+        <a href="/docs/getting-started/">Getting started →</a>
       </div>
       <p class="next">
         {next.map((item) => (
-          <a href={`/for/${item.id}/`} data-track="deep_cta_click">
-            {item.data.toc} →
-          </a>
+          <a href={`/for/${item.id}/`}>{item.data.toc} →</a>
         ))}
         {plugins.map((plugin) => (
-          <a href={plugin.data.docs} data-track="deep_cta_click">
-            {plugin.data.name} ↗
-          </a>
+          <a href={plugin.data.docs}>{plugin.data.name} ↗</a>
         ))}
       </p>
     </div>
@@ -120,14 +114,6 @@ const number = chapterNumber(situation.id)
     import { $copied, copiedInstall } from '../../state/site'
     const id =
       document.querySelector<HTMLElement>('[data-deep-id]')?.dataset.deepId
-    const referrer = document.referrer ? new URL(document.referrer) : null
-    const from =
-      referrer?.origin !== location.origin
-        ? 'external'
-        : referrer.pathname === '/'
-          ? 'home'
-          : 'internal'
-    track('deep_view', { situationId: id, from })
     $copied.subscribe((copied) => {
       const status = document.querySelector('[data-copy-status]')
       if (status) status.textContent = copied ? 'Copied!' : ''
@@ -143,13 +129,6 @@ const number = chapterNumber(situation.id)
           /* Clipboard may be unavailable outside a secure context. */
         }
       })
-    document
-      .querySelectorAll<HTMLAnchorElement>('[data-track="deep_cta_click"]')
-      .forEach((link) =>
-        link.addEventListener('click', () =>
-          track('deep_cta_click', { situationId: id, from, target: link.href }),
-        ),
-      )
   </script>
 </BaseLayout>
 <style>

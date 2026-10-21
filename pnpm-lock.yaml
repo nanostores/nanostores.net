@@ -169,6 +169,9 @@ importers:
       '@astrojs/starlight':
         specifier: ^0.42.6
         version: 0.42.6(@astrojs/markdown-remark@7.3.2)(astro@7.3.8(@astrojs/markdown-remark@7.3.2)(@types/node@24.19.2)(yaml@2.9.1))(typescript@6.0.3)
+      '@plausible-analytics/tracker':
+        specifier: 0.4.6
+        version: 0.4.6
       astro:
         specifier: ^7.3.8
         version: 7.3.8(@astrojs/markdown-remark@7.3.2)(@types/node@24.19.2)(yaml@2.9.1)
@@ -1006,6 +1009,9 @@ packages:
     resolution: {integrity: sha512-Fa2Iyw7kaDRzGMfNYNUXNW2zbL5FQVDgSOcbDHdzBrDEdpqOqg8TcZ68F22ol6NJ9IGzvUdmeyZypLW5dyhqsg==}
     cpu: [x64]
     os: [win32]
+
+  '@plausible-analytics/tracker@0.4.6':
+    resolution: {integrity: sha512-nbu6xGgSP6jeYuoVklZBzucUnIpo75tVu3Kr+R0EDycVKaMC/jF5Q/YCaM/8gR4fPZ1IDcXt6FdBJFZ1uZwEPA==}
 
   '@rolldown/binding-android-arm-eabi@1.2.13':
     resolution: {integrity: sha512-Vu/NICrgdRvUOeaJZIyB2FP63s6fO/4ud5l8dXmxDx9yDyn+mN0y+gsvsVviSli+T361Aqo0h46EuMoobrwawA==}
@@ -3678,6 +3684,8 @@ snapshots:
 
   '@pagefind/windows-x64@1.5.2':
     optional: true
+
+  '@plausible-analytics/tracker@0.4.6': {}
 
   '@rolldown/binding-android-arm-eabi@1.2.13':
     optional: true

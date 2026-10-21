@@ -1,6 +1,5 @@
 import { atom, map, onMount } from 'nanostores'
 
-export const $activeSection = atom<string | null>(null)
 export const $period = atom<'monthly' | 'yearly'>('monthly')
 export const $copied = atom(false)
 // Which sections show their folded code, by situation id.

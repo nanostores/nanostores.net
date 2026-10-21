@@ -4,6 +4,7 @@ import instrument from '@fontsource-variable/instrument-sans/files/instrument-sa
 import ThemeProvider from '../components/layout/ThemeProvider.astro'
 import SiteHeader from '../components/layout/SiteHeader.astro'
 import SiteFooter from '../components/layout/SiteFooter.astro'
+import Analytics from '../components/layout/Analytics.astro'
 interface Props {
   title: string
   description: string
@@ -52,5 +53,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
       <slot />
     </main>
     <SiteFooter />
+    <Analytics />
   </body>
 </html>

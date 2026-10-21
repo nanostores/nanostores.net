@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.6",
+    "@plausible-analytics/tracker": "0.4.6",
     "astro": "^7.3.8",
     "nanostores": "^1.5.5"
   },
@@ -81,7 +82,7 @@
         "!dist/_astro/ui-core.*.js"
       ],
       "brotli": false,
-      "limit": "14 kB"
+      "limit": "20 kB"
     },
     {
       "name": "Search JS",
