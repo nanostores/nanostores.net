@@ -97,14 +97,12 @@ export default defineConfig({
       styleDirective: {
         resources: [
           "'self'",
-          'https://fonts.googleapis.com',
           { resource: "'unsafe-inline'", kind: 'attribute' },
         ],
       },
       directives: [
         "default-src 'self'",
         "img-src 'self' data: https:",
-        "font-src 'self' https://fonts.gstatic.com",
         "connect-src 'self'",
         "worker-src 'self'",
       ],
