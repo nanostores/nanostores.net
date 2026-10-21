@@ -1,6 +1,11 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { linkProblem, markdownLinks, readPage } from './build-links.mjs'
+import {
+  cspAllows,
+  linkProblem,
+  markdownLinks,
+  readPage,
+} from './build-links.mjs'
 
 const root = process.argv[2] ?? 'dist'
 const requiredPages = [
@@ -50,13 +55,19 @@ try {
       if (problem) errors.push(`${file} → ${href} (${problem})`)
     }
   }
-  // Inline code runs only when the page's policy lists its hash.
+  // Inline code runs only when the page's policy lists its hash, and a
+  // resource from another host loads only when its directive names that host.
   for (const [file, page] of pages) {
-    if (!page.csp) errors.push(`${file}: missing Content-Security-Policy meta`)
-    else
-      for (const { tag, hash } of page.inline)
-        if (!page.csp.includes(`'${hash}'`))
-          errors.push(`${file}: inline <${tag}> not allowed by CSP (${hash})`)
+    if (!page.csp) {
+      errors.push(`${file}: missing Content-Security-Policy meta`)
+      continue
+    }
+    for (const { tag, hash } of page.inline)
+      if (!page.csp.includes(`'${hash}'`))
+        errors.push(`${file}: inline <${tag}> not allowed by CSP (${hash})`)
+    for (const { directive, url } of page.resources)
+      if (!cspAllows(page.csp, directive, url, site))
+        errors.push(`${file}: ${url} not allowed by CSP ${directive}`)
   }
   const ids = pages.get('docs/api/index.html').ids
   const seen = new Set()
@@ -74,7 +85,7 @@ try {
   }
   if (errors.length) throw new Error(errors.join('\n'))
   console.info(
-    `Build checks passed: ${pages.size} HTML pages, required outputs, navigation links, inline CSP hashes, API IDs and ${exports.length} documentation exports.`,
+    `Build checks passed: ${pages.size} HTML pages, required outputs, navigation links, CSP for inline code and external resources, API IDs and ${exports.length} documentation exports.`,
   )
 } catch (error) {
   console.error(`Build checks failed:\n${error.message}`)

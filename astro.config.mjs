@@ -102,7 +102,7 @@ export default defineConfig({
       },
       directives: [
         "default-src 'self'",
-        "img-src 'self' data: https:",
+        "img-src 'self' data: https://cdn.evilmartians.com",
         "connect-src 'self'",
         "worker-src 'self'",
       ],

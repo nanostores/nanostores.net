@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest'
 import {
+  cspAllows,
   linkProblem,
   markdownLinks,
   readPage,
@@ -105,4 +106,31 @@ test('reads documentation links including references and ignores code examples',
       ].join('\n'),
     ),
   ).toEqual(['/docs/api/#atom', '/docs/getting-started/', '/docs/'])
+})
+
+test('checks external resources against the page policy', () => {
+  const page = readPage(`
+    <img src="/logo.svg" srcset="https://cdn.example.test/a.png 2x">
+    <script src="https://evil.example/x.js"></script>
+    <link rel="stylesheet" href="/style.css">`)
+  expect(page.resources).toEqual([
+    { directive: 'img-src', url: '/logo.svg' },
+    { directive: 'img-src', url: 'https://cdn.example.test/a.png' },
+    { directive: 'script-src', url: 'https://evil.example/x.js' },
+    { directive: 'style-src', url: '/style.css' },
+  ])
+  const csp =
+    "default-src 'self'; img-src 'self' data: https://cdn.example.test"
+  expect(cspAllows(csp, 'img-src', '/logo.svg', site)).toBe(true)
+  expect(cspAllows(csp, 'img-src', 'data:image/png;base64,AA', site)).toBe(true)
+  expect(
+    cspAllows(csp, 'img-src', 'https://cdn.example.test/a.png', site),
+  ).toBe(true)
+  expect(cspAllows(csp, 'img-src', 'https://tracker.test/p.gif', site)).toBe(
+    false,
+  )
+  expect(cspAllows(csp, 'script-src', 'https://evil.example/x.js', site)).toBe(
+    false,
+  )
+  expect(cspAllows(csp, 'style-src', '/style.css', site)).toBe(true)
 })
