@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { parse } from 'parse5'
 import { fromMarkdown } from 'mdast-util-from-markdown'
 
@@ -10,6 +11,12 @@ export function readPage(html) {
   /** @type {string[]} */
   const ids = []
   const anchors = new Set()
+  /** @type {string | undefined} */
+  let csp
+  /** @type {{ tag: string, hash: string }[]} */
+  const inline = []
+  /** @type {{ directive: 'script-src' | 'style-src' | 'img-src' | 'frame-src', url: string }[]} */
+  const resources = []
   /** @param {import('parse5').DefaultTreeAdapterMap['node']} node */
   function walk(node) {
     if ('tagName' in node) {
@@ -25,12 +32,77 @@ export function readPage(html) {
         links.push(attrs.href)
       if (node.tagName === 'link' && attrs.rel === 'canonical' && !canonical)
         canonical = attrs.href
+      if (
+        node.tagName === 'meta' &&
+        attrs['http-equiv']?.toLowerCase() === 'content-security-policy'
+      )
+        csp = attrs.content
+      if (
+        (node.tagName === 'script' && !('src' in attrs)) ||
+        node.tagName === 'style'
+      ) {
+        const body = node.childNodes
+          .map((child) => ('value' in child ? child.value : ''))
+          .join('')
+        const hash = createHash('sha256').update(body).digest('base64')
+        inline.push({ tag: node.tagName, hash: `sha256-${hash}` })
+      }
+      if (node.tagName === 'script' && attrs.src)
+        resources.push({ directive: 'script-src', url: attrs.src })
+      if (
+        node.tagName === 'link' &&
+        attrs.rel?.split(/\s+/).includes('stylesheet') &&
+        attrs.href
+      )
+        resources.push({ directive: 'style-src', url: attrs.href })
+      if (node.tagName === 'iframe' && attrs.src)
+        resources.push({ directive: 'frame-src', url: attrs.src })
+      if (node.tagName === 'img' || node.tagName === 'source') {
+        const srcset = (attrs.srcset ?? '')
+          .split(',')
+          .map((candidate) => candidate.trim().split(/\s+/)[0])
+        for (const url of [attrs.src, ...srcset])
+          if (url) resources.push({ directive: 'img-src', url })
+      }
     }
     if ('childNodes' in node) for (const child of node.childNodes) walk(child)
   }
   // A tree parser reads markup without browser APIs or script execution.
   walk(parse(html))
-  return { canonical, links, ids, anchors }
+  return { canonical, links, ids, anchors, csp, inline, resources }
+}
+
+// Directives a browser falls back to when a more specific one is missing.
+const fallbacks = {
+  'script-src': ['script-src-elem', 'script-src', 'default-src'],
+  'style-src': ['style-src-elem', 'style-src', 'default-src'],
+  'img-src': ['img-src', 'default-src'],
+  'frame-src': ['frame-src', 'child-src', 'default-src'],
+}
+
+/**
+ * Whether a policy loads `href` for `directive`. Supports the source forms
+ * the site uses: 'self', schemes like `https:` and exact origins.
+ *
+ * @param {string} csp
+ * @param {keyof typeof fallbacks} directive
+ * @param {string} href
+ * @param {URL} site
+ */
+export function cspAllows(csp, directive, href, site) {
+  const policy = new Map(
+    csp
+      .split(';')
+      .map((part) => part.trim().split(/\s+/))
+      .filter(([name]) => name)
+      .map(([name, ...sources]) => [name, sources]),
+  )
+  const name = fallbacks[directive].find((candidate) => policy.has(candidate))
+  if (!name) return true
+  const sources = policy.get(name) ?? []
+  const url = new URL(href, site)
+  if (url.origin === site.origin && sources.includes("'self'")) return true
+  return sources.includes(url.protocol) || sources.includes(url.origin)
 }
 
 /** @param {string} markdown */

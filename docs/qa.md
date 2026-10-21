@@ -31,7 +31,7 @@ pnpm test
 - `test:snippet-types` (`check:snippets`) checks executable TS, TSX and Vue examples; Svelte, text-only examples and code fences in Markdown are reviewed manually.
 - `test:astro` runs Astro diagnostics (`check:types`), then `check`, then `check:size` on the built `dist/`. Diagnostics and the build run one after another because both regenerate the API reference.
 
-`check` creates a fresh `dist/` and runs `scripts/check-build.mjs` with Node. It requires nonempty home, docs, Getting started and API pages, plus all three `llms` exports. It checks navigation links (root-relative, relative and same-origin absolute URLs), same-page and cross-page HTML anchors, unique API IDs and local links in the exports, including Markdown reference links. External URLs are not fetched. Bare fragments inside combined exports have no source-page context and are reviewed with the affected documentation. HTML is parsed with `parse5`; no browser, DOM environment or test runner is launched.
+`check` creates a fresh `dist/` and runs `scripts/check-build.mjs` with Node. It requires nonempty home, docs, Getting started and API pages, plus all three `llms` exports. It checks that every page's Content-Security-Policy meta lists the hash of each inline script and style and allows the host of each external script, stylesheet, image and frame. It checks navigation links (root-relative, relative and same-origin absolute URLs), same-page and cross-page HTML anchors, unique API IDs and local links in the exports, including Markdown reference links. External URLs are not fetched. Bare fragments inside combined exports have no source-page context and are reviewed with the affected documentation. HTML is parsed with `parse5`; no browser, DOM environment or test runner is launched.
 
 ## Text-only examples
 
@@ -51,7 +51,9 @@ After `check`, start a background preview on a free port:
 pnpm run astro preview --background --host 127.0.0.1 --port 4324
 ```
 
-Open the reported URL in an installed browser. Stop it afterward with `pnpm run astro preview stop`. Use a production preview for search checks: Pagefind's index is generated during the build. In a Dev Container use `--host 0.0.0.0` and forward the chosen port.
+Open the reported URL in an installed browser. Stop it afterward with `pnpm run astro preview stop`. Use a production preview for search and Content-Security-Policy checks: Pagefind's index is generated during the build. In a Dev Container use `--host 0.0.0.0` and forward the chosen port.
+
+- Open `/`, `/docs/`, `/docs/api/`, `/docs/getting-started/` (switch a tab and reload) and `/ecosystem/` in both color schemes, and use search and the sidebar. The browser console has no Content-Security-Policy violations. Search compiles WebAssembly in its worker, outside the page policy; code blocks need `style-src-attr`.
 
 ## Layout and images
 
