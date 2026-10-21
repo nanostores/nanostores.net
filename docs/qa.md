@@ -53,7 +53,7 @@ pnpm run astro preview --background --host 127.0.0.1 --port 4324
 
 Open the reported URL in an installed browser. Stop it afterward with `pnpm run astro preview stop`. Use a production preview for search and Content-Security-Policy checks: Pagefind's index is generated during the build. In a Dev Container use `--host 0.0.0.0` and forward the chosen port.
 
-- Open `/`, `/docs/`, `/docs/api/`, `/docs/getting-started/` (switch a tab and reload) and `/ecosystem/` in both color schemes, and use search and the sidebar. The browser console has no Content-Security-Policy violations. Search needs `'wasm-unsafe-eval'`; code blocks need `style-src-attr`.
+- Open `/`, `/docs/`, `/docs/api/`, `/docs/getting-started/` (switch a tab and reload) and `/ecosystem/` in both color schemes, and use search and the sidebar. The browser console has no Content-Security-Policy violations. Search compiles WebAssembly in its worker, outside the page policy; code blocks need `style-src-attr`.
 
 ## Layout and images
 

@@ -90,7 +90,9 @@ export default defineConfig({
   security: {
     csp: {
       scriptDirective: {
-        resources: ["'self'", "'wasm-unsafe-eval'"],
+        // Pagefind compiles its WebAssembly in a worker, which gets its policy
+        // from the worker file's response, not from this page.
+        resources: ["'self'"],
         hashes: [themeHash, tabsHash],
       },
       styleDirective: {
