@@ -63,14 +63,9 @@ gh workflow run ci.yml --repo nanostores/nanostores.net --ref main
 ```
 
 See [the receiver](.github/workflows/ci.yml) and
-[a sender](https://github.com/nanostores/nanostores/blob/main/.github/workflows/site.yml).
+[the sender](docs/upstream-signal.md#sender-workflow).
 A daily build catches missed runs. `nanostores.net/upstream.json` shows
 the deployed commits.
 
-To connect another repository, add it to `upstream.json`, copy the sender
-workflow and give it the `SITE_NOTIFIER_KEY` organization secret
-(App with `Actions: write` on this repository only). For an ecosystem
-page, also add it to [`src/config/plugin-docs.json`](src/config/plugin-docs.json).
-
-To roll back docs, set the `UPSTREAM_PINS` repository variable to
-`{"<id>":"<full SHA>"}` and rerun CI; delete it after the fix.
+- [Connect a library to the site](docs/upstream-signal.md)
+- [Roll back docs](docs/rollback.md) when a library breaks them
