@@ -58,15 +58,19 @@ export function siteNavigation(
       .map((entry) =>
         link(entry.data.sidebar.label ?? entry.data.title, `/${entry.id}/`),
       )
+  // Section index pages are reached from the section hub, not the sidebar.
+  const childPages = (directory: string): NavigationEntry[] =>
+    pages(directory).filter(
+      (entry) => entry.type !== 'link' || entry.href !== `/${directory}/`,
+    )
   return [
     group(
       'docs',
       'Docs',
       [
-        link('Overview', '/docs/'),
         link('Getting started', '/docs/getting-started/'),
         ...docsSections.map(({ label, directory }) =>
-          group(directory, label, pages(directory)),
+          group(directory, label, childPages(directory)),
         ),
       ],
       true,
@@ -75,7 +79,6 @@ export function siteNavigation(
       'api',
       'API',
       [
-        link('Overview', '/docs/api/'),
         ...apiNavigation(apiGroups).map((entry) =>
           group(
             `api/${entry.anchor}`,
@@ -93,10 +96,8 @@ export function siteNavigation(
       'ecosystem',
       'Ecosystem',
       [
-        link('Overview', '/ecosystem/'),
         ...ecosystem.map((entry) =>
           group(`ecosystem/${entry.id}`, entry.title, [
-            link('Overview', `/ecosystem/#${entry.id}`),
             ...entry.rows.map((row) => {
               if (!row.id)
                 throw new Error(`Missing Ecosystem anchor: ${row.title}`)
@@ -107,7 +108,12 @@ export function siteNavigation(
               : []),
           ]),
         ),
-        group('ecosystem/docs', 'Package docs', pages('docs/ecosystem'), true),
+        group(
+          'ecosystem/docs',
+          'Package docs',
+          childPages('docs/ecosystem'),
+          true,
+        ),
       ],
       true,
     ),
