@@ -86,8 +86,7 @@ export default defineConfig({
   // Keep the native Markdown parser beside its platform binding under pnpm.
   vite: { ssr: { external: ['satteri'] } },
   // Blocks scripts injected through imported README Markdown. Astro hashes its
-  // own inline scripts and styles. Expressive Code writes inline style
-  // attributes, which only 'unsafe-inline' can allow.
+  // own inline scripts and styles.
   security: {
     csp: {
       scriptDirective: {
@@ -97,6 +96,8 @@ export default defineConfig({
       styleDirective: {
         resources: [
           "'self'",
+          // Expressive Code and Starlight write `style` attributes, and CSP
+          // hashes cover only <style> elements, not attributes.
           { resource: "'unsafe-inline'", kind: 'attribute' },
         ],
       },
