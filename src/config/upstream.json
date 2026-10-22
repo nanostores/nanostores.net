@@ -1,0 +1,8 @@
+[
+  { "id": "nanostores", "repo": "nanostores/nanostores" },
+  { "id": "persistent", "repo": "nanostores/persistent" },
+  { "id": "query", "repo": "nanostores/query" },
+  { "id": "router", "repo": "nanostores/router" },
+  { "id": "i18n", "repo": "nanostores/i18n" },
+  { "id": "nanostores-devtools", "repo": "psd-coder/nanostores-devtools" }
+]

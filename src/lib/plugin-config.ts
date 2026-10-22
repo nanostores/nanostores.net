@@ -7,8 +7,6 @@ const pluginDocSchema = z.object({
   label: z.string().min(1),
   slug: z.string().regex(/^[a-z0-9-]+$/),
   package: z.string().min(1),
-  repo: z.string().regex(/^[\w.-]+\/[\w.-]+$/),
-  tagPrefix: z.string(),
 })
 
 // Checks the shape of src/config/plugin-docs.json; a typo fails the build.
