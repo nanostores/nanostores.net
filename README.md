@@ -20,7 +20,7 @@ Open forwarded port 4321 in your browser. The server runs in the terminal and sh
 - `src/components/` and `src/styles/` — UI and styles.
 - `src/snippets/` — displayed code examples.
 
-Docs come from other repositories, see [Deployment from other repositories](#deployment-from-other-repositories). Run `pnpm run fetch:upstream --refresh` to get their new commits, or replace `.upstream/<id>` with a symlink to your checkout. Do not edit `src/content/docs/docs/api/` or `dist/`.
+Docs come from other repositories, see [Deployment from other repositories](#deployment-from-other-repositories). Run `pnpm run fetch:upstream --refresh` to get their new releases, or replace `.upstream/<id>` with a symlink to your checkout to see unreleased changes. Do not edit `src/content/docs/docs/api/` or `dist/`.
 
 ## Checks
 
@@ -53,10 +53,11 @@ health path `/`, and writable tmpfs `/var/lib/nginx/tmp`.
 
 ### Deployment from other repositories
 
-Docs and the API reference are built from the latest commits of the
+Docs and the API reference are built from the latest releases of the
 repositories in [`src/config/upstream.json`](src/config/upstream.json).
-The build only reads their files, so a library can't run code in our CI.
-After a push to `main` their workflows run:
+A release is the tag of the `version` in `package.json`, like `1.5.5` or
+`v0.3.4`. The build only reads their files, so a library can't run code
+in our CI. After a release tag their workflows run:
 
 ```sh
 gh workflow run ci.yml --repo nanostores/nanostores.net --ref main
@@ -65,7 +66,7 @@ gh workflow run ci.yml --repo nanostores/nanostores.net --ref main
 See [the receiver](.github/workflows/ci.yml) and
 [the sender](docs/upstream-signal.md#sender-workflow).
 A daily build catches missed runs. `nanostores.net/upstream.json` shows
-the deployed commits.
+the deployed tags and commits.
 
 - [Connect a library to the site](docs/upstream-signal.md)
 - [Roll back docs](docs/rollback.md) when a library breaks them

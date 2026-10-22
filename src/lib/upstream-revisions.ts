@@ -1,9 +1,12 @@
-// Commits of the upstream repositories in .upstream/, recorded by
-// scripts/fetch-upstream.mjs. Run `pnpm run fetch:upstream` if it is missing.
+// Release tags and commits of the upstream repositories in .upstream/,
+// recorded by scripts/fetch-upstream.mjs. Run `pnpm run fetch:upstream` if it
+// is missing.
 import revisions from '../../.upstream/revisions.json'
 
 export interface Revision {
   repo: string
+  // null for a pinned commit or a local checkout
+  tag?: string | null
   // null for a local checkout without Git history
   sha: string | null
   pinned?: boolean
