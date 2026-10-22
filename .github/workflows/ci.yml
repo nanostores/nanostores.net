@@ -1,7 +1,7 @@
 name: CI
-# Docs come from the latest commits of the upstream repositories, see
-# Deploy in README.md. Upstream CI sends workflow_dispatch without inputs after a
-# push; the daily schedule picks up a lost signal.
+# Docs come from the latest release tags of the upstream repositories, see
+# Deploy in README.md. Upstream CI sends workflow_dispatch without inputs after
+# a release tag; the daily schedule picks up a lost signal.
 on:
   pull_request:
   push:
@@ -39,12 +39,12 @@ jobs:
         env:
           # Repository variable for a rollback without commits, see README.md
           UPSTREAM_PINS: ${{ vars.UPSTREAM_PINS }}
-      - name: Summarize upstream commits
+      - name: Summarize upstream releases
         run: |
           {
-            echo '| Repository | Commit |'
-            echo '| --- | --- |'
-            jq -r 'to_entries[] | "| \(.value.repo) | \(.value.sha)\(if .value.pinned then " (pinned)" else "" end) |"' \
+            echo '| Repository | Tag | Commit |'
+            echo '| --- | --- | --- |'
+            jq -r 'to_entries[] | "| \(.value.repo) | \(.value.tag // "") | \(.value.sha)\(if .value.pinned then " (pinned)" else "" end) |"' \
               .upstream/revisions.json
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Pack build artifacts

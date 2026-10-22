@@ -1,11 +1,13 @@
-// Downloads the repositories from src/config/upstream.json into .upstream/
-// and records their commits in .upstream/revisions.json. The site reads
+// Downloads the latest release of every repository from
+// src/config/upstream.json into .upstream/ and records the tags and commits
+// in .upstream/revisions.json. The release is the tag of the `version` in
+// package.json on the default branch: 1.5.5 or v1.5.5. The site reads
 // READMEs, types and images from there and never runs upstream code: no
 // install, no scripts, no hooks, no submodules, symlinks checked out as
 // plain files.
 //
 // Without flags only missing repositories are downloaded. --refresh updates
-// all of them to the latest commit. UPSTREAM_PINS selects exact commits.
+// all of them to the latest release. UPSTREAM_PINS selects exact commits.
 // A symlink in place of .upstream/<id> points to a local checkout and is
 // used as it is.
 import { execFileSync } from 'node:child_process'
@@ -40,6 +42,45 @@ function git(dir, ...args) {
   }).trim()
 }
 
+const url = (repo) => `https://github.com/${repo}.git`
+
+function fetchCommit(dir, repo, target) {
+  git(
+    dir,
+    'fetch',
+    '--quiet',
+    '--depth=1',
+    '--no-tags',
+    '--no-recurse-submodules',
+    url(repo),
+    target,
+  )
+}
+
+// The tag of the version the branch declares in package.json.
+function releaseTag(dir, repo) {
+  fetchCommit(dir, repo, 'HEAD')
+  const { version } = JSON.parse(git(dir, 'show', 'FETCH_HEAD:package.json'))
+  const tags = git(
+    dir,
+    'ls-remote',
+    '--tags',
+    url(repo),
+    `refs/tags/${version}`,
+    `refs/tags/v${version}`,
+  )
+    .split('\n')
+    .map((line) => line.split('\t')[1]?.replace('refs/tags/', ''))
+    .filter((tag) => tag && !tag.endsWith('^{}'))
+  if (tags.length !== 1) {
+    throw new Error(
+      `${repo} declares version ${version} in package.json, ` +
+        `but has ${tags.length ? 'several tags' : 'no tag'} for it`,
+    )
+  }
+  return tags[0]
+}
+
 const head = (dir) =>
   existsSync(new URL('.git', `${dir.href}/`))
     ? git(dir, 'rev-parse', 'HEAD')
@@ -47,7 +88,7 @@ const head = (dir) =>
 
 mkdirSync(root, { recursive: true })
 const revisions = {}
-for (const { id, repo, ref } of upstream) {
+for (const { id, repo } of upstream) {
   const dir = new URL(id, root)
   const pin = pins.get(id)
   if (existsSync(dir) && lstatSync(dir).isSymbolicLink()) {
@@ -56,25 +97,25 @@ for (const { id, repo, ref } of upstream) {
     continue
   }
   const current = existsSync(dir) ? head(dir) : ''
-  if (!current || refresh || (pin && pin !== current)) {
+  const tagFile = new URL(`${id}/.git/upstream-tag`, root)
+  let tag = existsSync(tagFile) ? readFileSync(tagFile, 'utf8').trim() : ''
+  if (!current || refresh || (pin ? pin !== current : !tag)) {
     rmSync(dir, { recursive: true, force: true })
     mkdirSync(dir)
     git(dir, 'init', '--quiet')
-    git(
-      dir,
-      'fetch',
-      '--quiet',
-      '--depth=1',
-      '--no-tags',
-      '--no-recurse-submodules',
-      `https://github.com/${repo}.git`,
-      pin ?? ref ?? 'HEAD',
-    )
+    tag = pin ? '' : releaseTag(dir, repo)
+    fetchCommit(dir, repo, pin ?? `refs/tags/${tag}`)
     git(dir, 'checkout', '--quiet', '--detach', 'FETCH_HEAD')
+    writeFileSync(tagFile, tag)
   }
   const sha = head(dir)
-  revisions[id] = { repo, sha, ...(pin ? { pinned: true } : {}) }
-  console.log(`${id}: ${repo}@${sha.slice(0, 7)}${pin ? ' (pinned)' : ''}`)
+  revisions[id] = {
+    repo,
+    tag: tag || null,
+    sha,
+    ...(pin ? { pinned: true } : {}),
+  }
+  console.log(`${id}: ${repo}@${pin ? `${sha.slice(0, 7)} (pinned)` : tag}`)
 }
 writeFileSync(
   new URL('revisions.json', root),

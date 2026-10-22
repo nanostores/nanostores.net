@@ -9,7 +9,7 @@ const SHA = /^[0-9a-f]{40}$/
 
 /**
  * @param {unknown} data
- * @returns {{ id: string, repo: string, ref?: string }[]}
+ * @returns {{ id: string, repo: string }[]}
  */
 export function parseUpstream(data) {
   const fail = (message) => {
@@ -20,13 +20,10 @@ export function parseUpstream(data) {
   for (const entry of data) {
     const where = JSON.stringify(entry)
     if (typeof entry !== 'object' || entry === null) fail(`${where}`)
-    const { id, repo, ref, ...rest } = entry
+    const { id, repo, ...rest } = entry
     if (typeof id !== 'string' || !ID.test(id)) fail(`bad "id" in ${where}`)
     if (typeof repo !== 'string' || !REPO.test(repo)) {
       fail(`bad "repo" in ${where}`)
-    }
-    if (ref !== undefined && (typeof ref !== 'string' || !ref)) {
-      fail(`bad "ref" in ${where}`)
     }
     if (Object.keys(rest).length) fail(`unknown fields in ${where}`)
     if (ids.has(id)) fail(`duplicate id ${id}`)

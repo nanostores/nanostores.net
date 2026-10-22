@@ -71,13 +71,16 @@ try {
       if (!cspAllows(page.csp, directive, url, site))
         errors.push(`${file}: ${url} not allowed by CSP ${directive}`)
   }
-  // Every upstream repository is listed with the commit it was built from.
+  // Every upstream repository is listed with the release tag and commit it
+  // was built from; a pinned commit has no tag.
   const { upstream } = JSON.parse(readFileSync(join(root, 'upstream.json')))
   for (const { id, repo } of upstreamConfig) {
     const revision = upstream?.[id]
     if (revision?.repo !== repo) errors.push(`upstream.json: no ${repo}`)
     else if (!revision.local && !/^[0-9a-f]{40}$/.test(revision.sha ?? '')) {
       errors.push(`upstream.json: ${id} has no commit`)
+    } else if (!revision.local && !revision.pinned && !revision.tag) {
+      errors.push(`upstream.json: ${id} has no release tag`)
     }
   }
   const ids = pages.get('docs/api/index.html').ids
@@ -96,7 +99,7 @@ try {
   }
   if (errors.length) throw new Error(errors.join('\n'))
   console.info(
-    `Build checks passed: ${pages.size} HTML pages, required outputs, navigation links, CSP for inline code and external resources, upstream commits, API IDs and ${exports.length} documentation exports.`,
+    `Build checks passed: ${pages.size} HTML pages, required outputs, navigation links, CSP for inline code and external resources, upstream releases, API IDs and ${exports.length} documentation exports.`,
   )
 } catch (error) {
   console.error(`Build checks failed:\n${error.message}`)

@@ -14,9 +14,9 @@ describe('upstream config', () => {
 
   it('rejects broken entries', () => {
     const entry = { id: 'demo', repo: 'nanostores/demo' }
-    expect(parseUpstream([entry, { ...entry, id: 'b', ref: 'next' }])).toEqual([
+    expect(parseUpstream([entry, { ...entry, id: 'b' }])).toEqual([
       entry,
-      { ...entry, id: 'b', ref: 'next' },
+      { ...entry, id: 'b' },
     ])
     expect(() => parseUpstream([{ ...entry, repo: 'demo' }])).toThrow(/repo/)
     expect(() => parseUpstream([{ ...entry, id: 'A b' }])).toThrow(/id/)

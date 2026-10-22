@@ -1,7 +1,6 @@
 export interface Upstream {
   id: string
   repo: string
-  ref?: string
 }
 
 export function parseUpstream(data: unknown): Upstream[]

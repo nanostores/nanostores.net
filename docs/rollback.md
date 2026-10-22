@@ -1,11 +1,11 @@
 # Roll back docs
 
-When a library commit breaks the docs, the `UPSTREAM_PINS` repository variable makes builds use given commits instead of the latest ones. Needs admin access to `nanostores/nanostores.net`.
+When a library release breaks the docs, the `UPSTREAM_PINS` repository variable makes builds use given commits instead of the latest releases. Needs admin access to `nanostores/nanostores.net`.
 
 ## Find the last good commit
 
 - **The build fails:** the site still runs the last good version. Take the SHA from [`nanostores.net/upstream.json`](https://nanostores.net/upstream.json).
-- **The build passes, but a page is wrong:** open [CI runs on `main`](https://github.com/nanostores/nanostores.net/actions/workflows/ci.yml?query=branch%3Amain) → the last green run before the problem → **Summary**. Take the SHA from the table.
+- **The build passes, but a page is wrong:** open [CI runs on `main`](https://github.com/nanostores/nanostores.net/actions/workflows/ci.yml?query=branch%3Amain) → the last green run before the problem → **Summary**. Take the SHA of the previous release tag from the table.
 
 The key is the `id` from [`src/config/upstream.json`](../src/config/upstream.json), for example `nanostores` for `nanostores/nanostores` or `query` for `nanostores/query`. Use the full 40-character SHA.
 

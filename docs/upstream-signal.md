@@ -1,6 +1,6 @@
 # Connect a library to the site
 
-After a push to `main`, a library starts the site build with a GitHub App token, not a personal token:
+After a release tag, a library starts the site build with a GitHub App token, not a personal token:
 
 - **You create** the `nanostores-site-notifier` App and store its private key as `SITE_NOTIFIER_KEY`.
 - **On each run** the [`actions/create-github-app-token`](https://github.com/actions/create-github-app-token) step exchanges the key for a 1-hour token that can only start workflows in `nanostores/nanostores.net`.
@@ -44,8 +44,7 @@ Example: `nanostores/router`.
 name: Site
 on:
   push:
-    branches: [main]
-    paths: [README.md, '**/*.d.ts', 'img/**']
+    tags: ['*']
 permissions: {}
 jobs:
   notify:
@@ -68,11 +67,12 @@ jobs:
         run: gh workflow run ci.yml --repo nanostores/nanostores.net --ref main
 ```
 
-`paths` lists what the site reads. For `nanostores/nanostores` keep `README.md`, `**/*.d.ts`, `img/**`. For a plugin like `nanostores/router` use `README.md` and the folders of its README images.
+The site builds the tag of the `version` in `package.json` on the default branch, so release with a tag of the same version: `1.5.5` or `v1.5.5`.
 
 ## Check
 
-1. Push a README change to `main` of the library, for example `nanostores/router`.
-2. [`nanostores/router` Actions](https://github.com/nanostores/router/actions) show a green **Site** run.
-3. [`nanostores/nanostores.net` CI runs](https://github.com/nanostores/nanostores.net/actions/workflows/ci.yml) show a new run "Manually run by nanostores-site-notifier[bot]".
-4. After it finishes, `https://nanostores.net/upstream.json` lists the new commit.
+1. After the next release of the library, for example `nanostores/router`, [its Actions](https://github.com/nanostores/router/actions) show a green **Site** run.
+2. [`nanostores/nanostores.net` CI runs](https://github.com/nanostores/nanostores.net/actions/workflows/ci.yml) show a new run "Manually run by nanostores-site-notifier[bot]".
+3. After it finishes, `https://nanostores.net/upstream.json` shows the new tag.
+
+Without a release, **Run workflow** on [CI](https://github.com/nanostores/nanostores.net/actions/workflows/ci.yml) checks the build, but not the signal.
