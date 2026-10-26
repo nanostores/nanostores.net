@@ -182,7 +182,6 @@ export default defineConfig({
           label: 'Docs',
           collapsed: true,
           items: [
-            { label: 'Overview', link: '/docs/' },
             { label: 'Getting started', link: '/docs/getting-started/' },
             ...docsSections.map(({ label, directory }) => ({
               label,
