@@ -74,7 +74,7 @@ Example JSON body (`v` is the SDK protocol version):
 }
 ```
 
-Nginx forwards to `https://plausible.io/api/event`: exact POST route, 16 KiB body
+Nginx forwards to `https://lens.hplush.dev/api/event`: exact POST route, 16 KiB body
 limit, SNI + certificate verification, connect / send / read timeouts of 3 / 5 / 5
 seconds, no retries. Other methods return 405. Upstream DNS uses the container's
 system resolver at startup; reload / restart Nginx after upstream address changes.
@@ -89,18 +89,26 @@ Keep port 8000 private; revalidate visitor IP forwarding after hosting changes.
 - `install_copy` measures copying, not completed installation; outbound clicks measure a handoff, not package adoption.
 - Follow the manual checks in [QA](qa.md): copy success, content expansion, single outbound click delivery and silent internal navigation. SDK engagement handles background time; custom section timers are absent. On production, verify pageviews and custom events in the dashboard; localhost / preview builds must send nothing.
 
-Proxy diagnostic, without recording an event:
+Proxy diagnostic. lens (Plausible Community Edition) does not answer debug
+requests: `X-Debug-Request` returns a normal 202 and cannot show the visitor IP.
+
+Reachability, from inside the Nginx container:
 
 ```sh
-curl --silent --show-error --include \
-  https://nanostores.net/api/event \
-  -H 'Content-Type: text/plain' \
-  -H 'X-Debug-Request: true' \
-  --data '{"name":"pageview","url":"https://example.invalid/","domain":"example.invalid"}'
+curl --silent --show-error --output /dev/null --write-out '%{http_code}\n' \
+  https://lens.hplush.dev/api/system/health/ready
 ```
 
-Expected: HTTP 200 + visitor public IP. Normal HTTP 202 alone does not prove
-recording; `x-plausible-dropped: 1` indicates rejection ([API reference](https://plausible.io/docs/events-api)).
+Expected: `200`.
+
+Recording and visitor IP: open nanostores.net, ideally through a VPN in another
+country, and check the lens realtime dashboard. The pageview must show the
+visitor's country, not the server's. lens and nanostores.net share one host
+behind Caddy; if every visit shows the server location, Caddy is replacing
+`X-Forwarded-For`.
+
+HTTP 202 alone does not prove recording; `x-plausible-dropped: 1` indicates
+rejection ([API reference](https://plausible.io/docs/events-api)).
 For local TLS inspection, use a test-only trust bundle; retain production TLS verification.
 
 Live dashboard verification and goal setup remain pending.
