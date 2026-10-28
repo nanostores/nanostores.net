@@ -1,7 +1,5 @@
-import { $activeSection, $openCode, setCodeOpen } from '../state/site'
-import { track, type EventName } from '../lib/analytics'
-
-const sections = [...document.querySelectorAll<HTMLElement>('.situation')]
+import { $openCode, setCodeOpen } from '../state/site'
+import { track } from '../lib/analytics'
 
 // Code popovers: the store owns which section's code is open; the popover
 // and its arrow render it. CSS anchors place both under the Show code
@@ -41,60 +39,9 @@ $openCode.listen((open, _old, id) => {
   }
 })
 $openCode.listen((open, _old, situationId) => {
-  if (situationId && open[situationId]) track('code_expand', { situationId })
-})
-document.addEventListener('click', (event) => {
-  const target = (event.target as Element).closest<HTMLElement>('[data-track]')
-  if (!target) return
-  track(target.dataset.track as EventName, {
-    situationId: target.dataset.situationId,
-    target: target.dataset.target,
-  })
-})
-
-let enteredAt = performance.now()
-const seen = new Set<string>()
-function active() {
-  let best: { id: string; visible: number } | undefined
-  for (const section of sections) {
-    const rect = section.getBoundingClientRect()
-    const visible = Math.max(
-      0,
-      Math.min(rect.bottom, innerHeight) - Math.max(rect.top, 0),
-    )
-    // Sections can be shorter than half the screen: a section is active
-    // when half of it is visible; the most visible one wins.
-    const coverage = visible / Math.min(rect.height, innerHeight)
-    if (coverage >= 0.5 && (!best || visible > best.visible))
-      best = { id: section.dataset.situationId!, visible }
-  }
-  const previous = $activeSection.get()
-  const id = best?.id || null
-  if (id === previous) return
-  const now = performance.now()
-  if (previous)
-    track('section_dwell', {
-      situationId: previous,
-      ms: Math.round(now - enteredAt),
-    })
-  $activeSection.set(id)
-  enteredAt = now
-  if (id && !seen.has(id)) {
-    seen.add(id)
-    track('section_view', { situationId: id })
-  }
-}
-const observer = new IntersectionObserver(active, {
-  threshold: [0, 0.25, 0.5, 0.75, 1],
-})
-sections.forEach((section) => observer.observe(section))
-addEventListener('resize', active)
-addEventListener('pagehide', () => {
-  const id = $activeSection.get()
-  if (id)
-    track('section_dwell', {
-      situationId: id,
-      ms: Math.round(performance.now() - enteredAt),
+  if (situationId && open[situationId])
+    track('content_expand', {
+      situationId,
+      contentType: situationId === 'small-ecosystem' ? 'objections' : 'code',
     })
 })
-active()
