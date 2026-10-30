@@ -75,8 +75,9 @@ interface Heading {
 
 const REPO = 'https://github.com/nanostores/nanostores'
 
-export function readmeUrl(readme: string): string {
-  return `${REPO}/blob/${readmeVersion(readme)}/README.md`
+// `sha` is the upstream commit the README was read from.
+export function readmeUrl(sha: string): string {
+  return `${REPO}/blob/${sha}/README.md`
 }
 
 // Size Limit numbers from the README: a single atom up to map with computed.
@@ -84,12 +85,6 @@ export function coreSize(readme: string): string {
   const size = readme.match(/Between (\d+) and (\d+) bytes/)
   if (!size) throw new Error('README no longer says "Between N and M bytes"')
   return `${size[1]}–${size[2]} bytes`
-}
-
-export function readmeVersion(readme: string): string {
-  const version = readme.match(/^<!-- nanostores@(\S+) /)?.[1]
-  if (!version) throw new Error('The vendored README has no version header')
-  return version
 }
 
 function headings(lines: string[]): Heading[] {
@@ -133,7 +128,6 @@ export function plainText(markdown: string): string {
 }
 
 function planReadme(readme: string) {
-  const version = readmeVersion(readme)
   const lines = readme.split(/\r?\n/)
   const all = headings(lines)
 
@@ -172,7 +166,7 @@ function planReadme(readme: string) {
     })
   })
 
-  return { version, lines, definitions, definitionLine, anchors, planned }
+  return { lines, definitions, definitionLine, anchors, planned }
 }
 
 // Core README anchors that became docs pages: `store-events` → route.
@@ -184,14 +178,14 @@ export function coreRoutes(readme: string): Map<string, string> {
   return routes
 }
 
-export function readmePages(readme: string): ReadmePage[] {
-  const { version, lines, definitions, definitionLine, anchors, planned } =
+export function readmePages(readme: string, sha: string): ReadmePage[] {
+  const { lines, definitions, definitionLine, anchors, planned } =
     planReadme(readme)
-  const readmeUrl = `${REPO}/blob/${version}/README.md`
+  const url = readmeUrl(sha)
   const rewriteAnchors = (markdown: string) =>
     markdown.replace(/\]\(#([^)]+)\)/g, (_, anchor: string) => {
       const route = anchors.get(anchor)
-      return `](${route || `${readmeUrl}#${anchor}`})`
+      return `](${route || `${url}#${anchor}`})`
     })
 
   return planned.map(({ heading, order, id }) => {
@@ -209,8 +203,8 @@ export function readmePages(readme: string): ReadmePage[] {
       rewriteAnchors(content),
       used.join('\n'),
       '---',
-      `*Imported from the [Nano Stores README](${readmeUrl}#${anchor}) ` +
-        `for version ${version}. Improve this page there.*`,
+      `*Imported from the [Nano Stores README](${url}#${anchor}). ` +
+        'Improve this page there.*',
     ]
       .filter(Boolean)
       .join('\n\n')
