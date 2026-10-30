@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Initial from '../components/primitives/Initial.astro'
 import CodeWindow from '../components/primitives/CodeWindow.astro'
-import WayOfThinkingSketch from '../components/blocks/WayOfThinkingSketch.astro'
+import WayOfThinkingDiagram from '../components/blocks/WayOfThinkingDiagram.astro'
 import jacquard from '@fontsource/jacquard-12/files/jacquard-12-latin-400-normal.woff2?url'
 ---
 
@@ -20,7 +20,9 @@ import jacquard from '@fontsource/jacquard-12/files/jacquard-12-latin-400-normal
         a simple rendering layer. We think much of the complexity we attribute
         to frameworks comes from the logic we write inside them.
       </p>
-      <WayOfThinkingSketch />
+      <div class="diagram">
+        <WayOfThinkingDiagram />
+      </div>
       <p class="idea">
         This is the idea Nano Stores is built around, and it is our opinion, not
         an API rule: we think a component should draw state, not own it.
@@ -166,6 +168,9 @@ import jacquard from '@fontsource/jacquard-12/files/jacquard-12-latin-400-normal
     font-stretch: 78%;
     line-height: 1.09;
     letter-spacing: -0.025em;
+  }
+  .diagram {
+    margin-bottom: 32px;
   }
   .column .lead {
     margin-block: 24px 32px;
