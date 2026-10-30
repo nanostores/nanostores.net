@@ -67,7 +67,7 @@ function pickAdapter(): Adapter {
   }
   init({
     domain: 'nanostores.net',
-    endpoint: '/api/event',
+    endpoint: 'https://lens.hplush.dev/api/event',
     autoCapturePageviews: true,
     outboundLinks: false,
     fileDownloads: false,
