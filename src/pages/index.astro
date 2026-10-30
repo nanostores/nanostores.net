@@ -1,5 +1,5 @@
 ---
-import WayOfThinkingSketch from '../components/blocks/WayOfThinkingSketch.astro'
+import WayOfThinkingDiagram from '../components/blocks/WayOfThinkingDiagram.astro'
 import CodePreview from '../components/primitives/CodePreview.astro'
 import Meme from '../components/primitives/Meme.astro'
 import type { Source } from '../lib/sources'
@@ -334,8 +334,8 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
             </a>
           </p>
         </div>
-        <div class="way-sketch">
-          <WayOfThinkingSketch />
+        <div class="way-figure">
+          <WayOfThinkingDiagram />
         </div>
       </div>
     </section>
@@ -456,18 +456,8 @@ const number = (item: { id: string }) => order.indexOf(item.id) + 1
     align-self: stretch;
     margin-top: var(--space-1);
   }
-  /* The sketch reaches 9L tall and scales proportionally on narrow screens. */
-  .way-sketch {
+  .way-figure {
     width: 100%;
-  }
-  .way-sketch :global(.sketch) {
-    margin: 0;
-  }
-  .way-sketch :global(svg) {
-    display: block;
-    width: min(100%, calc(9 * var(--line-unit) * 480 / 250));
-    height: auto;
-    margin-inline: 0;
   }
   /*
    * Small ecosystem: a quiet row between the feed and the way of thinking,

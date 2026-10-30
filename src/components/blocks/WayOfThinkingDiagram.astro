@@ -1,0 +1,100 @@
+---
+// The "way of thinking" diagram on the home page and /why/: logic tangled in
+// components (the UI as a hostage) versus logic in one store (the UI as a
+// skin). Each panel is an external SVG drawn through <use>, so both pages
+// share one cached file and the panels take the page's color tokens and
+// fonts: labels are text in Fragment Mono and Instrument Sans. The
+// frame, the rule between the panels and the "or" badge are HTML.
+import components from '../../assets/way/components.svg?url&no-inline'
+import stores from '../../assets/way/stores.svg?url&no-inline'
+---
+
+<div class="way-diagram">
+  <figure
+    role="img"
+    aria-label="Logic in components: three components each fetch /cats in their own useEffect and sync through props, so the UI is a hostage. Or logic in stores: one store $cats holds cats, loading and the feed rule, fetches once, and every component only calls useStore($cats), so the UI is a skin."
+  >
+    <div class="panel">
+      <svg viewBox="0 0 400 472" aria-hidden="true">
+        <use href={`${components}#panel`}></use>
+      </svg>
+    </div>
+    <div class="panel">
+      <span class="or" aria-hidden="true">
+        or
+      </span>
+      <svg viewBox="0 0 400 472" aria-hidden="true">
+        <use href={`${stores}#panel`}></use>
+      </svg>
+    </div>
+  </figure>
+</div>
+<style>
+  /*
+   * Panels are drawn 400×472. They stack on narrow containers and stand side
+   * by side from 680px, where the smallest labels are still 85% of the
+   * drawing. The badge and its gaps scale with the panel (cqi of the panel).
+   */
+  .way-diagram {
+    container: way-diagram / inline-size;
+  }
+  figure {
+    display: grid;
+    max-width: 440px;
+    margin: 0;
+    border: 1px solid var(--line);
+    background: var(--page);
+  }
+  .panel {
+    position: relative;
+    container-type: inline-size;
+  }
+  .panel:first-child {
+    padding-bottom: 5cqi;
+  }
+  .panel + .panel {
+    padding-top: 6cqi;
+    border-top: 1px solid var(--line);
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .or {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 11.75cqi;
+    aspect-ratio: 1;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--desk-color);
+    color: var(--text-2);
+    font-size: 5cqi;
+    font-stretch: 78%;
+    font-weight: 680;
+    line-height: 1;
+    translate: -50% -50%;
+  }
+  @container way-diagram (width >= 680px) {
+    figure {
+      grid-template-columns: 1fr 1fr;
+      max-width: none;
+    }
+    .panel:first-child {
+      padding-bottom: 0;
+    }
+    .panel + .panel {
+      padding-top: 0;
+      border-top: 0;
+      border-left: 1px solid var(--line);
+    }
+    .or {
+      top: 50%;
+      left: 0;
+    }
+  }
+</style>
