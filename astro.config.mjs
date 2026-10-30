@@ -106,7 +106,8 @@ export default defineConfig({
       directives: [
         "default-src 'self'",
         "img-src 'self' data: https://cdn.evilmartians.com",
-        "connect-src 'self'",
+        // Analytics events go straight to our Plausible.
+        "connect-src 'self' https://lens.hplush.dev",
         "worker-src 'self'",
       ],
     },
