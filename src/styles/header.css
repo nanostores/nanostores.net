@@ -58,9 +58,8 @@ body:has(.leaf) .site-header {
   pointer-events: none;
 }
 
-/* A classic scrollbar's track shows the body: make it desk, as beside it. */
-body:has(.site-header-desk) {
-  background: var(--desk-color);
+:root:has(.site-header-desk) {
+  scrollbar-color: var(--scrollbar) var(--desk-color);
 }
 
 .site-header-inner.site-header-sheet {
