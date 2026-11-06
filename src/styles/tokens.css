@@ -85,6 +85,11 @@
 :root {
   scrollbar-gutter: stable;
 }
+/* Thin scrollbars in the palette; the track shows the paper or the desk. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+}
 
 :root {
   color-scheme: light;
@@ -150,6 +155,7 @@
   --control: oklch(var(--slip));
   --control-hover: color-mix(in oklab, var(--control), var(--text) 8%);
   --underline: oklch(var(--secondary) / 50%);
+  --scrollbar: oklch(var(--secondary) / 45%);
   --accent-color: oklch(var(--accent));
   --on-accent-color: oklch(var(--on-accent));
   --surface-raised: oklch(var(--slip));
