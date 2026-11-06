@@ -36,12 +36,9 @@ site-search .search-shortcut {
   white-space: nowrap;
   font: inherit;
 }
-site-search .search-shortcut-meta,
+:root:not([data-platform='apple']) site-search .search-shortcut-meta,
 :root[data-platform='apple'] site-search .search-shortcut-ctrl {
   display: none;
-}
-:root[data-platform='apple'] site-search .search-shortcut-meta {
-  display: inline;
 }
 site-search dialog {
   width: min(40rem, calc(100% - 2 * var(--space-4)));
