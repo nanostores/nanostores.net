@@ -6,6 +6,7 @@ export default {
   plugins: [docsStoreMarkers],
   useStarlightDarkModeSwitch: true,
   useStarlightUiThemeColors: false,
+  useThemedScrollbars: false,
   styleOverrides: {
     // Expressive Code adds its 1px border to the rendered corner radius.
     borderRadius: '7px',
