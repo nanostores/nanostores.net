@@ -78,13 +78,6 @@
   }
 }
 
-/*
- * Classic scrollbars (macOS "Always", Windows) take width. Reserve it from the
- * first paint, so the centered sheet stays put while a long page loads.
- */
-:root {
-  scrollbar-gutter: stable;
-}
 /* Thin scrollbars in the palette; the track shows the paper or the desk. */
 * {
   scrollbar-width: thin;
