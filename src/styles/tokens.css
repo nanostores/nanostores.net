@@ -78,7 +78,6 @@
   }
 }
 
-/* Thin scrollbars in the palette; the track shows the paper or the desk. */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar) transparent;

@@ -8,7 +8,6 @@
   window.StarlightThemeProvider = { updatePickers() {} }
   apply()
   media.addEventListener('change', apply)
-  // The search shortcut shows ⌘ on Apple devices from the first paint.
   if (/(Mac|iPhone|iPad|iPod)/i.test(navigator.platform)) {
     document.documentElement.dataset.platform = 'apple'
   }
