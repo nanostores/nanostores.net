@@ -15,7 +15,7 @@ Mandatory automation (`pnpm test`, also run by CI) checks formatting, unit tests
 | README/API generation or docs navigation      | Inspect affected generated pages and exports; check production search and API anchors                                      |
 | Publishing                                    | Check search, canonical URLs, sitemap and indexing settings; measure performance after significant asset or layout changes |
 
-No general asset crawler, screenshot suite, coverage target or load tests are required. The build validates content schemas, referenced collection entries, vendored README versions and their local images. Avoid duplicating those checks in unit tests. Review accent-color use and Starlight CSS boundaries manually when styles or Starlight change.
+No general asset crawler, screenshot suite, coverage target or load tests are required. The build validates content schemas, referenced collection entries, upstream README sections and their local images. Avoid duplicating those checks in unit tests. Review accent-color use and Starlight CSS boundaries manually when styles or Starlight change.
 
 ## Automated checks
 

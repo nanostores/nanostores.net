@@ -3,40 +3,30 @@
     "id": "persistent",
     "label": "Persistent",
     "slug": "persistent",
-    "package": "@nanostores/persistent",
-    "repo": "nanostores/persistent",
-    "tagPrefix": ""
+    "package": "@nanostores/persistent"
   },
   {
     "id": "query",
     "label": "Query",
     "slug": "query",
-    "package": "@nanostores/query",
-    "repo": "nanostores/query",
-    "tagPrefix": "v"
+    "package": "@nanostores/query"
   },
   {
     "id": "router",
     "label": "Router",
     "slug": "router",
-    "package": "@nanostores/router",
-    "repo": "nanostores/router",
-    "tagPrefix": ""
+    "package": "@nanostores/router"
   },
   {
     "id": "i18n",
     "label": "I18n",
     "slug": "i18n",
-    "package": "@nanostores/i18n",
-    "repo": "nanostores/i18n",
-    "tagPrefix": ""
+    "package": "@nanostores/i18n"
   },
   {
     "id": "nanostores-devtools",
     "label": "Devtools",
     "slug": "devtools",
-    "package": "nanostores-devtools",
-    "repo": "psd-coder/nanostores-devtools",
-    "tagPrefix": ""
+    "package": "nanostores-devtools"
   }
 ]

@@ -1,5 +1,5 @@
 // Relative image paths a plugin README refers to, outside code blocks.
-// Plain .mjs so that scripts/sync-readme.mjs and the site share one function.
+// Plain .mjs so that scripts/fetch-upstream.mjs and the site share one function.
 // The logo is left out: the docs page drops it.
 
 const relative = (path) => !/^(#|[a-z][a-z0-9+.-]*:|\/)/i.test(path)

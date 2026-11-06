@@ -1,5 +1,6 @@
-import readme from '../vendor/nanostores-readme.md?raw'
+import readme from '../../.upstream/nanostores/README.md?raw'
 import { coreSize, readmeUrl } from './readme-docs'
+import { upstreamRevision } from './upstream-revisions'
 import npm from '../vendor/npm-downloads.json'
 
 // Weekly npm downloads as people say them: 11.8M, 950K.
@@ -9,12 +10,12 @@ export function shortCount(count: number): string {
   return String(count)
 }
 
-// Facts the site quotes from the vendored README and npm stats. Content
-// uses them as `{coreSize}` so the numbers follow `pnpm run sync:readme`
+// Facts the site quotes from the upstream README and npm stats. Content
+// uses them as `{coreSize}` so the numbers follow the latest README
 // and `pnpm run sync:downloads`.
 export const facts: Record<string, string> = {
   coreSize: coreSize(readme),
-  readmeUrl: readmeUrl(readme),
+  readmeUrl: readmeUrl(upstreamRevision('nanostores').sha),
   weeklyDownloads: shortCount(npm.downloads),
 }
 
