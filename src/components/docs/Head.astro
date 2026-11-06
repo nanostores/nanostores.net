@@ -1,14 +1,8 @@
 ---
 import Default from '@astrojs/starlight/components/Head.astro'
-import instrument from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-standard-normal.woff2?url'
 import fragment from '@fontsource/fragment-mono/files/fragment-mono-latin-400-normal.woff2?url'
-
-// Docs text and code use these faces on the first screen. Without a preload,
-// the browser finds them only after CSS and shows the fallback first.
-const fonts = [instrument, fragment]
+import FontPreloads from '../layout/FontPreloads.astro'
 ---
 
 <Default />
-{fonts.map((href) => (
-  <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
-))}
+<FontPreloads extra={[fragment]} />
