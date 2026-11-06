@@ -17,8 +17,10 @@ import '../../styles/search.css'
     <span class="search-label" aria-hidden="true">
       Search
     </span>
+    <!-- theme.js marks Apple devices before paint: one label shows. -->
     <kbd class="search-shortcut" aria-hidden="true">
-      Ctrl K
+      <span class="search-shortcut-ctrl">Ctrl K</span>
+      <span class="search-shortcut-meta">⌘ K</span>
     </kbd>
   </button>
   <dialog aria-label="Search">
@@ -51,8 +53,7 @@ import '../../styles/search.css'
       const dialog = this.querySelector('dialog')!
       const status = this.querySelector<HTMLElement>('.search-status')
       let initialising: Promise<void> | undefined
-      if (/(Mac|iPhone|iPad|iPod)/i.test(navigator.platform)) {
-        this.querySelector('kbd')!.textContent = '⌘ K'
+      if (document.documentElement.dataset.platform === 'apple') {
         trigger.setAttribute('aria-keyshortcuts', 'Meta+K')
       }
       trigger.disabled = false
