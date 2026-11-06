@@ -41,7 +41,6 @@
   --sheet-margin: 0px;
   --sheet-edge: 0px;
   --sheet-width: min(960px, 100% - 2 * var(--sheet-margin));
-  --sheet-offset: max(var(--sheet-margin), (100vw - 960px) / 2);
   --content-max: 1200px;
   --col-a: 624px; /* the longest heading on one line, plus slack */
   --col-b-min: 328px;

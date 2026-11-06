@@ -109,7 +109,8 @@ const { hasSidebar } = Astro.locals.starlightRoute
   @media (width >= 50rem) {
     .sidebar-pane {
       display: block;
-      inset-inline-start: calc(var(--sheet-offset) + 1px);
+      /* 100% excludes a classic scrollbar, unlike 100vw. */
+      inset-inline-start: calc((100% - var(--sheet-width)) / 2 + 1px);
       inset-inline-end: auto;
       width: var(--sl-sidebar-width);
       margin: 0;

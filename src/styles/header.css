@@ -40,13 +40,18 @@ body:has(.leaf) .site-header {
  * ruled edges, a top edge on the strip's bottom rule. It is fixed inside the
  * fixed header, so it stays above Starlight's fixed sidebars and nothing
  * scrolls into the margins; PageFrame keeps the content inside the sheet.
+ *
+ * The desk is a sheet-sized hole centered like the sheet; a spread shadow
+ * paints the desk around it. Viewport units would include a classic
+ * scrollbar and shift the hole off the sheet.
  */
 .site-header-desk {
   position: fixed;
-  inset: 0;
-  border: solid var(--desk-color);
-  border-width: calc(var(--site-header-height) - 1px) var(--sheet-offset) 0;
+  inset: calc(var(--site-header-height) - 1px) 0 0;
+  width: var(--sheet-width);
+  margin-inline: auto;
   box-shadow:
+    0 0 0 100vmax var(--desk-color),
     inset 0 1px var(--line),
     inset var(--sheet-edge) 0 var(--line),
     inset calc(-1 * var(--sheet-edge)) 0 var(--line);
