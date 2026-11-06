@@ -8,4 +8,7 @@
   window.StarlightThemeProvider = { updatePickers() {} }
   apply()
   media.addEventListener('change', apply)
+  if (/(Mac|iPhone|iPad|iPod)/i.test(navigator.platform)) {
+    document.documentElement.dataset.platform = 'apple'
+  }
 })()

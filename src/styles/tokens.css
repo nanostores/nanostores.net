@@ -41,7 +41,6 @@
   --sheet-margin: 0px;
   --sheet-edge: 0px;
   --sheet-width: min(960px, 100% - 2 * var(--sheet-margin));
-  --sheet-offset: max(var(--sheet-margin), (100vw - 960px) / 2);
   --content-max: 1200px;
   --col-a: 624px; /* the longest heading on one line, plus slack */
   --col-b-min: 328px;
@@ -77,6 +76,11 @@
     --page-margin: var(--space-7);
     --leaf-pad: 120px;
   }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
 }
 
 :root {
@@ -143,6 +147,7 @@
   --control: oklch(var(--slip));
   --control-hover: color-mix(in oklab, var(--control), var(--text) 8%);
   --underline: oklch(var(--secondary) / 50%);
+  --scrollbar: oklch(var(--secondary) / 45%);
   --accent-color: oklch(var(--accent));
   --on-accent-color: oklch(var(--on-accent));
   --surface-raised: oklch(var(--slip));

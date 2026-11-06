@@ -1,0 +1,11 @@
+---
+import instrument from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-standard-normal.woff2?url'
+interface Props {
+  extra?: string[]
+}
+const { extra = [] } = Astro.props
+---
+
+{[instrument, ...extra].map((href) => (
+  <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+))}

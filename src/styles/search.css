@@ -36,6 +36,10 @@ site-search .search-shortcut {
   white-space: nowrap;
   font: inherit;
 }
+:root:not([data-platform='apple']) site-search .search-shortcut-meta,
+:root[data-platform='apple'] site-search .search-shortcut-ctrl {
+  display: none;
+}
 site-search dialog {
   width: min(40rem, calc(100% - 2 * var(--space-4)));
   max-width: 100%;
