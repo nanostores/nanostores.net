@@ -90,6 +90,11 @@
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar) transparent;
 }
+/* Code blocks keep Expressive Code's own bars, which these would override. */
+.expressive-code pre {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
 
 :root {
   color-scheme: light;
