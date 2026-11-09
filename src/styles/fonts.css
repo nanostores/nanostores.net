@@ -31,10 +31,7 @@
   src: url('@fontsource/jacquard-12/files/jacquard-12-latin-400-normal.woff2')
     format('woff2');
 }
-/*
- * Starlight thins docs text with antialiased smoothing. One value on every
- * page keeps the shared header and sidebar the same on docs and leaf pages.
- */
+/* Undo Starlight's antialiased body, so the shared header looks the same everywhere. */
 body {
   -webkit-font-smoothing: auto;
 }

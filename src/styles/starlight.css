@@ -38,12 +38,7 @@
   --sl-mobile-toc-height: 0rem;
 }
 
-/*
- * A classic scrollbar that appears once a loading page overflows shifts the
- * sheet. So the docs root shows its track from the first paint; header.css
- * paints it as desk. Only this file loads on docs before the body, unlike a
- * header.css :has() rule. A gutter would show paper beside the desk.
- */
+/* Show the track from the first paint, so a late scrollbar never shifts the sheet. */
 :root {
   overflow-y: scroll;
 }

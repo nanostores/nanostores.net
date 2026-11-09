@@ -27,10 +27,7 @@ body:has(.leaf) .site-header {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--site-header-gap);
-  /*
-   * Set, not inherited: docs bodies carry Starlight's font stack and line
-   * height. The stack's fallback draws ⌘, which Instrument Sans lacks.
-   */
+  /* Not inherited: docs bodies carry Starlight's font stack and line height. */
   font-family: 'Instrument Sans', system-ui, sans-serif;
   line-height: normal;
   /* At most the sheet wide: the slots switch on its width, not the viewport's. */
