@@ -60,7 +60,8 @@ const unusedPagefindFiles = [
   'pagefind-ui.js',
 ]
 
-const apiEntry = './node_modules/nanostores/index.d.ts'
+// Types straight from the upstream repository, see scripts/fetch-upstream.mjs.
+const apiEntry = './.upstream/nanostores/index.d.ts'
 const apiExports = readApiExports(apiEntry)
 checkApiGroups(apiGroups, apiExports)
 // TypeDoc renders its readme as /docs/api/, so the overview is written as one.

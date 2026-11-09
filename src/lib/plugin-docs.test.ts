@@ -2,20 +2,18 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { parsePluginDocs, pluginDocs } from './plugin-config'
 import { coreRoutes } from './readme-docs'
-import { pluginPage, pluginVendorVersion, type PluginDoc } from './plugin-docs'
+import { pluginPage, type PluginSource } from './plugin-docs'
+import { upstreamRevision } from './upstream-revisions'
 import { relativeImagePaths } from './plugin-images.mjs'
 
-const plugin: PluginDoc = {
+const plugin: PluginSource = {
   id: 'demo',
   label: 'Demo',
   slug: 'demo',
   package: '@nanostores/demo',
   repo: 'nanostores/demo',
-  tagPrefix: '',
+  sha: 'c0ffee',
 }
-
-const wrap = (body: string, pkg = plugin.package, version = '1.2.3') =>
-  `<!-- ${pkg}@${version} https://example.test/README.md -->\n${body}`
 
 const logo = `<img align="right" width="92" height="92" title="Nano Stores logo"
      src="https://nanostores.github.io/nanostores/logo.svg">`
@@ -30,25 +28,9 @@ const sponsor = `<a href="https://evilmartians.com/?utm_source=x">
 </a>`
 
 describe('plugin docs', () => {
-  it('reads the vendored version and rejects a wrong header', () => {
-    expect(pluginVendorVersion(wrap('# X'), plugin.package)).toBe('1.2.3')
-    expect(
-      pluginVendorVersion(
-        wrap('# X', '@nanostores/query', '0.3.4'),
-        '@nanostores/query',
-      ),
-    ).toBe('0.3.4')
-    expect(() => pluginVendorVersion('# X', plugin.package)).toThrow()
-    expect(() =>
-      pluginVendorVersion(wrap('# X', '@nanostores/other'), plugin.package),
-    ).toThrow()
-  })
-
   it('drops the H1 and the logo and takes the description', () => {
     const page = pluginPage(
-      wrap(
-        `# Nano Stores Demo\n\n${logo}\n\nA tiny [demo](https://x.test) store.\n\n## Install\n`,
-      ),
+      `# Nano Stores Demo\n\n${logo}\n\nA tiny [demo](https://x.test) store.\n\n## Install\n`,
       plugin,
       3,
     )
@@ -60,15 +42,13 @@ describe('plugin docs', () => {
     expect(page.body).not.toContain('<img')
     expect(page.body).toContain('## Install')
     expect(page.body).toContain(
-      '*Imported from the [Nano Stores Demo README](https://github.com/nanostores/demo/blob/1.2.3/README.md) for version 1.2.3. Improve this page there.*',
+      '*Imported from the [Nano Stores Demo README](https://github.com/nanostores/demo/blob/c0ffee/README.md). Improve this page there.*',
     )
   })
 
   it('removes a Made at block in the middle and keeps the text around it', () => {
     const page = pluginPage(
-      wrap(
-        `# Demo\n\nIntro text.\n\n${madeAt}\n\n## Install\n\nRun it.\n\n## License\n\nMIT`,
-      ),
+      `# Demo\n\nIntro text.\n\n${madeAt}\n\n## Install\n\nRun it.\n\n## License\n\nMIT`,
       plugin,
       1,
     )
@@ -81,7 +61,7 @@ describe('plugin docs', () => {
 
   it('removes the sponsor badge', () => {
     const page = pluginPage(
-      wrap(`# Demo\n\nIntro.\n\n${sponsor}\n\n## Install\n`),
+      `# Demo\n\nIntro.\n\n${sponsor}\n\n## Install\n`,
       plugin,
       1,
     )
@@ -93,7 +73,7 @@ describe('plugin docs', () => {
 
   it('keeps the text when there are no promo blocks', () => {
     const page = pluginPage(
-      wrap('# Demo\n\nIntro.\n\n## Install\n\nnpm i'),
+      '# Demo\n\nIntro.\n\n## Install\n\nnpm i',
       plugin,
       1,
     )
@@ -105,9 +85,7 @@ describe('plugin docs', () => {
   it('throws on a Made at line without --- around it', () => {
     expect(() =>
       pluginPage(
-        wrap(
-          '# Demo\n\nMade at <a href="https://evilmartians.com/">EM</a>\n\n## Install',
-        ),
+        '# Demo\n\nMade at <a href="https://evilmartians.com/">EM</a>\n\n## Install',
         plugin,
         1,
       ),
@@ -115,13 +93,9 @@ describe('plugin docs', () => {
   })
 
   it('makes relative links and images absolute with the right tag', () => {
-    const query: PluginDoc = {
-      ...plugin,
-      repo: 'nanostores/query',
-      tagPrefix: 'v',
-    }
+    const query: PluginSource = { ...plugin, repo: 'nanostores/query' }
     const page = pluginPage(
-      wrap(`# Demo
+      `# Demo
 
 [MIT](./LICENSE.md) and [docs](docs/api.md) and [web](https://a.test/x) and [anchor](#how)
 
@@ -130,12 +104,12 @@ describe('plugin docs', () => {
 <picture>
   <source srcset="./docs/dark.png">
   <img alt="x" src="./docs/light.png">
-</picture>`),
+</picture>`,
       query,
       1,
     )
-    const blob = 'https://github.com/nanostores/query/blob/v1.2.3'
-    const local = '/vendor/plugins/demo'
+    const blob = 'https://github.com/nanostores/query/blob/c0ffee'
+    const local = '/vendor/upstream/demo'
     expect(page.body).toContain(`[MIT](${blob}/LICENSE.md)`)
     expect(page.body).toContain(`[docs](${blob}/docs/api.md)`)
     expect(page.body).toContain('[web](https://a.test/x)')
@@ -147,24 +121,22 @@ describe('plugin docs', () => {
 
   it('keeps relative-looking text inside fenced code untouched', () => {
     const page = pluginPage(
-      wrap(
-        [
-          '# Demo',
-          '',
-          '[MIT](./LICENSE.md)',
-          '',
-          '```ts',
-          'handlers[key](event)',
-          'const x = [a](./b)',
-          '```',
-          '',
-          '~~~',
-          'list[i](./c)',
-          '~~~',
-          '',
-          '[docs](docs/api.md)',
-        ].join('\n'),
-      ),
+      [
+        '# Demo',
+        '',
+        '[MIT](./LICENSE.md)',
+        '',
+        '```ts',
+        'handlers[key](event)',
+        'const x = [a](./b)',
+        '```',
+        '',
+        '~~~',
+        'list[i](./c)',
+        '~~~',
+        '',
+        '[docs](docs/api.md)',
+      ].join('\n'),
       plugin,
       1,
     )
@@ -172,31 +144,29 @@ describe('plugin docs', () => {
     expect(page.body).toContain('[a](./b)')
     expect(page.body).toContain('list[i](./c)')
     expect(page.body).toContain(
-      '[MIT](https://github.com/nanostores/demo/blob/1.2.3/LICENSE.md)',
+      '[MIT](https://github.com/nanostores/demo/blob/c0ffee/LICENSE.md)',
     )
     expect(page.body).toContain(
-      '[docs](https://github.com/nanostores/demo/blob/1.2.3/docs/api.md)',
+      '[docs](https://github.com/nanostores/demo/blob/c0ffee/docs/api.md)',
     )
   })
 
   it('links core README references to docs pages outside code', () => {
     const routes = new Map([['store-events', '/docs/concepts/store-events/']])
     const page = pluginPage(
-      wrap(
-        [
-          '# Demo',
-          '',
-          '[events](https://github.com/nanostores/nanostores#store-events)',
-          '[pinned](https://github.com/nanostores/nanostores/blob/1.5.4/README.md#store-events)',
-          '[guide](https://github.com/nanostores/nanostores#guide)',
-          '[readme](https://github.com/nanostores/nanostores#readme)',
-          '[other](https://github.com/nanostores/other#store-events)',
-          '',
-          '```md',
-          '[events](https://github.com/nanostores/nanostores#store-events)',
-          '```',
-        ].join('\n'),
-      ),
+      [
+        '# Demo',
+        '',
+        '[events](https://github.com/nanostores/nanostores#store-events)',
+        '[pinned](https://github.com/nanostores/nanostores/blob/1.5.4/README.md#store-events)',
+        '[guide](https://github.com/nanostores/nanostores#guide)',
+        '[readme](https://github.com/nanostores/nanostores#readme)',
+        '[other](https://github.com/nanostores/other#store-events)',
+        '',
+        '```md',
+        '[events](https://github.com/nanostores/nanostores#store-events)',
+        '```',
+      ].join('\n'),
       plugin,
       1,
       routes,
@@ -216,7 +186,7 @@ describe('plugin docs', () => {
   })
 
   it('finds the core anchors that became docs pages', () => {
-    const core = readFileSync('src/vendor/nanostores-readme.md', 'utf8')
+    const core = readFileSync('.upstream/nanostores/README.md', 'utf8')
     const routes = coreRoutes(core)
     expect(routes.get('store-events')).toBe('/docs/concepts/store-events/')
     expect(routes.has('guide')).toBe(false)
@@ -224,21 +194,19 @@ describe('plugin docs', () => {
 
   it('leaves logo-like images and promo inside code blocks alone', () => {
     const page = pluginPage(
-      wrap(
-        [
-          '# Demo',
-          '',
-          logo,
-          '',
-          'Intro.',
-          '',
-          '```html',
-          '<img src="logo.svg">',
-          madeAt,
-          sponsor,
-          '```',
-        ].join('\n'),
-      ),
+      [
+        '# Demo',
+        '',
+        logo,
+        '',
+        'Intro.',
+        '',
+        '```html',
+        '<img src="logo.svg">',
+        madeAt,
+        sponsor,
+        '```',
+      ].join('\n'),
       plugin,
       1,
     )
@@ -254,27 +222,30 @@ describe('plugin docs', () => {
       label: 'Demo',
       slug: 'demo',
       package: '@nanostores/demo',
-      repo: 'nanostores/demo',
-      tagPrefix: '',
     }
     expect(parsePluginDocs([entry])).toEqual([entry])
     const { label: _label, ...withoutLabel } = entry
     expect(() => parsePluginDocs([withoutLabel])).toThrow(/label/)
-    expect(() => parsePluginDocs([{ ...entry, repo: 'demo' }])).toThrow(/repo/)
+    expect(() => parsePluginDocs([{ ...entry, slug: 'A b' }])).toThrow(/slug/)
   })
 
   it('passes the sidebar label', () => {
     expect(
-      pluginPage(wrap(['# Demo', '', 'Text.'].join('\n')), plugin, 1).label,
+      pluginPage(['# Demo', '', 'Text.'].join('\n'), plugin, 1).label,
     ).toBe('Demo')
   })
 })
 
-describe('vendored plugin READMEs', () => {
+describe('upstream plugin READMEs', () => {
+  const source = (item: (typeof pluginDocs)[number]) => ({
+    ...item,
+    ...upstreamRevision(item.id),
+  })
+
   for (const item of pluginDocs) {
     it(`turns ${item.package} into a clean page`, () => {
-      const readme = readFileSync(`src/vendor/plugins/${item.slug}.md`, 'utf8')
-      const page = pluginPage(readme, item, 1)
+      const readme = readFileSync(`.upstream/${item.id}/README.md`, 'utf8')
+      const page = pluginPage(readme, source(item), 1)
       expect(page.body.trim()).not.toBe('')
       expect(page.body).not.toContain('logo.svg"')
       expect(page.body).not.toContain('Made at')
@@ -308,8 +279,8 @@ describe('vendored plugin READMEs', () => {
   it('keeps Install in persistent, router and i18n', () => {
     for (const slug of ['persistent', 'router', 'i18n']) {
       const item = pluginDocs.find((p) => p.slug === slug)!
-      const readme = readFileSync(`src/vendor/plugins/${slug}.md`, 'utf8')
-      expect(pluginPage(readme, item, 1).body).toContain('## Install')
+      const readme = readFileSync(`.upstream/${item.id}/README.md`, 'utf8')
+      expect(pluginPage(readme, source(item), 1).body).toContain('## Install')
     }
   })
 })
