@@ -31,6 +31,13 @@
   src: url('@fontsource/jacquard-12/files/jacquard-12-latin-400-normal.woff2')
     format('woff2');
 }
+/*
+ * Starlight thins docs text with antialiased smoothing. One value on every
+ * page keeps the shared header and sidebar the same on docs and leaf pages.
+ */
+body {
+  -webkit-font-smoothing: auto;
+}
 /* Regular mono has no synthetic bold weight. */
 code,
 pre,
