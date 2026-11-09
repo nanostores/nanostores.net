@@ -31,6 +31,10 @@
   src: url('@fontsource/jacquard-12/files/jacquard-12-latin-400-normal.woff2')
     format('woff2');
 }
+/* Undo Starlight's antialiased body, so the shared header looks the same everywhere. */
+body {
+  -webkit-font-smoothing: auto;
+}
 /* Regular mono has no synthetic bold weight. */
 code,
 pre,

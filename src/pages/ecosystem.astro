@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import CodeWindow from '../components/primitives/CodeWindow.astro'
 import SiteSidebar from '../components/layout/SiteSidebar.astro'
 import { getEcosystemGroups } from '../lib/ecosystem'
+import mono from '@fontsource/fragment-mono/files/fragment-mono-latin-400-normal.woff2?url'
 
 const groups = await getEcosystemGroups()
 ---
@@ -10,6 +11,7 @@ const groups = await getEcosystemGroups()
 <BaseLayout
   title="Ecosystem | Nano Stores"
   description="Connect your framework, add persistence, data fetching, routing or i18n when the task shows up, and inspect every store in Redux DevTools."
+  preload={[mono]}
 >
   <div class="leaf ecosystem-leaf">
     <aside class="ecosystem-index" data-pagefind-ignore="all">
