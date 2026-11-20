@@ -1,6 +1,6 @@
 // Saves the weekly npm downloads of nanostores into src/vendor, so the
 // home page quotes a number without the build depending on the network.
-// Run it before a release, like sync:readme.
+// Run it before a release.
 import { writeFile } from 'node:fs/promises'
 
 const url = 'https://api.npmjs.org/downloads/point/last-week/nanostores'

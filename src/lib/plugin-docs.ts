@@ -5,19 +5,17 @@ export interface PluginDoc {
   label: string
   slug: string
   package: string
-  repo: string
-  tagPrefix: string
 }
 
-// `<!-- @nanostores/query@0.3.4 https://… -->` → '0.3.4'
-export function pluginVendorVersion(readme: string, pkg: string): string {
-  const prefix = `<!-- ${pkg}@`
-  if (!readme.startsWith(prefix)) {
-    throw new Error(`The vendored README has no version header for ${pkg}`)
-  }
-  const version = readme.slice(prefix.length).match(/^(\S+) /)?.[1]
-  if (!version) throw new Error(`The vendored README of ${pkg} has no version`)
-  return version
+// A plugin with the upstream repository and commit its README came from.
+export interface PluginSource extends PluginDoc {
+  repo: string
+  sha: string
+}
+
+// Where scripts/fetch-upstream.mjs copies the README's relative images.
+export function upstreamImages(id: string): string {
+  return `/vendor/upstream/${id}`
 }
 
 // Applies `fn` to the text between fenced code blocks (``` and ~~~).
@@ -73,18 +71,15 @@ function removeMadeAt(lines: string[]): string[] {
 
 export function pluginPage(
   readme: string,
-  plugin: PluginDoc,
+  plugin: PluginSource,
   order: number,
   // Core README anchors that are docs pages, from `coreRoutes()`.
   coreLinks: Map<string, string> = new Map(),
 ): ReadmePage {
-  const version = pluginVendorVersion(readme, plugin.package)
-  const tag = `${plugin.tagPrefix}${version}`
-  const blob = `https://github.com/${plugin.repo}/blob/${tag}`
-  // Images are vendored by sync:readme into public/vendor/plugins/<slug>/.
-  const local = `/vendor/plugins/${plugin.slug}`
+  const blob = `https://github.com/${plugin.repo}/blob/${plugin.sha}`
+  const local = upstreamImages(plugin.id)
 
-  const lines = readme.split(/\r?\n/).slice(1)
+  const lines = readme.split(/\r?\n/)
   const h1 = lines.findIndex((line) => /^# \S/.test(line))
   if (h1 === -1) throw new Error(`${plugin.package} README has no "# " title`)
   const title = plainText(lines[h1].slice(2))
@@ -132,8 +127,8 @@ export function pluginPage(
   const firstParagraph =
     body.split(/\n\s*\n/).find((paragraph) => paragraph.trim()) ?? ''
   const footer =
-    `*Imported from the [${title} README](${blob}/README.md) ` +
-    `for version ${version}. Improve this page there.*`
+    `*Imported from the [${title} README](${blob}/README.md). ` +
+    'Improve this page there.*'
 
   return {
     id: `docs/ecosystem/${plugin.slug}`,

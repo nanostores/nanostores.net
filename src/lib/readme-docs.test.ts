@@ -3,10 +3,11 @@ import { describe, expect, it } from 'vitest'
 import { coreSize, readmePages } from './readme-docs'
 import { withFacts } from './readme'
 
-const readme = readFileSync('src/vendor/nanostores-readme.md', 'utf8')
+const readme = readFileSync('.upstream/nanostores/README.md', 'utf8')
+const sha = 'c0ffee'
 describe('README docs', () => {
   it('turns README sections into pages', () => {
-    const atoms = readmePages(readme).find(
+    const atoms = readmePages(readme, sha).find(
       (page) => page.id === 'docs/concepts/atoms',
     )
     expect(atoms?.title).toBe('Atoms')
@@ -19,7 +20,7 @@ describe('README docs', () => {
   })
 
   it('orders guides from several README sections', () => {
-    const guides = readmePages(readme).filter((page) =>
+    const guides = readmePages(readme, sha).filter((page) =>
       page.id.startsWith('docs/guides/'),
     )
     expect(guides.map((page) => [page.id, page.order])).toEqual([
@@ -29,7 +30,7 @@ describe('README docs', () => {
   })
 
   it('puts best practices into the handbook', () => {
-    const handbook = readmePages(readme).filter((page) =>
+    const handbook = readmePages(readme, sha).filter((page) =>
       page.id.startsWith('docs/handbook/'),
     )
     expect(handbook.map((page) => [page.id, page.order])).toEqual([
@@ -41,7 +42,7 @@ describe('README docs', () => {
 
   it('fails when a listed heading is missing', () => {
     expect(() =>
-      readmePages(readme.replace('### Atoms', '### Atom stores')),
+      readmePages(readme.replace('### Atoms', '### Atom stores'), sha),
     ).toThrow('README has no "### Atoms"')
   })
 
