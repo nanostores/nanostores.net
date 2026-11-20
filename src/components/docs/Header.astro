@@ -1,8 +1,8 @@
 ---
 import HeaderContent from '../layout/HeaderContent.astro'
 
-const search =
-  Astro.url.pathname === '/docs' || Astro.url.pathname.startsWith('/docs/')
+const path = Astro.url.pathname
+const search = path === '/docs' || path.startsWith('/docs/') || path === '/404/'
 ---
 
 <!-- Starlight's fixed header spans the viewport: it becomes desk, and the
