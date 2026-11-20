@@ -88,7 +88,7 @@
         "!dist/_astro/ui-core.*.js"
       ],
       "brotli": false,
-      "limit": "20 kB"
+      "limit": "21 kB"
     },
     {
       "name": "Search JS",

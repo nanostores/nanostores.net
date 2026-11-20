@@ -89,6 +89,9 @@ site-search :focus-visible {
   outline: 2px solid var(--text);
   outline-offset: 2px;
 }
+#site-search-results .pagefind-ui__result-link:focus-visible {
+  outline-offset: 0;
+}
 #site-search-results {
   --pagefind-ui-scale: 0.8;
   --pagefind-ui-primary: var(--text);

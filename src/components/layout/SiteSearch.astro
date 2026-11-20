@@ -56,8 +56,11 @@ import '../../styles/search.css'
         trigger.setAttribute('aria-keyshortcuts', 'Meta+K')
       }
       trigger.disabled = false
+      const input = () => this.querySelector<HTMLInputElement>('input')
+      const results = () => this.querySelectorAll('.pagefind-ui__result')
+      let pending = -1
       const focusInput = () => {
-        if (dialog.open) this.querySelector<HTMLInputElement>('input')?.focus()
+        if (dialog.open) input()?.focus()
       }
       const initialise = () => {
         if (import.meta.env.DEV) return Promise.resolve()
@@ -74,8 +77,27 @@ import '../../styles/search.css'
             showImages: false,
             showSubResults: true,
             translations: { placeholder: 'Search the site' },
+            processResult: (result: {
+              url: string
+              sub_results: { url: string }[]
+            }) => {
+              for (const sub of result.sub_results) {
+                if (sub.url === `${result.url}#_top`) sub.url = result.url
+              }
+              return result
+            },
           })
           status!.hidden = true
+          new MutationObserver(() => {
+            const added = results()[pending]?.querySelector<HTMLElement>('a')
+            if (added) {
+              pending = -1
+              added.focus()
+            }
+          }).observe(this.querySelector('#site-search-results')!, {
+            childList: true,
+            subtree: true,
+          })
         })().catch(() => {
           initialising = undefined
           status!.textContent =
@@ -95,12 +117,38 @@ import '../../styles/search.css'
       trigger.addEventListener('click', open)
       close.addEventListener('click', () => dialog.close())
       dialog.addEventListener('click', (event) => {
-        const link = (event.target as Element).closest('a[href]')
-        if (event.target === dialog || link) dialog.close()
+        const target = event.target as Element
+        if (target === dialog || target.closest('a[href]')) dialog.close()
+        if (target.closest('.pagefind-ui__search-clear')) input()?.focus()
       })
-      dialog.addEventListener('close', () =>
-        trigger.focus({ preventScroll: true }),
+      dialog.addEventListener(
+        'click',
+        (event) => {
+          if ((event.target as Element).closest('.pagefind-ui__button')) {
+            pending = results().length
+          }
+        },
+        true,
       )
+      dialog.addEventListener('keydown', (event) => {
+        const { key, isComposing, shiftKey, altKey, ctrlKey, metaKey } = event
+        if (key !== 'ArrowDown' && key !== 'ArrowUp') return
+        if (isComposing || shiftKey || altKey || ctrlKey || metaKey) return
+        const items = [
+          input(),
+          ...this.querySelectorAll<HTMLElement>(
+            '.pagefind-ui__result-link, .pagefind-ui__button',
+          ),
+        ]
+        const index = items.indexOf(document.activeElement as HTMLElement)
+        if (index === -1) return
+        event.preventDefault()
+        items[index + (key === 'ArrowDown' ? 1 : -1)]?.focus()
+      })
+      dialog.addEventListener('close', () => {
+        pending = -1
+        trigger.focus({ preventScroll: true })
+      })
       const shortcut = (event: KeyboardEvent) => {
         if (
           (event.ctrlKey || event.metaKey) &&
